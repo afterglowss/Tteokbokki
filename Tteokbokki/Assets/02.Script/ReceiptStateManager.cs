@@ -8,6 +8,9 @@ public class ReceiptStateManager : MonoBehaviour
 
     public Receipt ActiveReceipt { get; private set; }  // 현재 활성화된 영수증
 
+    public ReceiptPopup receiptPopup;
+    public CombinedIngredientManager combined;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -20,6 +23,13 @@ public class ReceiptStateManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);  // 씬 전환에도 유지 가능
     }
 
+    private void Start()
+    {
+        receiptPopup.OnPopupClosed += () => {
+            ClearActiveReceipt();
+        };
+    }
+
     public void SetActiveReceipt(Receipt receipt)
     {
         ActiveReceipt = receipt;
@@ -27,8 +37,9 @@ public class ReceiptStateManager : MonoBehaviour
 
     public void ClearActiveReceipt()
     {
+        if (ActiveReceipt == null) return;
         ActiveReceipt = null;
-        FindObjectOfType<ReceiptPopup>()?.Close();
-        FindObjectOfType<CombinedIngredientManager>()?.ClearIngredientsText();  // 재료 합산도 초기화
+        receiptPopup.gameObject.SetActive(false);
+        combined.ClearIngredientsText();  // 재료 합산도 초기화
     }
 }

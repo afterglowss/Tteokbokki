@@ -2,6 +2,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class StoveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -152,7 +153,7 @@ public class StoveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         RectTransform canvasRect = canvas.GetComponent<RectTransform>();
         RectTransform tooltipRect = tooltipPanel.GetComponent<RectTransform>();
 
-        Vector2 mousePosition = Input.mousePosition;
+        Vector2 mousePosition = Mouse.current.position.ReadValue();
         Vector2 localPoint;
 
         if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)

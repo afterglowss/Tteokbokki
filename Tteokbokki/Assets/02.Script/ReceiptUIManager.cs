@@ -7,14 +7,14 @@ using UnityEngine.UI;
 public class ReceiptUIManager : MonoBehaviour
 {
     public TextMeshProUGUI receiptText;  // Content 안에 배치된 TextMeshProUGUI
-    public TextMeshProUGUI isCookedText;    // 조리가 완료된 상태인지 확인할 수 있는 텍스트
-    public ScrollRect scrollRect;        // ScrollView 본체 (스크롤 제어용)
+    public TextMeshProUGUI isCookedOrNotText;    // 조리가 완료된 상태인지 확인할 수 있는 텍스트
+    public ScrollRect scrollViewRecentReceipt;        // ScrollView 본체 (스크롤 제어용)
 
     public void ShowReceiptText(string content)
     {
         receiptText.text = content;
         Canvas.ForceUpdateCanvases();  // 즉시 레이아웃 갱신
-        scrollRect.verticalNormalizedPosition = 1f;  // 스크롤 최상단 이동
+        scrollViewRecentReceipt.verticalNormalizedPosition = 1f;  // 스크롤 최상단 이동
     }
     public void UpdateIsCookedDisplay(Receipt receipt)
     {
@@ -38,7 +38,7 @@ public class ReceiptUIManager : MonoBehaviour
             }
         }
 
-        isCookedText.text = isCooked;
+        isCookedOrNotText.text = isCooked;
     }
 
 }

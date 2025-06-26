@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class ReceiptLineItem : MonoBehaviour
 {
@@ -10,9 +11,10 @@ public class ReceiptLineItem : MonoBehaviour
 
     private Receipt receipt;
     private ReceiptLineManager manager;
-    private float elapsedTime = 0f;
     private ReceiptPopup receiptPopup;
     private CombinedIngredientManager combinedIngredientManager;
+
+    private DateTime orderStartTime;
 
     public void Setup(Receipt receipt, float cookMinutes, ReceiptLineManager manager, ReceiptPopup popup, CombinedIngredientManager ingredientManager)
     {
@@ -22,20 +24,21 @@ public class ReceiptLineItem : MonoBehaviour
         this.combinedIngredientManager = ingredientManager;  // 의존성 주입
         cookTimeSeconds = cookMinutes * 60f;
         orderIDText.text = $"주문번호: {receipt.OrderID}";
+        orderStartTime = receipt.OrderDateTime;
 
         receiptButton.onClick.AddListener(OnClick);
     }
 
     private void Update()
     {
-        elapsedTime += Time.deltaTime * (60f / 3f);
+        DateTime now = GameClock.gameTime;
 
-        float progress = Mathf.Clamp01(elapsedTime / cookTimeSeconds);
-        transform.localPosition = new Vector3(progress * 800f, transform.localPosition.y, 0);
+        TimeSpan elapsed = now - orderStartTime;
 
-        if (elapsedTime >= cookTimeSeconds)
+        if (elapsed.TotalMinutes >= cookTimeSeconds / 60f)
         {
             manager.RemoveReceipt(this);
+            return;
         }
     }
 

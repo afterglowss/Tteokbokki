@@ -430,6 +430,52 @@ public class ReceiptManager
 
         File.WriteAllText(todayFilePath, JsonUtility.ToJson(wrapper, true));
     }
+
+    // 하루 동안 놓친 영수증 저장하기
+    public static void SaveMissedReceipts(List<Receipt> missedReceipts, DateTime date)
+    {
+        if (missedReceipts == null || missedReceipts.Count == 0) return;
+
+        string folderPath = Path.Combine(Application.dataPath, "Receipts/Missed");
+        if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+        string fileName = $"{date:yyyy-MM-dd}_MissedReceipts.json";
+        string filePath = Path.Combine(folderPath, fileName);
+
+        var wrapper = new ReceiptsWrapper { Receipts = new List<ReceiptData>() };
+
+        foreach (var receipt in missedReceipts)
+        {
+            var receiptData = new ReceiptData
+            {
+                OrderID = receipt.OrderID,
+                OrderDateTime = receipt.OrderDateTime.ToString("yyyy-MM-dd HH:mm"),
+                Orders = new List<OrderItemData>()
+            };
+
+            foreach (var order in receipt.GetOrders())
+            {
+                var orderData = new OrderItemData
+                {
+                    MenuName = order.Menu.Name,
+                    BasePrice = order.Menu.BasePrice,
+                    Extras = new List<KeyValueStringInt>()
+                };
+
+                foreach (var extra in order.GetExtras())
+                {
+                    orderData.Extras.Add(new KeyValueStringInt { Key = extra.Key, Value = extra.Value });
+                }
+
+                receiptData.Orders.Add(orderData);
+            }
+
+            wrapper.Receipts.Add(receiptData);
+        }
+
+        File.WriteAllText(filePath, JsonUtility.ToJson(wrapper, true));
+    }
+
 }
 
 public class ReceiptSystem : MonoBehaviour

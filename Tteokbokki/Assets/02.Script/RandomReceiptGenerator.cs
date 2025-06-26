@@ -63,7 +63,7 @@ public class RandomReceiptGenerator : MonoBehaviour
         receiptManager = new ReceiptManager(currentGameTime);
 
         // 게임 시작 시 영수증 자동 생성
-        GenerateAndDisplayReceipt();
+        //GenerateAndDisplayReceipt();
 
         // 버튼 이벤트 연결
         generateButton.onClick.AddListener(GenerateAndDisplayReceipt);

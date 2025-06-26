@@ -7,6 +7,7 @@ public class StoveManager : MonoBehaviour
 {
     public StoveSlot[] stoves;
     public TextMeshProUGUI resultText;
+    public ReceiptLineManager receiptLineManager;
 
     public void TryStartCooking(OrderItem order, float cookTimeSeconds = 5 * 60)
     {
@@ -18,7 +19,8 @@ public class StoveManager : MonoBehaviour
             var activeReceipt = ReceiptStateManager.Instance.ActiveReceipt; 
             if (AllMenusHandled(activeReceipt))     //메뉴를 올리는 순간 모든 메뉴가 조리 중이거나 완료 상태일 경우, 영수증 제거하기
             {
-                FindObjectOfType<ReceiptLineManager>().RemoveReceiptByOrderID(activeReceipt.OrderID);
+                Debug.Log($"[StoveManager] 모든 메뉴 처리됨 → 영수증 제거 시도: {activeReceipt.OrderID}");
+                receiptLineManager.RemoveReceiptByOrderID(activeReceipt.OrderID);
             }
         }
         else
@@ -72,21 +74,24 @@ public class StoveManager : MonoBehaviour
 
     private bool AllMenusHandled(Receipt receipt) //영수증의 모든 메뉴가 조리 중이거나 조리 완료 되었음을 확인
     {
-        bool allHandled = true;
         foreach (var order in receipt.GetOrders())
         {
             if (!order.IsOnStove && !order.IsCompleted)
             {
-                allHandled = false;
-                break;
+                return false;
             }
         }
-        return allHandled;
+        return true;
+    }
 
-        //if (allHandled)   // 조리 중이거나 요리 끝났을 때 영수증을 자동으로 생성할 필요는 없음.
-        //{
-        //    FindObjectOfType<RandomReceiptGenerator>().GenerateAndDisplayReceipt();
-        //}
+    public static bool AllMenusHandledStatic(Receipt receipt)
+    {
+        foreach (var order in receipt.GetOrders())
+        {
+            if (!order.IsOnStove && !order.IsCompleted)
+                return false;
+        }
+        return true;
     }
 }
 

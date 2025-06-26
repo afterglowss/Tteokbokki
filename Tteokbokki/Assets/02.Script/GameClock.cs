@@ -13,13 +13,17 @@ public class GameClock : MonoBehaviour
     public int startHour = 12;
     public int startMinute = 0;
 
-    private DateTime gameTime;
+    public static DateTime gameTime;
     private float elapsedTime = 0f;
     private const float realSecondsPerGameMinute = 3f; // 현실 3초 = 게임 1분
     public DateTime GetCurrentGameTime() => gameTime;
-    void Start()
+    private void Awake()
     {
         gameTime = new DateTime(startYear, startMonth, startDay, startHour, startMinute, 0);
+    }
+    void Start()
+    {
+        
     }
 
     void Update()
