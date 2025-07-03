@@ -8,6 +8,44 @@ public class PlayerWokManager : MonoBehaviour
 
     public TextMeshProUGUI playerIngredientsText;
 
+    public StoveManager stoveManager;
+
+    public void OnCookButtonPressed()
+    {
+        if (!stoveManager.HasSelectedSlot())
+        {
+            Debug.LogWarning("[Wok] 선택된 화구가 없습니다!");
+            return;
+        }
+
+        var ingredients = GetPlayerIngredients();
+
+        if (!ContainsBaseIngredients(ingredients))
+        {
+            Debug.LogWarning("[Wok] 기본 재료가 부족하여 조리할 수 없습니다!");
+            // TODO: 원하면 UI에 경고 메시지 출력도 가능
+            return;
+        }
+
+        stoveManager.StartCookingOnSelectedSlot(ingredients);
+        ClearWok();  // 조리 시작 후 wok 초기화
+    }
+
+    private bool ContainsBaseIngredients(Dictionary<string, int> wok)
+    {
+        var baseMenu = MenuDatabase.Menus["군자 떡볶이"];
+        var baseIngredients = baseMenu.DefaultIngredients;
+
+        foreach (var pair in baseIngredients)
+        {
+            if (!wok.TryGetValue(pair.Key, out int amount) || amount < pair.Value)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
     public void AddIngredient(string ingredientName)
     {
         if (!playerIngredients.ContainsKey(ingredientName))
