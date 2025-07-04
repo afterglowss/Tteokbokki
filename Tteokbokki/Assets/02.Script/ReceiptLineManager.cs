@@ -12,7 +12,11 @@ public class ReceiptLineManager : MonoBehaviour
 
     //private List<ReceiptLineItem> activeReceipts = new();
     private List<Receipt> missedReceipts = new List<Receipt>();     // 놓친 영수증 저장해둘 리스트
-    public List<Receipt> GetMissedReceipts() => new List<Receipt>(missedReceipts);
+    public List<Receipt> GetMissedReceipts()
+    {
+        Debug.Log($"실패한 영수증 개수: {missedReceipts.Count}");
+        return new List<Receipt>(missedReceipts); // 반환값 추가
+    }
     public void ClearMissedReceipts() => missedReceipts.Clear();
 
     public float cookLimitMinutes = 30f;
