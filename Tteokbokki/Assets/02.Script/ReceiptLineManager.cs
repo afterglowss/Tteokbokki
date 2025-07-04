@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -122,8 +123,10 @@ public class ReceiptLineManager : MonoBehaviour
     {
         int count = receiptSlots.Count;
 
+        RectTransform rectTransform = GetComponent<RectTransform>();
+
         // 시작 기준점을 오른쪽 끝으로 이동시키기 위한 x 오프셋
-        float offsetX = this.gameObject.GetComponent<RectTransform>().rect.width / 2f;
+        float offsetX = rectTransform.rect.width;
 
         for (int i = 0; i < count; i++)
         {
@@ -132,9 +135,13 @@ public class ReceiptLineManager : MonoBehaviour
 
             if (item.IsBeingDragged) continue;
 
-            Vector3 targetPosition = new Vector3(-i * slotSpacing + offsetX, 0f, 0f);
+            RectTransform rt = item.GetComponent<RectTransform>();
+
+            Vector3 targetPosition = new Vector3(-i * slotSpacing + offsetX, rectTransform.position.y, 0f);
             item.CurrentSlotIndex = i;
-            item.transform.localPosition = targetPosition;
+
+            rt.DOAnchorPos(targetPosition, 0.3f).SetEase(Ease.OutCubic);
+            //item.transform.localPosition = targetPosition;
         }
     }
 

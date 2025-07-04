@@ -26,17 +26,19 @@ public static class IngredientDatabase
         { "떡", new Ingredient("떡", 1000) },
         { "오뎅", new Ingredient("오뎅", 1000) },
         { "파", new Ingredient("파", 0) },
-        { "배추", new Ingredient("배추", 0) },
+        { "양배추", new Ingredient("양배추", 0) },
         { "군자 소스", new Ingredient("군자 소스", 500) },
-        { "체다 치즈", new Ingredient("체다 치즈", 1000) },
+        { "체다치즈", new Ingredient("체다치즈", 1500) },
+        { "모짜렐라", new Ingredient("모짜렐라", 1500) },
         { "중국당면", new Ingredient("중국당면", 2000) },
         { "일반당면", new Ingredient("일반당면", 1000) },
-        { "우삼겹", new Ingredient("우삼겹", 3000) },
+        { "라면사리", new Ingredient("라면사리", 1000) },
+        { "우삼겹", new Ingredient("우삼겹", 2500) },
         { "계란", new Ingredient("계란", 1500) },
         { "메추리알", new Ingredient("메추리알", 1500) },
-        { "분모자", new Ingredient("분모자", 2000) },
-        { "유부", new Ingredient("유부", 1000) },
-        { "곱창", new Ingredient("곱창", 3000) },
+        { "분모자", new Ingredient("분모자", 3000) },
+        { "유부", new Ingredient("유부", 1500) },
+        { "곱창", new Ingredient("곱창", 4000) },
         { "마라 소스", new Ingredient("마라 소스", 0) },
         { "로제 크림", new Ingredient("로제 크림", 0) }
     };
@@ -62,50 +64,50 @@ public static class MenuDatabase
 {
     public static readonly Dictionary<string, MenuItem> Menus = new Dictionary<string, MenuItem>
     {
-        { "군자 떡볶이", new MenuItem("군자 떡볶이", 12000, new Dictionary<string, int>
+        { "군자 떡볶이", new MenuItem("군자 떡볶이", 8000, new Dictionary<string, int>
             {
                 { "떡", 2 },
                 { "오뎅", 2 },
                 { "파", 1 },
-                { "배추", 1 },
+                { "양배추", 1 },
                 { "군자 소스", 2 }
             })
         },
-        { "성인 군자 떡볶이", new MenuItem("성인 군자 떡볶이", 12000, new Dictionary<string, int>
+        { "성인 군자 떡볶이", new MenuItem("성인 군자 떡볶이", 8500, new Dictionary<string, int>
             {
                 { "떡", 2 },
                 { "오뎅", 2 },
                 { "파", 1 },
-                { "배추", 1 },
+                { "양배추", 1 },
                 { "군자 소스", 4 }
             })
         },
-        { "곱창 군자 떡볶이", new MenuItem("곱창 군자 떡볶이", 14500, new Dictionary<string, int>
+        { "곱창 군자 떡볶이", new MenuItem("곱창 군자 떡볶이", 12000, new Dictionary<string, int>
             {
                 { "떡", 2 },
                 { "오뎅", 2 },
                 { "파", 1 },
-                { "배추", 1 },
+                { "양배추", 1 },
                 { "군자 소스", 2 },
                 { "곱창", 1 }
             })
         },
-        { "마라 군자 떡볶이", new MenuItem("마라 군자 떡볶이", 13000, new Dictionary<string, int>
+        { "마라 군자 떡볶이", new MenuItem("마라 군자 떡볶이", 10000, new Dictionary<string, int>
             {
                 { "떡", 2 },
                 { "오뎅", 2 },
                 { "파", 1 },
-                { "배추", 1 },
+                { "양배추", 1 },
                 { "군자 소스", 2 },
                 { "마라 소스", 1 }
             })
         },
-        { "로제 군자 떡볶이", new MenuItem("로제 군자 떡볶이", 13000, new Dictionary<string, int>
+        { "로제 군자 떡볶이", new MenuItem("로제 군자 떡볶이", 10000, new Dictionary<string, int>
             {
                 { "떡", 2 },
                 { "오뎅", 2 },
                 { "파", 1 },
-                { "배추", 1 },
+                { "양배추", 1 },
                 { "군자 소스", 2 },
                 { "로제 크림", 1 }
             })
