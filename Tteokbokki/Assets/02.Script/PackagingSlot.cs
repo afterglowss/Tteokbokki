@@ -10,6 +10,8 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
     private List<CookedFoodUI> stackedFoods = new();
     private PackagingAreaManager packagingArea;
 
+    public int maxStackSize = 4;
+
     public void Initialize(PackagingAreaManager area)
     {
         packagingArea = area;
@@ -17,20 +19,18 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
 
     public void OnDrop(PointerEventData eventData)
     {
-        //Debug.Log("OnDrop 호출");
-        // 음식 드롭인지 확인
-        var food = eventData.pointerDrag?.GetComponent<CookedFoodUI>();
-        if (food != null)
-        {
-            AddFood(food);
-            return;
-        }
+        var foodUI = eventData.pointerDrag?.GetComponent<CookedFoodUI>();
+        if (foodUI == null) return;
 
-        // 영수증 드롭인지 확인
-        var receiptItem = eventData.pointerDrag?.GetComponent<ReceiptLineItem>();
-        if (receiptItem != null)
+        if (stackedFoods.Count >= maxStackSize) return;
+
+        // 1. 슬롯에 쌓기
+        AddFood(foodUI);
+
+        // 2. 화구 상태 초기화
+        if (foodUI.originStoveSlot != null)
         {
-            HandleReceiptDrop(receiptItem);
+            foodUI.originStoveSlot.ResetSlot();
         }
     }
 
@@ -64,9 +64,19 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         }
     }
 
-    private void HandleReceiptDrop(ReceiptLineItem receiptItem)
+    public void HandleReceiptDrop(ReceiptLineItem receiptItem)
     {
         var receipt = receiptItem.GetReceipt();
+
+        if (stackedFoods.Count == 0)
+        {
+            // 음식이 하나도 없는 슬롯 → 실패 아님, 드롭 무효
+            Debug.Log("음식이 없는 슬롯입니다. 영수증 드롭 무시 + 복귀");
+
+            // 복귀를 위해 원래 위치로 돌려놓기
+            receiptItem.ReturnToOriginalPosition();
+            return;
+        }
 
         // 내부 음식 재료 목록 추출
         List<Dictionary<string, int>> cookedIngredients = new();
@@ -78,19 +88,18 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         bool success = MatchAllMenusInReceipt(receipt, cookedIngredients);
 
         if (!success)
-        {
             packagingArea.RecordFailedReceipt(receipt);
-        }
 
-        // 음식 UI 제거
+        TooltipManager.Instance.Hide(); // 툴팁 숨기기
         foreach (var food in stackedFoods)
-        {
             Destroy(food.gameObject);
-        }
+
         stackedFoods.Clear();
 
         // 영수증 UI 제거
         Destroy(receiptItem.gameObject);
+
+        ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
 
         // (선택사항: 성공/실패 피드백)
         Debug.Log(success ? $"영수증 {receipt.OrderID} 처리 성공!" : $"영수증 {receipt.OrderID} 처리 실패 - 기록됨");
@@ -134,8 +143,19 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         return true;
     }
 
+
+
     public bool IsTopOfStack(CookedFoodUI food)
     {
         return stackedFoods.Count > 0 && stackedFoods[stackedFoods.Count - 1] == food;
+    }
+
+    public int GetStackIndex(CookedFoodUI food)
+    {
+        return stackedFoods.IndexOf(food);
+    }
+    public bool HasAnyFood()
+    {
+        return stackedFoods != null && stackedFoods.Count > 0;
     }
 }

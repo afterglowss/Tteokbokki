@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
-public class StoveSlot : MonoBehaviour, IPointerClickHandler
+public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public TextMeshProUGUI timerText;
     public GameObject wokIcon;
@@ -22,6 +22,15 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler
     public bool IsAvailable => !isCooking && !isCooked;
 
     private StoveManager stoveManager;
+
+
+    public PackagingAreaManager packagingAreaManager;
+
+    public Transform cookedFoodSpawnPoint; // Inspector에서 빈 오브젝트로 위치 설정
+    public GameObject cookedFoodPrefab;    // 음식 UI 프리팹 (CookedFoodUI)
+
+    //public GameObject globalTooltipPanel;        // UI 전역 툴팁 패널
+    //public TextMeshProUGUI globalTooltipText;    // 텍스트
 
     public void Initialize(StoveManager manager)
     {
@@ -70,13 +79,6 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public PackagingAreaManager packagingAreaManager;
-
-    public Transform cookedFoodSpawnPoint; // Inspector에서 빈 오브젝트로 위치 설정
-    public GameObject cookedFoodPrefab;    // 음식 UI 프리팹 (CookedFoodUI)
-
-    public GameObject globalTooltipPanel;        // UI 전역 툴팁 패널
-    public TextMeshProUGUI globalTooltipText;    // 텍스트
     private void FinishCooking()
     {
         isCooking = false;
@@ -90,7 +92,9 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler
         foodUI.Initialize(currentIngredients);
 
         // 툴팁 연결
-        foodUI.SetTooltipReferences(globalTooltipPanel, globalTooltipText);
+        //foodUI.SetTooltipReferences(globalTooltipPanel, globalTooltipText);
+
+        foodUI.originStoveSlot = this; // 조리된 음식이 어떤 스토브에서 왔는지 기록
     }
 
     private void UpdateTimerDisplay()
@@ -100,5 +104,34 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler
         timerText.text = $"{minutes:D2}:{seconds:D2}";
     }
 
+    public void ResetSlot()
+    {
+        isCooked = false;
+        isCooking = false;
+        currentIngredients = null;
+        onCookComplete = null;
+        wokIcon.SetActive(false);
+        timerText.text = "대기중";  // 필요 시 텍스트 갱신
+        SetSelected(false);         // 선택 하이라이트 해제
+    }
+
     public Dictionary<string, int> GetCookedIngredients() => isCooked ? currentIngredients : null;
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (isCooking && currentIngredients != null)
+        {
+            string tooltip = "조리 중인 재료:\n";
+            foreach (var pair in currentIngredients)
+            {
+                tooltip += $"{pair.Key} x{pair.Value}\n";
+            }
+            TooltipManager.Instance.Show(tooltip);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        TooltipManager.Instance.Hide();
+    }
 }

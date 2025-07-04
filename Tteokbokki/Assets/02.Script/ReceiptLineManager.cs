@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 
 public class ReceiptLineManager : MonoBehaviour
 {
+    public static ReceiptLineManager Instance { get; private set; }
+
     public GameObject receiptPrefab;   // 영수증 UI 프리팹
     public Transform receiptLineParent; // 영수증들이 매달릴 부모 (줄)
 
@@ -24,6 +27,16 @@ public class ReceiptLineManager : MonoBehaviour
 
 
     public TextMeshProUGUI pendingCountText;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject); // 중복 방지
+            return;
+        }
+        Instance = this;
+    }
 
     public void AddNewReceipt(Receipt receipt)
     {
@@ -68,14 +81,20 @@ public class ReceiptLineManager : MonoBehaviour
         receiptSlots.Remove(item);
         Destroy(item.gameObject);
 
+        StartCoroutine(DelayedReposition());
+
         if (pendingReceipts.Count > 0)
         {
             var nextReceipt = pendingReceipts.Dequeue();
             CreateAndAddReceiptUI(nextReceipt);
             UpdatePendingCountUI();  // UI 갱신
         }
+    }
 
-        RepositionAll();  // 나머지 영수증들 이동
+    private IEnumerator DelayedReposition()
+    {
+        yield return null;  // 한 프레임 대기
+        RepositionAll();    // 이후 정확한 위치로 수동 정렬
     }
 
     private void CreateAndAddReceiptUI(Receipt receipt)
@@ -95,22 +114,22 @@ public class ReceiptLineManager : MonoBehaviour
         pendingCountText.text = count > 0 ? $"대기 중: {count}건" : "";
     }
 
-
-    //public void ClearAllReceipts()
-    //{
-    //    foreach (var item in activeReceipts)
-    //    {
-    //        Destroy(item.gameObject);
-    //    }
-    //    activeReceipts.Clear();
-    //}
     private void RepositionAll()
     {
-        for (int i = 0; i < receiptSlots.Count; i++)
+        int count = receiptSlots.Count;
+
+        // 시작 기준점을 오른쪽 끝으로 이동시키기 위한 x 오프셋
+        float offsetX = this.gameObject.GetComponent<RectTransform>().rect.width / 2f;
+
+        for (int i = 0; i < count; i++)
         {
             var item = receiptSlots[i];
             if (item == null || item.gameObject == null) continue;
-            Vector3 targetPosition = new Vector3(-i * slotSpacing, 0f, 0f);  // 오른쪽에서 왼쪽으로
+
+            if (item.IsBeingDragged) continue;
+
+            Vector3 targetPosition = new Vector3(-i * slotSpacing + offsetX, 0f, 0f);
+            item.CurrentSlotIndex = i;
             item.transform.localPosition = targetPosition;
         }
     }

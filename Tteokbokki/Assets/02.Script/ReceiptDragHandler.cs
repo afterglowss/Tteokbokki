@@ -1,6 +1,7 @@
+using DG.Tweening;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections.Generic;
 
 public class ReceiptDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -20,6 +21,10 @@ public class ReceiptDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+
+        var receipt = GetComponent<ReceiptLineItem>();
+        receipt?.OnBeginDrag();
+        // 원래 위치와 부모 저장
         originalPosition = rectTransform.anchoredPosition;
         originalParent = transform.parent;
 
@@ -38,7 +43,6 @@ public class ReceiptDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
         canvasGroup.blocksRaycasts = true;
         canvasGroup.alpha = 1f;
 
-        // Raycast로 음식 카드를 찾기
         List<RaycastResult> results = new();
         EventSystem.current.RaycastAll(eventData, results);
 
@@ -48,17 +52,24 @@ public class ReceiptDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
             if (foodUI != null)
             {
                 var slot = foodUI.GetComponentInParent<PackagingSlot>();
-                if (slot != null)
+                if (slot != null && slot.HasAnyFood())
                 {
-                    slot.OnDrop(eventData);  // 슬롯에게 영수증 전달
-                    Destroy(gameObject);     // 영수증 UI 제거
+                    var receiptItem = GetComponent<ReceiptLineItem>();
+                    slot.HandleReceiptDrop(receiptItem);  // 내부에서 manager.RemoveReceipt() 호출
                     return;
                 }
             }
         }
 
-        // 음식 카드가 아닌 곳 → 복귀
-        transform.SetParent(originalParent);
-        rectTransform.anchoredPosition = originalPosition;
+        // 드롭 실패 → 다시 원위치 복귀 (리스트 유지!)
+        //transform.SetParent(originalParent);
+        //rectTransform.DOAnchorPos(originalPosition, 0.25f).SetEase(Ease.OutCubic);
+
+        var receipt = GetComponent<ReceiptLineItem>();
+        receipt?.OnEndDrag();
+        if (receipt != null)
+        {
+            receipt.ReturnToOriginalPosition();  // 원래 위치로 복귀
+        }
     }
 }

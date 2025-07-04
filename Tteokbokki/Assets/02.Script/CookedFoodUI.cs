@@ -1,21 +1,15 @@
-using System.Collections.Generic;
+Ôªøusing System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using DG.Tweening;
 
 public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [Header("¿Á∑· ≈ÿΩ∫∆Æ")]
+    [Header("Ïû¨Î£å ÌÖçÏä§Ìä∏")]
     public TextMeshProUGUI ingredientsText;
-
-    [Header("≈¯∆¡ ∞¸∑√")]
-    public GameObject tooltipPanel;               // ≈¯∆¡ ∆–≥Œ (Canvas ªÛ¿« ∫∞µµ UI)
-    public TextMeshProUGUI tooltipText;           // ≈¯∆¡ ≥ªøÎ
-    public Vector2 tooltipOffset = new Vector2(15f, -15f);
-
-    private bool isTooltipVisible = false;
 
     public Dictionary<string, int> Ingredients { get; private set; }
 
@@ -24,37 +18,34 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     private Vector2 originalPosition;
 
     private Canvas canvas;
-    private RectTransform tooltipRect;
+    public PackagingSlot currentSlot { get; set; }
+    public bool isPlacedInSlot { get; set; } = false;
 
-    public PackagingSlot currentSlot;
+    private Vector3 originalLocalPosition;
+    private Transform originalParent;
+
+    public StoveSlot originStoveSlot;
+
+    private bool isTweening = false;
 
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = GetComponent<CanvasGroup>();
         canvas = GetComponentInParent<Canvas>();
-        if (tooltipPanel != null)
-            tooltipRect = tooltipPanel.GetComponent<RectTransform>();
     }
     private void Update()
     {
-        if (isTooltipVisible)
-        {
-            UpdateTooltipPosition();
-        }
+
     }
 
     public void Initialize(Dictionary<string, int> ingredients)
     {
         Ingredients = new Dictionary<string, int>(ingredients);
         UpdateText();
-    }
-    public void SetTooltipReferences(GameObject panel, TextMeshProUGUI text)
-    {
-        tooltipPanel = panel;
-        tooltipText = text;
-        if (tooltipPanel != null)
-            tooltipRect = tooltipPanel.GetComponent<RectTransform>();
+
+        originalLocalPosition = transform.localPosition;
+        originalParent = transform.parent;
     }
 
     private void UpdateText()
@@ -71,57 +62,20 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     private void ShowTooltip()
     {
-        if (tooltipPanel == null || tooltipText == null) return;
-
-        UpdateTooltipText();
-        tooltipPanel.SetActive(true);
-        isTooltipVisible = true;
+        string tooltip = "Ïû¨Î£å:\n";
+        foreach (var kv in Ingredients)
+        {
+            tooltip += $"{kv.Key} x{kv.Value}\n";
+        }
+        TooltipManager.Instance.Show(tooltip);
     }
 
     private void HideTooltip()
     {
-        if (tooltipPanel != null)
-            tooltipPanel.SetActive(false);
-
-        isTooltipVisible = false;
+        TooltipManager.Instance.Hide();
     }
 
-    private void UpdateTooltipText()
-    {
-        if (tooltipText == null) return;
-
-        string result = "¿Á∑·:\n";
-        foreach (var kv in Ingredients)
-        {
-            result += $"{kv.Key} x{kv.Value}\n";
-        }
-
-        tooltipText.text = result;
-    }
-
-    private void UpdateTooltipPosition()
-    {
-        if (tooltipRect == null || canvas == null) return;
-
-        Vector2 mousePosition = Mouse.current.position.ReadValue();
-        Vector2 localPoint;
-
-        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
-
-        if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
-        {
-            localPoint = mousePosition;
-        }
-        else
-        {
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                canvasRect, mousePosition, canvas.worldCamera, out localPoint);
-        }
-
-        tooltipRect.anchoredPosition = localPoint + tooltipOffset;
-    }
-
-    // ∏∂øÏΩ∫ ø√∂Û∞¨¿ª ∂ß
+    // ÎßàÏö∞Ïä§ Ïò¨ÎùºÍ∞îÏùÑ Îïå
     public void OnPointerEnter(PointerEventData eventData)
     {
         ShowTooltip();
@@ -134,29 +88,102 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (currentSlot != null && !currentSlot.IsTopOfStack(this))
+        if (isTweening)
         {
-            Debug.Log("Ω∫≈√¿« ∏« ¿ß∞° æ∆¥‘ °Ê µÂ∑°±◊ ∫“∞°");
-            eventData.pointerDrag = null;  // µÂ∑°±◊ ¡ﬂ¥‹
+            eventData.pointerDrag = null;  // ÎìúÎûòÍ∑∏ ÏûêÏ≤¥Î•º Î¨¥Ìö®Ìôî
             return;
         }
 
-        // µÂ∑°±◊ «„øÎ
+        if (currentSlot != null && !currentSlot.IsTopOfStack(this))
+        {
+            eventData.pointerDrag = null;
+            return;
+        }
+
+        originalLocalPosition = transform.localPosition;
+        originalParent = transform.parent;
+
         canvasGroup.blocksRaycasts = false;
         canvasGroup.alpha = 0.7f;
-        transform.SetParent(canvas.transform);
+        transform.SetParent(canvas.transform); // ÏûêÏú†Î°≠Í≤å Ïù¥Îèô
+
+        isPlacedInSlot = false;
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        UpdateTooltipPosition();
+        //UpdateTooltipPosition();
         rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log("OnEndDrag »£√‚");
         canvasGroup.blocksRaycasts = true;
         canvasGroup.alpha = 1f;
+
+        isPlacedInSlot = false;
+
+        List<RaycastResult> results = new();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        foreach (var result in results)
+        {
+            var slot = result.gameObject.GetComponentInParent<PackagingSlot>();
+            if (slot != null)
+            {
+                if (slot.foodStackParent.childCount >= slot.maxStackSize)
+                {
+                    TooltipManager.Instance.Show("Ìè¨Ïû• Ïä¨Î°ØÏùÄ ÏµúÎåÄ 4Í∞úÍπåÏßÄ Í∞ÄÎä•Ìï©ÎãàÎã§!");
+
+                    // Î≥µÍ∑Ä Ï≤òÎ¶¨
+                    if (currentSlot != null)
+                    {
+                        // Ïù¥Ï†Ñ Ïä¨Î°ØÏúºÎ°ú ÎêòÎèåÎ¶º
+                        transform.SetParent(currentSlot.foodStackParent);
+                        int index = currentSlot.GetStackIndex(this);
+                        if (index < 0) index = currentSlot.foodStackParent.childCount;
+                        Vector2 target = new Vector2(0, index * currentSlot.stackYOffset);
+                        isTweening = true;
+                        rectTransform.DOAnchorPos(target, 0.25f).SetEase(Ease.OutCubic)
+                            .OnComplete(() => isTweening = false);
+                    }
+                    else if (originStoveSlot != null)
+                    {
+                        // Ï≤òÏùå ÌôîÍµ¨Î°ú Î≥µÍ∑Ä
+                        transform.SetParent(originalParent);
+                        isTweening = true;
+                        rectTransform.DOAnchorPos(originalLocalPosition, 0.25f).SetEase(Ease.OutCubic)
+                            .OnComplete(() => isTweening = false);
+                    }
+
+                    return;
+                }
+
+                slot.OnDrop(eventData);
+                isPlacedInSlot = true;
+                break;
+            }
+        }
+
+        if (!isPlacedInSlot)
+        {
+            // Î≥µÍ∑Ä Ï≤òÎ¶¨ (Ïä¨Î°Ø Ïô∏ ÌÅ¥Î¶≠ Ïãú)
+            transform.SetParent(originalParent);
+            isTweening = true;
+            rectTransform.DOAnchorPos(originalLocalPosition, 0.25f).SetEase(Ease.OutCubic)
+                .OnComplete(() => isTweening = false);
+        }
+        else
+        {
+            // Ï†ïÏÉÅ ÎìúÎ°≠ Ïãú Ï†ïÎ†¨
+            transform.SetParent(currentSlot.foodStackParent);
+            Vector2 target = new Vector2(0, currentSlot.GetStackIndex(this) * currentSlot.stackYOffset);
+            isTweening = true;
+            rectTransform.DOAnchorPos(target, 0.25f).SetEase(Ease.OutCubic)
+                .OnComplete(() => isTweening = false);
+        }
     }
+
+
+
 }

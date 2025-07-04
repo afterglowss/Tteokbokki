@@ -65,7 +65,7 @@ public static class MenuDatabase
         { "군자 떡볶이", new MenuItem("군자 떡볶이", 12000, new Dictionary<string, int>
             {
                 { "떡", 2 },
-                { "오뎅", 1 },
+                { "오뎅", 2 },
                 { "파", 1 },
                 { "배추", 1 },
                 { "군자 소스", 2 }
@@ -74,7 +74,7 @@ public static class MenuDatabase
         { "성인 군자 떡볶이", new MenuItem("성인 군자 떡볶이", 12000, new Dictionary<string, int>
             {
                 { "떡", 2 },
-                { "오뎅", 1 },
+                { "오뎅", 2 },
                 { "파", 1 },
                 { "배추", 1 },
                 { "군자 소스", 4 }
@@ -83,7 +83,7 @@ public static class MenuDatabase
         { "곱창 군자 떡볶이", new MenuItem("곱창 군자 떡볶이", 14500, new Dictionary<string, int>
             {
                 { "떡", 2 },
-                { "오뎅", 1 },
+                { "오뎅", 2 },
                 { "파", 1 },
                 { "배추", 1 },
                 { "군자 소스", 2 },
@@ -93,7 +93,7 @@ public static class MenuDatabase
         { "마라 군자 떡볶이", new MenuItem("마라 군자 떡볶이", 13000, new Dictionary<string, int>
             {
                 { "떡", 2 },
-                { "오뎅", 1 },
+                { "오뎅", 2 },
                 { "파", 1 },
                 { "배추", 1 },
                 { "군자 소스", 2 },
@@ -103,7 +103,7 @@ public static class MenuDatabase
         { "로제 군자 떡볶이", new MenuItem("로제 군자 떡볶이", 13000, new Dictionary<string, int>
             {
                 { "떡", 2 },
-                { "오뎅", 1 },
+                { "오뎅", 2 },
                 { "파", 1 },
                 { "배추", 1 },
                 { "군자 소스", 2 },

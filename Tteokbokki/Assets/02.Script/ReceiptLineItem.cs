@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DG.Tweening;
+using Unity.VisualScripting;
 
 public class ReceiptLineItem : MonoBehaviour
 {
@@ -16,6 +18,46 @@ public class ReceiptLineItem : MonoBehaviour
 
     private DateTime orderStartTime;
 
+    private Vector3 originalPosition;
+    private Transform originalParent;
+
+    private int originalSiblingIndex;
+
+    public int CurrentSlotIndex { get; set; }  // 리스트 상 자신의 위치 인덱스
+
+    public bool IsBeingDragged { get; private set; }
+
+    private bool isTweening = false;
+
+    public void CachePosition()
+    {
+        originalPosition = GetComponent<RectTransform>().anchoredPosition;
+        originalParent = transform.parent;
+        originalSiblingIndex = transform.GetSiblingIndex();
+    }
+
+    public void ReturnToOriginalPosition(float duration = 0.25f)
+    {
+        transform.SetParent(originalParent);
+        transform.SetSiblingIndex(originalSiblingIndex);
+        isTweening = true;
+        GetComponent<RectTransform>().DOAnchorPos(originalPosition, duration).SetEase(Ease.OutCubic)
+            .OnComplete(() => isTweening = false);
+    }
+
+    // 드래그 시작 시 호출
+    public void OnBeginDrag()
+    {
+        if (isTweening) return;  // 이미 트윈이 진행 중이면 무시
+
+        IsBeingDragged = true;
+        CachePosition();
+    }
+    public void OnEndDrag()
+    {
+        IsBeingDragged = false;
+    }
+
     public void Setup(Receipt receipt, float cookMinutes, ReceiptLineManager manager, ReceiptPopup popup, CombinedIngredientManager ingredientManager)
     {
         this.receipt = receipt;
@@ -26,6 +68,8 @@ public class ReceiptLineItem : MonoBehaviour
         orderIDText.text = $"주문번호: {receipt.OrderID}";
         orderStartTime = receipt.OrderDateTime;
 
+        CachePosition();    // 드래그 이전 자리 기억
+
         receiptButton.onClick.AddListener(OnClick);
     }
 
@@ -35,8 +79,11 @@ public class ReceiptLineItem : MonoBehaviour
 
         TimeSpan elapsed = now - orderStartTime;
 
+        //Debug.Log($"[영수증 {receipt.OrderID}] 경과 시간: {elapsed.TotalMinutes:F2}분 / 제한: {cookTimeSeconds / 60f}분");
+
         if (elapsed.TotalMinutes >= cookTimeSeconds / 60f)
         {
+            //Debug.LogWarning($"[영수증 {receipt.OrderID}] 시간이 초과되어 삭제됩니다.");
             manager.RemoveReceipt(this);
             return;
         }
@@ -56,4 +103,9 @@ public class ReceiptLineItem : MonoBehaviour
         receiptPopup.Show(receipt);
     }
     public Receipt GetReceipt() { return receipt; }
+
+    public Vector3 GetSlotPosition(float spacing)
+    {
+        return new Vector3(-CurrentSlotIndex * spacing, 0f, 0f);
+    }
 }
