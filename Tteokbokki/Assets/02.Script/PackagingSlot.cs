@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -80,8 +81,9 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
 
         // 내부 음식 재료 목록 추출
         List<Dictionary<string, int>> cookedIngredients = new();
-        foreach (var food in stackedFoods)
+        foreach (var food in stackedFoods.ToList())
         {
+            if (food == null) continue;
             cookedIngredients.Add(food.Ingredients);
         }
 

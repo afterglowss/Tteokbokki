@@ -17,6 +17,11 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
                 food.originStoveSlot.ResetSlot();  // 화구 초기화
             }
 
+            if (food.currentSlot != null)
+            {
+                food.currentSlot.RemoveFood(food);  // 리스트에서 제거 + 정렬
+            }
+
             TooltipManager.Instance.Hide();
             Destroy(food.gameObject);
             Debug.Log("[휴지통] 음식카드가 버려졌습니다.");
@@ -28,7 +33,8 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
         if (receiptItem != null)
         {
             var receipt = receiptItem.GetReceipt();
-            ReceiptLineManager.Instance.RemoveReceipt(receiptItem);  // 실패 목록 기록 포함
+            ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
+            ReceiptLineManager.Instance.RemoveReceipt(receiptItem);  
 
             TooltipManager.Instance.Hide();
             Debug.Log($"[휴지통] 영수증 {receipt.OrderID}번이 포기되어 실패 목록에 추가되었습니다.");

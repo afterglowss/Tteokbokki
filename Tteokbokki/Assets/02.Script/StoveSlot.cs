@@ -99,6 +99,8 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         //foodUI.SetTooltipReferences(globalTooltipPanel, globalTooltipText);
 
         foodUI.originStoveSlot = this; // 조리된 음식이 어떤 스토브에서 왔는지 기록
+
+        onCookComplete?.Invoke(currentIngredients);
     }
 
     private void UpdateTimerDisplay()

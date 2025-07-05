@@ -106,6 +106,7 @@ public class ReceiptLineManager : MonoBehaviour
 
     public void RecordFailedReceipt(Receipt receipt)
     {
+        if (missedReceipts.Contains(receipt)) return;
         missedReceipts.Add(receipt);
         Debug.Log($"[기록] 실패 영수증: {receipt.OrderID}");
     }

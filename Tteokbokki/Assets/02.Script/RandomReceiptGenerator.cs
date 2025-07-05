@@ -159,7 +159,7 @@ public class RandomReceiptGenerator : MonoBehaviour
             int cost = order.GetTotalCostWithExtras();
             int profit = order.GetProfitWithExtras();
 
-            Debug.Log($"[영수증 {newReceipt.OrderID}] {order.Menu.Name} - 판매가 {order.TotalPrice}원 / 원가 {cost}원 / 이윤 {profit}원");
+            //Debug.Log($"[영수증 {newReceipt.OrderID}] {order.Menu.Name} - 판매가 {order.TotalPrice}원 / 원가 {cost}원 / 이윤 {profit}원");
         }
     }
 
