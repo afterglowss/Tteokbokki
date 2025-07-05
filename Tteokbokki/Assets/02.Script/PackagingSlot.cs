@@ -148,7 +148,13 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         return true;
     }
 
-
+    public void ForceAddFoodToStack(CookedFoodUI food)
+    {
+        food.transform.SetParent(foodStackParent);
+        food.transform.localPosition = new Vector3(0, stackedFoods.Count * stackYOffset, 0);
+        stackedFoods.Add(food);
+        food.currentSlot = this;
+    }
 
     public bool IsTopOfStack(CookedFoodUI food)
     {

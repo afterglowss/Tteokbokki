@@ -53,4 +53,10 @@ public class PlayerWalletManager : MonoBehaviour
         if (balanceText != null)
             balanceText.text = $"잔고: {CurrentBalance:N0}원";
     }
+
+    public void SetBalance(int newBalance)
+    {
+        CurrentBalance = newBalance;
+        UpdateUI();
+    }
 }

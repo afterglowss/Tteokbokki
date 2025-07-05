@@ -32,6 +32,10 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     //public GameObject globalTooltipPanel;        // UI 전역 툴팁 패널
     //public TextMeshProUGUI globalTooltipText;    // 텍스트
 
+    public bool IsCooking => isCooking;
+    public bool IsCooked => isCooked;
+    public float GetCookTimeRemaining() => cookTimeRemaining;
+
     public void Initialize(StoveManager manager)
     {
         stoveManager = manager;
@@ -134,4 +138,43 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     {
         TooltipManager.Instance.Hide();
     }
+    public Dictionary<string, int> GetRawIngredientsCopy()
+    {
+        return currentIngredients != null
+            ? new Dictionary<string, int>(currentIngredients)
+            : new Dictionary<string, int>();
+    }
+    public void RestoreFromSave(StoveSlotSaveData data)
+    {
+        ResetSlot();  // 기존 상태 초기화
+
+        if (data.isCooked)
+        {
+            // 조리 완료 상태만 복원 (음식 생성)
+            currentIngredients = new Dictionary<string, int>(data.currentIngredients);
+            isCooked = true;
+            isCooking = false;
+            timerText.text = "완료!";
+
+            GameObject obj = Instantiate(cookedFoodPrefab, cookedFoodSpawnPoint);
+            obj.transform.localPosition = Vector3.zero;
+
+            var foodUI = obj.GetComponent<CookedFoodUI>();
+            foodUI.Initialize(currentIngredients);
+            foodUI.originStoveSlot = this;
+        }
+        else if (data.isCooking)
+        {
+            // 조리 중 상태 복원
+            currentIngredients = new Dictionary<string, int>(data.currentIngredients);
+            cookTimeSeconds = data.cookTimeRemaining;
+            cookTimeRemaining = data.cookTimeRemaining;
+            isCooking = true;
+            isCooked = false;
+
+            wokIcon.SetActive(true);
+            UpdateTimerDisplay();
+        }
+    }
+
 }

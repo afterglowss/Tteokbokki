@@ -159,4 +159,16 @@ public class ReceiptLineManager : MonoBehaviour
         }
     }
 
+    public void RestoreMissed(List<Receipt> list)
+    {
+        foreach (var r in list)
+            missedReceipts.Add(r);
+    }
+
+    public void RestoreSuccessful(List<Receipt> list)
+    {
+        foreach (var r in list)
+            successfulReceipts.Add(r);
+    }
+
 }

@@ -5,12 +5,21 @@ using System;
 
 public class StoveManager : MonoBehaviour
 {
+    public static StoveManager Instance { get; private set; }
     public StoveSlot[] stoves;
     public TextMeshProUGUI resultText;
     public ReceiptLineManager receiptLineManager;
 
     private StoveSlot selectedSlot;
-
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
     private void Start()
     {
         foreach (var slot in stoves)

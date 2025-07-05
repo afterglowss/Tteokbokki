@@ -7,29 +7,30 @@ using System.IO;
 using Unity.VisualScripting;
 using UnityEngine.Windows;
 using System.Collections;
+using SaveData;
 
-[Serializable]
-public class KeyValueStringInt
-{
-    public string Key;
-    public int Value;
-}
+//[Serializable]
+//public class KeyValueStringInt
+//{
+//    public string Key;
+//    public int Value;
+//}
 
-[Serializable]
-public class ReceiptData
-{
-    public int OrderID;
-    public string OrderDateTime;
-    public List<OrderItemData> Orders;
-}
+//[Serializable]
+//public class ReceiptData
+//{
+//    public int OrderID;
+//    public string OrderDateTime;
+//    public List<OrderItemData> Orders;
+//}
 
-[Serializable]
-public class OrderItemData
-{
-    public string MenuName;
-    public int BasePrice;
-    public List<KeyValueStringInt> Extras = new List<KeyValueStringInt>();
-}
+//[Serializable]
+//public class OrderItemData
+//{
+//    public string MenuName;
+//    public int BasePrice;
+//    public List<KeyValueStringInt> Extras = new List<KeyValueStringInt>();
+//}
 
 [Serializable]
 public class ReceiptsWrapper

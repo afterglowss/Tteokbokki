@@ -37,4 +37,8 @@ public class GameClock : MonoBehaviour
 
         clockText.text = gameTime.ToString("HH:mm"); // UI 업데이트 (초 제외)
     }
+    public static void SetGameTime(DateTime newTime)
+    {
+        gameTime = newTime;
+    }
 }

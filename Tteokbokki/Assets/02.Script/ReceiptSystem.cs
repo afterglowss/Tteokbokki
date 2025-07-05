@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
+using UnityEditor.Build.Reporting;
+
+using SaveData;
+
 
 // 🟢 [1] 모든 재료를 저장하는 Ingredient 클래스
 
@@ -166,7 +170,7 @@ public static class MenuDatabase
 
 public class Receipt
 {
-    private static int OrderCounter = 1;
+    public static int OrderCounter = 1;
 
     public int OrderID { get; }
     public DateTime OrderDateTime { get; }
@@ -221,7 +225,7 @@ public class Receipt
 
 public class OrderItem
 {
-    private static int OrderItemCounter = 1;
+    public static int OrderItemCounter = 1;
     public int ItemID { get; }
     public MenuItem Menu { get; }
     private Dictionary<string, int> Extras { get; }  // 추가 재료 이름과 개수 저장
@@ -608,19 +612,106 @@ public class ReceiptManager
     }
 
 }
-
 public class ReceiptSystem : MonoBehaviour
 {
-
-    // Start is called before the first frame update
-    void Start()
+    public static int CurrentReceiptID
     {
-        
+        get => Receipt.OrderCounter;
+        set => Receipt.OrderCounter = value;
     }
 
-    // Update is called once per frame
-    void Update()
+    public static int CurrentOrderItemID
     {
-        
+        get => OrderItem.OrderItemCounter;
+        set => OrderItem.OrderItemCounter = value;
     }
+    public static ReceiptData ToData(Receipt receipt)
+    {
+        var data = new ReceiptData
+        {
+            OrderID = receipt.OrderID,
+            OrderDateTime = receipt.OrderDateTime.ToString("o"),
+            Orders = new List<OrderItemData>()
+        };
+
+        foreach (var order in receipt.GetOrders())
+        {
+            var orderData = new OrderItemData
+            {
+                MenuName = order.Menu.Name,
+                BasePrice = order.Menu.BasePrice,
+                Extras = new List<KeyValueStringInt>()
+            };
+
+            foreach (var extra in order.GetExtras())
+            {
+                orderData.Extras.Add(new KeyValueStringInt
+                {
+                    Key = extra.Key,
+                    Value = extra.Value
+                });
+            }
+
+            data.Orders.Add(orderData);
+        }
+
+        return data;
+    }
+    public static Receipt FromData(ReceiptData data)
+    {
+        var receipt = new Receipt(DateTime.Parse(data.OrderDateTime), data.OrderID);
+
+        foreach (var orderData in data.Orders)
+        {
+            Dictionary<string, int> extras = new();
+            foreach (var kv in orderData.Extras)
+            {
+                extras[kv.Key] = kv.Value;
+            }
+
+            receipt.AddOrder(orderData.MenuName, extras);
+        }
+
+        return receipt;
+    }
+    public static List<ReceiptData> ConvertToDataList(List<Receipt> receipts)
+    {
+        List<ReceiptData> result = new();
+        foreach (var r in receipts)
+        {
+            result.Add(ToData(r));
+        }
+        return result;
+    }
+
+    public static List<Receipt> ConvertToReceiptList(List<ReceiptData> datas)
+    {
+        List<Receipt> result = new();
+        foreach (var d in datas)
+        {
+            result.Add(FromData(d));
+        }
+        return result;
+    }
+
+    public static List<ReceiptData> GetMissedReceiptsData()
+    {
+        return ConvertToDataList(ReceiptLineManager.Instance.GetMissedReceipts());
+    }
+    public static List<ReceiptData> GetSuccessfulReceiptsData()
+    {
+        return ConvertToDataList(ReceiptLineManager.Instance.GetSuccessfulReceipts());
+    }
+
+    public static void RestoreReceipts(
+        List<ReceiptData> missedData,
+        List<ReceiptData> successfulData)
+    {
+        var missedReceipts = ConvertToReceiptList(missedData);
+        var successfulReceipts = ConvertToReceiptList(successfulData);
+
+        ReceiptLineManager.Instance.RestoreMissed(missedReceipts);
+        ReceiptLineManager.Instance.RestoreSuccessful(successfulReceipts);
+    }
+
 }

@@ -156,4 +156,19 @@ public class IngredientStockManager : MonoBehaviour
             UpdateStockText(kv.Key);
         }
     }
+
+    public Dictionary<string, int> GetCurrentStockCopy()
+    {
+        return new Dictionary<string, int>(stock);
+    }
+
+    public void RestoreStock(Dictionary<string, int> savedStock)
+    {
+        foreach (var pair in savedStock)
+        {
+            stock[pair.Key] = pair.Value;
+        }
+
+        UpdateAllStockTexts();
+    }
 }

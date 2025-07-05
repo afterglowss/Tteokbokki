@@ -4,11 +4,23 @@ using UnityEngine;
 
 public class PlayerWokManager : MonoBehaviour
 {
+    public static PlayerWokManager Instance { get; private set; }
+
     private Dictionary<string, int> playerIngredients = new Dictionary<string, int>();
 
     public TextMeshProUGUI playerIngredientsText;
 
     public StoveManager stoveManager;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
 
     public void OnCookButtonPressed()
     {
@@ -83,5 +95,17 @@ public class PlayerWokManager : MonoBehaviour
             result += $"{item.Key} x{item.Value}\n";
         }
         playerIngredientsText.text = result;
+    }
+
+    public void RestoreWok(Dictionary<string, int> savedIngredients)
+    {
+        playerIngredients.Clear();
+
+        foreach (var pair in savedIngredients)
+        {
+            playerIngredients[pair.Key] = pair.Value;
+        }
+
+        UpdateIngredientText();
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class PackagingAreaManager : MonoBehaviour
 {
+    public static PackagingAreaManager Instance { get; private set; }
     public Transform foodParent;  // 음식들을 담을 부모 (UI Grid)
     public GameObject foodPrefab; // CookedFoodUI 프리팹
     public int maxSlots = 4;
@@ -12,8 +13,16 @@ public class PackagingAreaManager : MonoBehaviour
     public bool CanAddFood => currentFoods.Count < maxSlots;
 
     public List<PackagingSlot> slots;
-    
 
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
     void Start()
     {
         foreach (var slot in slots)
@@ -63,4 +72,44 @@ public class PackagingAreaManager : MonoBehaviour
             slot.RemoveFood(food);
         }
     }
+
+    public List<List<Dictionary<string, int>>> GetSlotWiseCookedFoods()
+    {
+        List<List<Dictionary<string, int>>> result = new();
+
+        foreach (var slot in slots)
+        {
+            List<Dictionary<string, int>> stack = new();
+            foreach (Transform child in slot.foodStackParent)
+            {
+                var food = child.GetComponent<CookedFoodUI>();
+                if (food != null)
+                    stack.Add(new Dictionary<string, int>(food.Ingredients));
+            }
+            result.Add(stack);
+        }
+
+        return result;
+    }
+    public void RestoreSlots(List<List<Dictionary<string, int>>> savedData)
+    {
+        ClearAllFoods(); // 기존 음식들 제거
+
+        for (int i = 0; i < savedData.Count && i < slots.Count; i++)
+        {
+            var slot = slots[i];
+            var stack = savedData[i];
+
+            foreach (var ingredients in stack)
+            {
+                var obj = Instantiate(foodPrefab, slot.foodStackParent);
+                var foodUI = obj.GetComponent<CookedFoodUI>();
+                foodUI.Initialize(ingredients);
+                foodUI.currentSlot = slot;
+
+                slot.ForceAddFoodToStack(foodUI); // 자동 정렬
+            }
+        }
+    }
+
 }
