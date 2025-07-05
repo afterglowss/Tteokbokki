@@ -152,6 +152,14 @@ public class RandomReceiptGenerator : MonoBehaviour
         //ReceiptStateManager.Instance.SetActiveReceipt(newReceipt);// 영수증의 생성과 활성화 여부는 다름
                                                                     // 영수증이 생성되었더라도, 플레이어가 영수증을 클릭하지 않는 이상 활성화되지 않음. 
         receiptUIManager.UpdateIsCookedDisplay(newReceipt);         // 새로 생성된 영수증의 조리 완료 여부 표시
+
+        foreach (var order in newReceipt.GetOrders())
+        {
+            int cost = order.GetTotalCostWithExtras();
+            int profit = order.GetProfitWithExtras();
+
+            Debug.Log($"[영수증 {newReceipt.OrderID}] {order.Menu.Name} - 판매가 {order.TotalPrice}원 / 원가 {cost}원 / 이윤 {profit}원");
+        }
     }
 
     // 🔔 주문번호로 검색 후 화면 출력

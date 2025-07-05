@@ -12,7 +12,7 @@ public class PackagingAreaManager : MonoBehaviour
     public bool CanAddFood => currentFoods.Count < maxSlots;
 
     public List<PackagingSlot> slots;
-    private List<Receipt> failedReceipts = new();
+    
 
     void Start()
     {
@@ -21,14 +21,6 @@ public class PackagingAreaManager : MonoBehaviour
             slot.Initialize(this); // 이 매니저를 전달
         }
     }
-
-    public void RecordFailedReceipt(Receipt receipt)
-    {
-        failedReceipts.Add(receipt);
-        Debug.Log($"[기록] 실패 영수증: {receipt.OrderID}");
-    }
-
-    public List<Receipt> GetFailedReceipts() => new List<Receipt>(failedReceipts);
 
     public void AddCookedFood(Dictionary<string, int> ingredients)
     {

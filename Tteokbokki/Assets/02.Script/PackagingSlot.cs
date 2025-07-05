@@ -88,7 +88,12 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         bool success = MatchAllMenusInReceipt(receipt, cookedIngredients);
 
         if (!success)
-            packagingArea.RecordFailedReceipt(receipt);
+            ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
+        else
+        {
+            ReceiptLineManager.Instance.RecordSuccessfulReceipt(receipt);
+            PlayerWalletManager.Instance.AddIncome(receipt.GetTotalPrice());
+        }
 
         TooltipManager.Instance.Hide(); // ÅøÆÁ ¼û±â±â
         foreach (var food in stackedFoods)

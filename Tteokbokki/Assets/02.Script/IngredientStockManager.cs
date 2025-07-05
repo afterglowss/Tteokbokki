@@ -103,6 +103,15 @@ public class IngredientStockManager : MonoBehaviour
         int servings = meta.ServingsPerOrder;
         int cost = meta.OrderCost;
 
+        // 잔고에서 돈 차감
+        bool paid = PlayerWalletManager.Instance.Spend(cost);
+        if (!paid)
+        {
+            Debug.LogWarning($"'{ingredientName}' 주문 실패 - 잔고 부족!");
+            return;
+        }
+
+
         stock[ingredientName] += servings;
         TotalSpent += cost;
 

@@ -21,27 +21,46 @@ public class Ingredient
 // 🟢 [2] 재료 데이터베이스 (고정된 재료 목록)
 public static class IngredientDatabase
 {
-    public static readonly Dictionary<string, Ingredient> Ingredients = new Dictionary<string, Ingredient>
+    //public static readonly Dictionary<string, Ingredient> Ingredients = new Dictionary<string, Ingredient>
+    //{
+    //    { "떡", new Ingredient("떡", 1000) },
+    //    { "오뎅", new Ingredient("오뎅", 1000) },
+    //    { "파", new Ingredient("파", 0) },
+    //    { "양배추", new Ingredient("양배추", 0) },
+    //    { "군자 소스", new Ingredient("군자 소스", 500) },
+    //    { "체다치즈", new Ingredient("체다치즈", 1500) },
+    //    { "모짜렐라", new Ingredient("모짜렐라", 1500) },
+    //    { "중국당면", new Ingredient("중국당면", 2000) },
+    //    { "일반당면", new Ingredient("일반당면", 1000) },
+    //    { "라면사리", new Ingredient("라면사리", 1000) },
+    //    { "우삼겹", new Ingredient("우삼겹", 2500) },
+    //    { "계란", new Ingredient("계란", 1500) },
+    //    { "메추리알", new Ingredient("메추리알", 1500) },
+    //    { "분모자", new Ingredient("분모자", 3000) },
+    //    { "유부", new Ingredient("유부", 1500) },
+    //    { "곱창", new Ingredient("곱창", 4000) },
+    //    { "마라 소스", new Ingredient("마라 소스", 0) },
+    //    { "로제 크림", new Ingredient("로제 크림", 0) }
+    //};
+    public static readonly Dictionary<string, Ingredient> Ingredients = CreateLegacyIngredientDict();
+
+    private static Dictionary<string, Ingredient> CreateLegacyIngredientDict()
     {
-        { "떡", new Ingredient("떡", 1000) },
-        { "오뎅", new Ingredient("오뎅", 1000) },
-        { "파", new Ingredient("파", 0) },
-        { "양배추", new Ingredient("양배추", 0) },
-        { "군자 소스", new Ingredient("군자 소스", 500) },
-        { "체다치즈", new Ingredient("체다치즈", 1500) },
-        { "모짜렐라", new Ingredient("모짜렐라", 1500) },
-        { "중국당면", new Ingredient("중국당면", 2000) },
-        { "일반당면", new Ingredient("일반당면", 1000) },
-        { "라면사리", new Ingredient("라면사리", 1000) },
-        { "우삼겹", new Ingredient("우삼겹", 2500) },
-        { "계란", new Ingredient("계란", 1500) },
-        { "메추리알", new Ingredient("메추리알", 1500) },
-        { "분모자", new Ingredient("분모자", 3000) },
-        { "유부", new Ingredient("유부", 1500) },
-        { "곱창", new Ingredient("곱창", 4000) },
-        { "마라 소스", new Ingredient("마라 소스", 0) },
-        { "로제 크림", new Ingredient("로제 크림", 0) }
-    };
+        var dict = new Dictionary<string, Ingredient>();
+
+        foreach (var kv in IngredientEconomyDatabase.Data)
+        {
+            string name = kv.Key;
+            var meta = kv.Value;
+
+            // 기존 시스템에서 기대하는 구조로 변환 (1인분 가격 기준)
+            int price = meta.SalePricePerUse;
+
+            dict[name] = new Ingredient(name, price);
+        }
+
+        return dict;
+    }
 }
 
 
@@ -56,6 +75,35 @@ public class MenuItem
         Name = name;
         BasePrice = basePrice;
         DefaultIngredients = new Dictionary<string, int>(ingredients);
+    }
+
+    // 메뉴의 원가 계산 함수 (각 재료의 원가 합)
+    public int GetTotalCost()
+    {
+        int total = 0;
+
+        foreach (var kv in DefaultIngredients)
+        {
+            string name = kv.Key;
+            int count = kv.Value;
+
+            if (IngredientEconomyDatabase.Data.TryGetValue(name, out var meta))
+            {
+                total += meta.CostPerServing * count;
+            }
+            else
+            {
+                Debug.LogWarning($"'{name}' 원가 정보를 찾을 수 없습니다.");
+            }
+        }
+
+        return total;
+    }
+
+    // 메뉴의 이윤 계산 함수
+    public int GetProfit()
+    {
+        return BasePrice - GetTotalCost();
     }
 }
 
@@ -156,6 +204,16 @@ public class Receipt
         return result;
     }
 
+    public int GetTotalPrice()
+    {
+        int total = 0;
+        foreach (var order in orders)
+        {
+            total += order.TotalPrice;
+        }
+        return total;
+    }
+
     public List<OrderItem> GetOrders() => orders;
 
     public Dictionary<string, int> GetExtras(int orderIndex) => orders[orderIndex].GetExtras();
@@ -217,6 +275,28 @@ public class OrderItem
     public Dictionary<string, int> GetExtras()
     {
         return new Dictionary<string, int>(Extras);
+    }
+
+    // 메인 메뉴와 추가 재료 포함해서 총 원가 계산하는 함수
+    public int GetTotalCostWithExtras()
+    {
+        int total = Menu.GetTotalCost(); // 기본 재료 원가
+
+        foreach (var kv in Extras)
+        {
+            if (IngredientEconomyDatabase.Data.TryGetValue(kv.Key, out var meta))
+            {
+                total += meta.CostPerServing * kv.Value;
+            }
+        }
+
+        return total;
+    }
+
+    // 메인 메뉴와 추가재료까지 포함해서 판매금액 - 원가 = 이윤
+    public int GetProfitWithExtras()
+    {
+        return TotalPrice - GetTotalCostWithExtras(); // TotalPrice는 판매가 + 추가재료 금액
     }
 }
 
@@ -438,6 +518,9 @@ public class ReceiptManager
     {
         if (missedReceipts == null || missedReceipts.Count == 0) return;
 
+        // OrderID 오름차순 정렬
+        missedReceipts.Sort((a, b) => a.OrderID.CompareTo(b.OrderID));
+
         string folderPath = Path.Combine(Application.dataPath, "Receipts/Missed");
         if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 
@@ -447,6 +530,52 @@ public class ReceiptManager
         var wrapper = new ReceiptsWrapper { Receipts = new List<ReceiptData>() };
 
         foreach (var receipt in missedReceipts)
+        {
+            var receiptData = new ReceiptData
+            {
+                OrderID = receipt.OrderID,
+                OrderDateTime = receipt.OrderDateTime.ToString("yyyy-MM-dd HH:mm"),
+                Orders = new List<OrderItemData>()
+            };
+
+            foreach (var order in receipt.GetOrders())
+            {
+                var orderData = new OrderItemData
+                {
+                    MenuName = order.Menu.Name,
+                    BasePrice = order.Menu.BasePrice,
+                    Extras = new List<KeyValueStringInt>()
+                };
+
+                foreach (var extra in order.GetExtras())
+                {
+                    orderData.Extras.Add(new KeyValueStringInt { Key = extra.Key, Value = extra.Value });
+                }
+
+                receiptData.Orders.Add(orderData);
+            }
+
+            wrapper.Receipts.Add(receiptData);
+        }
+
+        File.WriteAllText(filePath, JsonUtility.ToJson(wrapper, true));
+    }
+    // 하루 동안 성공한 영수증 저장
+    public static void SaveSuccessfulReceipts(List<Receipt> receipts, DateTime date)
+    {
+        if (receipts == null || receipts.Count == 0) return;
+
+        receipts.Sort((a, b) => a.OrderID.CompareTo(b.OrderID)); // 오름차순 정렬
+
+        string folderPath = Path.Combine(Application.dataPath, "Receipts/Successful");
+        if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+        string fileName = $"{date:yyyy-MM-dd}_SuccessfulReceipts.json";
+        string filePath = Path.Combine(folderPath, fileName);
+
+        var wrapper = new ReceiptsWrapper { Receipts = new List<ReceiptData>() };
+
+        foreach (var receipt in receipts)
         {
             var receiptData = new ReceiptData
             {

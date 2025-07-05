@@ -20,6 +20,10 @@ public class ReceiptLineManager : MonoBehaviour
     }
     public void ClearMissedReceipts() => missedReceipts.Clear();
 
+    private List<Receipt> successfulReceipts = new();
+    public List<Receipt> GetSuccessfulReceipts() => new(successfulReceipts);
+    public void ClearSuccessfulReceipts() => successfulReceipts.Clear();
+
     public float cookLimitMinutes = 30f;
 
     public ReceiptPopup receiptPopup;
@@ -68,13 +72,13 @@ public class ReceiptLineManager : MonoBehaviour
     {
         Receipt receipt = item.GetReceipt();
 
-        // 모든 메뉴가 조리중이거나 완료된 상태여야 성공해서 삭제된 영수증
-        bool isUncompleted = !StoveManager.AllMenusHandledStatic(receipt);
+        //// 모든 메뉴가 조리중이거나 완료된 상태여야 성공해서 삭제된 영수증
+        //bool isUncompleted = !StoveManager.AllMenusHandledStatic(receipt);
 
-        if (isUncompleted)
-        {
-            missedReceipts.Add(receipt);
-        }
+        //if (isUncompleted)
+        //{
+        //    missedReceipts.Add(receipt);
+        //}
 
         if (ReceiptStateManager.Instance.ActiveReceipt == receipt)
         {
@@ -82,7 +86,6 @@ public class ReceiptLineManager : MonoBehaviour
             receiptPopup.Close(); // 팝업 닫기
         }
 
-        //activeReceipts.Remove(item);
         receiptSlots.Remove(item);
         Destroy(item.gameObject);
 
@@ -94,6 +97,17 @@ public class ReceiptLineManager : MonoBehaviour
             CreateAndAddReceiptUI(nextReceipt);
             UpdatePendingCountUI();  // UI 갱신
         }
+    }
+    public void RecordSuccessfulReceipt(Receipt receipt)
+    {
+        successfulReceipts.Add(receipt);
+        Debug.Log($"[기록] 성공 영수증: {receipt.OrderID}");
+    }
+
+    public void RecordFailedReceipt(Receipt receipt)
+    {
+        missedReceipts.Add(receipt);
+        Debug.Log($"[기록] 실패 영수증: {receipt.OrderID}");
     }
 
     private IEnumerator DelayedReposition()
