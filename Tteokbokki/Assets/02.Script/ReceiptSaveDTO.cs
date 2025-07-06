@@ -26,6 +26,14 @@ namespace SaveData
         public int BasePrice;
         public List<KeyValueStringInt> Extras = new List<KeyValueStringInt>();
     }
+    [Serializable]
+    public class ReceiptSlotSaveData
+    {
+        public ReceiptData receiptData;      // 주문 정보 (메뉴, 재료 등)
+        public float remainingTime;          // 제한시간 타이머
+        public float cookLimitTime;          // 전체 제한 시간
+        public int slotIndex;                // 슬롯 위치 (0~N)
+    }
 }
 
 public class ReceiptSaveDTO : MonoBehaviour

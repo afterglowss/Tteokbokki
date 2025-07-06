@@ -1355,7 +1355,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foodParent: {fileID: 144850647}
-  foodPrefab: {fileID: 0}
+  foodPrefab: {fileID: 355488986595139890, guid: 91224ac8f4764854c8f5e44e67f684e4, type: 3}
   maxSlots: 4
   slots:
   - {fileID: 1306567822}
@@ -1575,7 +1575,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   receiptText: {fileID: 909551981}
-  isCookedOrNotText: {fileID: 388722691}
   scrollViewRecentReceipt: {fileID: 222921240772039084}
 --- !u!4 &206028304
 Transform:
@@ -2334,7 +2333,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -505.64, y: -280}
+  m_AnchoredPosition: {x: -593.14, y: -270.99997}
   m_SizeDelta: {x: 98.98, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &363194035
@@ -2810,7 +2809,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &388722690
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8069,7 +8068,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -643, y: -280}
+  m_AnchoredPosition: {x: -706.5, y: -271.99997}
   m_SizeDelta: {x: 99.97, y: 49.997}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1123651207
@@ -10461,7 +10460,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -375.5, y: -280}
+  m_AnchoredPosition: {x: -476, y: -271}
   m_SizeDelta: {x: 98.98, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1290293910

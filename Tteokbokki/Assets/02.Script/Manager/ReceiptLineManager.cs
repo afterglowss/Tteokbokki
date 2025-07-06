@@ -1,6 +1,8 @@
 ﻿using DG.Tweening;
+using SaveData;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -31,6 +33,20 @@ public class ReceiptLineManager : MonoBehaviour
 
     public int maxSlots = 15;
     private List<ReceiptLineItem> receiptSlots = new();  // 고정된 순서 유지
+    public List<ReceiptLineItem> GetReceiptSlots() => new(receiptSlots); // 슬롯 리스트 반환
+    public void ClearAllReceipts()
+    {
+        foreach (var item in receiptSlots)
+        {
+            if (item != null && item.gameObject != null)
+            {
+                Destroy(item.gameObject);
+            }
+        }
+        receiptSlots.Clear();
+        pendingReceipts.Clear();
+        UpdatePendingCountUI();  // 대기중 표시 초기화
+    }
     private Queue<Receipt> pendingReceipts = new();
     public float slotSpacing = 160f;  // 슬롯 간 거리
 
@@ -148,7 +164,8 @@ public class ReceiptLineManager : MonoBehaviour
             var item = receiptSlots[i];
             if (item == null || item.gameObject == null) continue;
 
-            if (item.IsBeingDragged) continue;
+            if (item.IsBeingDragged || DOTween.IsTweening(item.GetComponent<RectTransform>()))
+                continue;
 
             RectTransform rt = item.GetComponent<RectTransform>();
 
@@ -160,6 +177,7 @@ public class ReceiptLineManager : MonoBehaviour
         }
     }
 
+
     public void RestoreMissed(List<Receipt> list)
     {
         foreach (var r in list)
@@ -170,6 +188,82 @@ public class ReceiptLineManager : MonoBehaviour
     {
         foreach (var r in list)
             successfulReceipts.Add(r);
+    }
+    public List<ReceiptSlotSaveData> GetCurrentReceiptSlots()
+    {
+        var result = new List<ReceiptSlotSaveData>();
+
+        for (int i = 0; i < receiptSlots.Count; i++)
+        {
+            var receiptItem = receiptSlots[i];
+
+            if (receiptItem != null && receiptItem.GetReceipt() != null)
+            {
+                var data = new ReceiptSlotSaveData
+                {
+                    slotIndex = i,
+                    receiptData = ReceiptSystem.ToData(receiptItem.GetReceipt()),
+                    remainingTime = receiptItem.GetRemainingTime(),
+                    cookLimitTime = receiptItem.GetLimitTime()
+                };
+
+                result.Add(data);
+            }
+        }
+
+        return result;
+    }
+    public void RestoreReceiptSlots(List<ReceiptSlotSaveData> savedSlots)
+    {
+        // 1. 기존 슬롯 초기화
+        ClearAllReceipts();
+
+        foreach (var slotData in savedSlots)
+        {
+            // 2. ReceiptData → Receipt 복원
+            Receipt restoredReceipt = ReceiptSystem.FromData(slotData.receiptData);
+
+            // 3. 복원된 Receipt를 지정된 슬롯에 추가
+            AddNewReceipt(restoredReceipt, slotData.cookLimitTime, slotData.slotIndex);
+
+            // 4. 남은 시간 덮어쓰기 (타이머 복원)
+            var receiptItem = receiptSlots[slotData.slotIndex];
+            receiptItem.OverrideRemainingTime(slotData.remainingTime);
+        }
+
+        RepositionAll();
+    }
+    public void AddNewReceipt(Receipt receipt, float cookTime, int slotIndex)
+    {
+        while (receiptSlots.Count <= slotIndex)
+        {
+            receiptSlots.Add(null); // 빈 슬롯 추가
+        }
+        if (receiptSlots[slotIndex] != null)
+        {
+            Destroy(receiptSlots[slotIndex].gameObject);
+        }
+        GameObject go = Instantiate(receiptPrefab, receiptLineParent);
+        ReceiptLineItem item = go.GetComponent<ReceiptLineItem>();
+        item.Setup(receipt, cookTime, this, receiptPopup, combinedIngredientManager);
+        receiptSlots[slotIndex] = item;
+    }
+
+    public List<ReceiptData> GetPendingReceiptsData()
+    {
+        return ReceiptSystem.ConvertToDataList(pendingReceipts.ToList());
+    }
+    public void RestorePendingReceipts(List<ReceiptData> dataList)
+    {
+        pendingReceipts.Clear();
+
+        foreach (var data in dataList)
+        {
+            Receipt r = ReceiptSystem.FromData(data);
+            pendingReceipts.Enqueue(r);
+        }
+
+        UpdatePendingCountUI(); // 대기 중 숫자 UI 업데이트
     }
 
 }

@@ -50,6 +50,8 @@ public class ReceiptLineItem : MonoBehaviour
     {
         if (isTweening) return;  // 이미 트윈이 진행 중이면 무시
 
+        GetComponent<RectTransform>().DOComplete();
+
         IsBeingDragged = true;
         CachePosition();
     }
@@ -108,4 +110,33 @@ public class ReceiptLineItem : MonoBehaviour
     {
         return new Vector3(-CurrentSlotIndex * spacing, 0f, 0f);
     }
+    public float GetRemainingTime()
+    {
+        TimeSpan elapsed = GameClock.gameTime - orderStartTime;
+        return Mathf.Max(0f, cookTimeSeconds - (float)elapsed.TotalSeconds);
+    }
+
+    public float GetLimitTime()
+    {
+        return cookTimeSeconds;
+    }
+    public void OverrideRemainingTime(float remaining)
+    {
+        // 1. 유효성 검사
+        if (cookTimeSeconds <= 0f)
+        {
+            Debug.LogWarning("cookTimeSeconds가 아직 설정되지 않았거나 0입니다.");
+            return;
+        }
+
+        // 2. 남은 시간 값 클램프
+        float clampedRemaining = Mathf.Clamp(remaining, 0f, cookTimeSeconds);
+
+        // 3. 시작 시간 역산하여 설정
+        orderStartTime = GameClock.gameTime.AddSeconds(-(cookTimeSeconds - clampedRemaining));
+
+        // 4. 디버깅 로그 (선택)
+        // Debug.Log($"제한시간: {cookTimeSeconds}, 남은시간: {clampedRemaining}, 역산된 시작시간: {orderStartTime}");
+    }
+
 }

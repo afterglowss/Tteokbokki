@@ -1,8 +1,10 @@
+using Newtonsoft.Json;
+using SaveData;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 using UnityEngine;
-using SaveData;
 
 [Serializable]
 public class GameSaveData
@@ -17,6 +19,8 @@ public class GameSaveData
     public int lastOrderItemID;
     public List<ReceiptData> missedReceipts;
     public List<ReceiptData> successfulReceipts;
+    public List<ReceiptSlotSaveData> receiptSlots;
+    public List<ReceiptData> pendingReceipts;
 }
 
 [Serializable]
@@ -32,23 +36,18 @@ public class GameSaveManager : MonoBehaviour
 {
     private const string SaveFilePath = "SaveData.json";
 
-    private void Start()
-    {
-        Debug.Log("Saved to: " + Path.Combine(Application.persistentDataPath, SaveFilePath));
-    }
-
     public void SaveGame()
     {
-        GameSaveData data = new GameSaveData();
+        GameSaveData data = new GameSaveData
+        {
+            gameTime = GameClock.gameTime.ToString("yyyy-MM-dd HH:mm"),
+            playerBalance = PlayerWalletManager.Instance.CurrentBalance,
+            ingredientStocks = IngredientStockManager.Instance.GetCurrentStockCopy(),
+            playerWok = PlayerWokManager.Instance.GetPlayerIngredients(),
+            packagingArea = PackagingAreaManager.Instance.GetSlotWiseCookedFoods(),
+            stoveStates = new List<StoveSlotSaveData>()
+        };
 
-        data.gameTime = GameClock.gameTime.ToString("o");
-        data.playerBalance = PlayerWalletManager.Instance.CurrentBalance;
-        data.ingredientStocks = IngredientStockManager.Instance.GetCurrentStockCopy();
-        data.playerWok = PlayerWokManager.Instance.GetPlayerIngredients();
-        data.packagingArea = PackagingAreaManager.Instance.GetSlotWiseCookedFoods();
-
-        // 저장: 스토브 상태
-        var stoveList = new List<StoveSlotSaveData>();
         foreach (var slot in StoveManager.Instance.stoves)
         {
             StoveSlotSaveData slotData = new StoveSlotSaveData
@@ -58,19 +57,20 @@ public class GameSaveManager : MonoBehaviour
                 cookTimeRemaining = slot.GetCookTimeRemaining(),
                 currentIngredients = slot.GetRawIngredientsCopy()
             };
-            stoveList.Add(slotData);
+            data.stoveStates.Add(slotData);
         }
-        data.stoveStates = stoveList;
 
-        // TODO: 아래 ID와 영수증은 ReceiptManager에서 받아오도록 처리
         data.lastReceiptID = ReceiptSystem.CurrentReceiptID;
         data.lastOrderItemID = ReceiptSystem.CurrentOrderItemID;
-
+        data.receiptSlots = ReceiptLineManager.Instance.GetCurrentReceiptSlots();
+        data.pendingReceipts = ReceiptLineManager.Instance.GetPendingReceiptsData();
         data.missedReceipts = ReceiptSystem.GetMissedReceiptsData();
         data.successfulReceipts = ReceiptSystem.GetSuccessfulReceiptsData();
 
-        File.WriteAllText(Path.Combine(Application.persistentDataPath, SaveFilePath), JsonUtility.ToJson(data, true));
-        Debug.Log("Saved to: " + Path.Combine(Application.persistentDataPath, SaveFilePath));
+        string json = JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
+        File.WriteAllText(Path.Combine(Application.persistentDataPath, SaveFilePath), json);
+
+        Debug.Log("게임 저장 완료!");
     }
 
     public void LoadGame()
@@ -83,7 +83,7 @@ public class GameSaveManager : MonoBehaviour
         }
 
         string json = File.ReadAllText(fullPath);
-        GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
+        GameSaveData data = JsonConvert.DeserializeObject<GameSaveData>(json);
 
         GameClock.SetGameTime(DateTime.Parse(data.gameTime));
         PlayerWalletManager.Instance.SetBalance(data.playerBalance);
@@ -96,10 +96,12 @@ public class GameSaveManager : MonoBehaviour
             StoveManager.Instance.stoves[i].RestoreFromSave(data.stoveStates[i]);
         }
 
+        ReceiptLineManager.Instance.RestoreReceiptSlots(data.receiptSlots);
+
         ReceiptSystem.CurrentReceiptID = data.lastReceiptID;
         ReceiptSystem.CurrentOrderItemID = data.lastOrderItemID;
-
         ReceiptSystem.RestoreReceipts(data.missedReceipts, data.successfulReceipts);
+        ReceiptLineManager.Instance.RestorePendingReceipts(data.pendingReceipts);
 
         Debug.Log("게임 불러오기 완료!");
     }

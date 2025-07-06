@@ -106,6 +106,7 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         // 영수증 UI 제거
         Destroy(receiptItem.gameObject);
 
+        receiptItem.OnEndDrag();
         ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
 
         // (선택사항: 성공/실패 피드백)

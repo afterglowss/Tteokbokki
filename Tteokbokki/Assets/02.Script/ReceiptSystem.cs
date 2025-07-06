@@ -630,7 +630,7 @@ public class ReceiptSystem : MonoBehaviour
         var data = new ReceiptData
         {
             OrderID = receipt.OrderID,
-            OrderDateTime = receipt.OrderDateTime.ToString("o"),
+            OrderDateTime = receipt.OrderDateTime.ToString("yyyy-MM-dd HH:mm"),
             Orders = new List<OrderItemData>()
         };
 
@@ -659,7 +659,7 @@ public class ReceiptSystem : MonoBehaviour
     }
     public static Receipt FromData(ReceiptData data)
     {
-        var receipt = new Receipt(DateTime.Parse(data.OrderDateTime), data.OrderID);
+        var receipt = new Receipt(DateTime.ParseExact(data.OrderDateTime, "yyyy-MM-dd HH:mm", null), data.OrderID);
 
         foreach (var orderData in data.Orders)
         {
@@ -696,11 +696,13 @@ public class ReceiptSystem : MonoBehaviour
 
     public static List<ReceiptData> GetMissedReceiptsData()
     {
-        return ConvertToDataList(ReceiptLineManager.Instance.GetMissedReceipts());
+        var list = ReceiptLineManager.Instance.GetMissedReceipts();
+        return list != null ? ConvertToDataList(list) : new List<ReceiptData>();
     }
     public static List<ReceiptData> GetSuccessfulReceiptsData()
     {
-        return ConvertToDataList(ReceiptLineManager.Instance.GetSuccessfulReceipts());
+        var list = ReceiptLineManager.Instance.GetSuccessfulReceipts();
+        return list != null ? ConvertToDataList(list) : new List<ReceiptData>();
     }
 
     public static void RestoreReceipts(
@@ -713,5 +715,4 @@ public class ReceiptSystem : MonoBehaviour
         ReceiptLineManager.Instance.RestoreMissed(missedReceipts);
         ReceiptLineManager.Instance.RestoreSuccessful(successfulReceipts);
     }
-
 }

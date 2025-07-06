@@ -152,7 +152,7 @@ public class RandomReceiptGenerator : MonoBehaviour
         receiptLineManager.AddNewReceipt(newReceipt); // 신규 주문 들어옴
         //ReceiptStateManager.Instance.SetActiveReceipt(newReceipt);// 영수증의 생성과 활성화 여부는 다름
                                                                     // 영수증이 생성되었더라도, 플레이어가 영수증을 클릭하지 않는 이상 활성화되지 않음. 
-        receiptUIManager.UpdateIsCookedDisplay(newReceipt);         // 새로 생성된 영수증의 조리 완료 여부 표시
+        //receiptUIManager.UpdateIsCookedDisplay(newReceipt);         // 새로 생성된 영수증의 조리 완료 여부 표시
 
         foreach (var order in newReceipt.GetOrders())
         {
@@ -173,7 +173,7 @@ public class RandomReceiptGenerator : MonoBehaviour
             if(receiptText.text != null)
             {
                 ReceiptStateManager.Instance.SetActiveReceipt(foundReceipt);    //주문 번호로 찾은 영수증을 활성화
-                receiptUIManager.UpdateIsCookedDisplay(foundReceipt);       //주문 번호로 찾은 영수증의 조리 완료 여부 표시
+                //receiptUIManager.UpdateIsCookedDisplay(foundReceipt);       //주문 번호로 찾은 영수증의 조리 완료 여부 표시
             }
         }
         else
