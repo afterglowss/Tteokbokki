@@ -97,7 +97,7 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
             PlayerWalletManager.Instance.AddIncome(receipt.GetTotalPrice());
         }
 
-        TooltipManager.Instance.Hide(); // ÅøÆÁ ¼û±â±â
+        TooltipManager.Hide(TooltipType.Info); // ÅøÆÁ ¼û±â±â
         foreach (var food in stackedFoods)
             Destroy(food.gameObject);
 

@@ -11,7 +11,7 @@ public class GameSaveData
 {
     public string gameTime;
     public int playerBalance;
-    public Dictionary<string, int> ingredientStocks;
+    public Dictionary<string, List<StockEntry>> ingredientStocks;
     public Dictionary<string, int> playerWok;
     public List<List<Dictionary<string, int>>> packagingArea;
     public List<StoveSlotSaveData> stoveStates;
@@ -42,7 +42,7 @@ public class GameSaveManager : MonoBehaviour
         {
             gameTime = GameClock.gameTime.ToString("yyyy-MM-dd HH:mm"),
             playerBalance = PlayerWalletManager.Instance.CurrentBalance,
-            ingredientStocks = IngredientStockManager.Instance.GetCurrentStockCopy(),
+            ingredientStocks = IngredientStockManager.Instance.GetCurrentStockForSave(),
             playerWok = PlayerWokManager.Instance.GetPlayerIngredients(),
             packagingArea = PackagingAreaManager.Instance.GetSlotWiseCookedFoods(),
             stoveStates = new List<StoveSlotSaveData>()

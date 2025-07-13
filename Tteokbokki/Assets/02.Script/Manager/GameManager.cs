@@ -19,6 +19,20 @@ public class GameManager : MonoBehaviour
         
     }
 
+    public void StartOfDay()
+    {
+        // 하루 시작 시 초기화
+        receiptLineManager.ClearMissedReceipts();
+        receiptLineManager.ClearSuccessfulReceipts();
+
+        IngredientStockManager.Instance.ResetDailyOrderFlags();
+
+        IngredientStockManager.Instance.AdvanceDayAndDecay();
+
+        // 로그 출력
+        Debug.Log("[시작] 새로운 영업일이 시작되었습니다.");
+    }
+
     public void EndOfDay()
     {
         var missed = receiptLineManager.GetMissedReceipts();
@@ -43,5 +57,10 @@ public class GameManager : MonoBehaviour
         // 초기화
         receiptLineManager.ClearMissedReceipts();
         receiptLineManager.ClearSuccessfulReceipts(); // 성공 기록도 초기화!
+
+        IngredientStockManager.Instance.ResetDailyOrderFlags();
+
+        IngredientStockManager.Instance.AdvanceDayAndDecay();
+        Debug.Log("[마감] 영업일이 종료되었습니다. 재고가 초기화되고 유통기한이 갱신되었습니다.");
     }
 }

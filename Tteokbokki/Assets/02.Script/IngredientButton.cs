@@ -17,7 +17,7 @@ public class IngredientButton : MonoBehaviour
         }
         else
         {
-            TooltipManager.Instance?.Show($"{ingredientName} 재고가 부족합니다!");
+            TooltipManager.ShowFollowMouse(TooltipType.UI, $"{ingredientName} 재고가 부족합니다!", 1f);
             Debug.LogWarning($"'{ingredientName}' 재고 부족 - 추가 실패");
         }
     }

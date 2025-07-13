@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -9,12 +10,20 @@ public class IngredientStockEntry
     public TextMeshProUGUI textUI;
 }
 
+[System.Serializable]
+public class StockEntry
+{
+    public int count;
+    public int dayRemaining;
+}
+
+
 public class IngredientStockManager : MonoBehaviour
 {
     public static IngredientStockManager Instance { get; private set; }
 
     // 현재 재고
-    private Dictionary<string, int> stock = new();
+    private Dictionary<string, List<StockEntry>> stock = new();
 
     public List<IngredientStockEntry> stockTextEntries;
 
@@ -23,6 +32,10 @@ public class IngredientStockManager : MonoBehaviour
 
     // 총 사용된 돈 기록 (Optional)
     public int TotalSpent { get; private set; } = 0;
+
+    private HashSet<string> orderedToday = new();
+
+    private const int ShelfLifeDays = 5; // 모든 재료 유통기한 5일
 
     private void Awake()
     {
@@ -46,7 +59,7 @@ public class IngredientStockManager : MonoBehaviour
 
     void Start()
     {
-        OrderAllIngredientsOnce();
+        //OrderAllIngredientsOnce();
     }
 
     /// <summary>
@@ -56,7 +69,7 @@ public class IngredientStockManager : MonoBehaviour
     {
         foreach (var name in IngredientEconomyDatabase.Data.Keys)
         {
-            stock[name] = 0;
+            stock[name] = new List<StockEntry>();
         }
 
         UpdateAllStockTexts();
@@ -78,32 +91,60 @@ public class IngredientStockManager : MonoBehaviour
     /// </summary>
     public bool UseIngredient(string ingredientName)
     {
-        if (!stock.ContainsKey(ingredientName) || stock[ingredientName] <= 0)
+        if (!stock.ContainsKey(ingredientName) || stock[ingredientName].Count == 0)
         {
-            Debug.LogWarning($"'{ingredientName}' 재고가 부족합니다!");
+            Debug.LogWarning($"'{ingredientName}' 재고가 없습니다!");
             return false;
         }
 
-        stock[ingredientName]--;
-        UpdateStockText(ingredientName);
-        return true;
+        // 유통기한이 가장 짧은 항목부터 사용
+        var entryList = stock[ingredientName]
+            .OrderBy(e => e.dayRemaining)
+            .ToList();
+
+        foreach (var entry in entryList)
+        {
+            if (entry.count > 0)
+            {
+                entry.count--;
+
+                if (entry.count == 0)
+                {
+                    stock[ingredientName].Remove(entry);
+                }
+
+                UpdateStockText(ingredientName);
+                return true;
+            }
+        }
+
+        Debug.LogWarning($"'{ingredientName}' 재고는 있으나 모두 폐기 상태입니다.");
+        return false;
     }
+
 
     /// <summary>
     /// 고정된 주문량 기준으로 재료 보충
     /// </summary>
     public void OrderIngredient(string ingredientName)
     {
+        //Debug.Log($"OrderIngredient 호출됨: {ingredientName}");
+
+        if (orderedToday.Contains(ingredientName))
+        {
+            Debug.LogWarning($"'{ingredientName}'은(는) 이미 오늘 주문했습니다!");
+            return;
+        }
+
         if (!IngredientEconomyDatabase.Data.TryGetValue(ingredientName, out var meta))
         {
-            Debug.LogWarning($"'{ingredientName}'은(는) 경제 정보에 등록되어 있지 않습니다.");
+            Debug.LogWarning($"'{ingredientName}'은(는) 경제 정보에 없습니다.");
             return;
         }
 
         int servings = meta.ServingsPerOrder;
         int cost = meta.OrderCost;
 
-        // 잔고에서 돈 차감
         bool paid = PlayerWalletManager.Instance.Spend(cost);
         if (!paid)
         {
@@ -111,20 +152,41 @@ public class IngredientStockManager : MonoBehaviour
             return;
         }
 
+        // 유통기한이 있는 새로운 재고 항목 추가
+        if (!stock.ContainsKey(ingredientName))
+            stock[ingredientName] = new List<StockEntry>();
 
-        stock[ingredientName] += servings;
+        stock[ingredientName].Add(new StockEntry
+        {
+            count = servings,
+            dayRemaining = ShelfLifeDays
+        });
+
         TotalSpent += cost;
+        orderedToday.Add(ingredientName);
 
-        Debug.Log($"'{ingredientName}' 재료를 {servings}인분만큼 보충했습니다. (비용: {cost}원)");
+        Debug.Log($"'{ingredientName}' {servings}인분 (유통기한 {ShelfLifeDays}일) 주문 완료!");
         UpdateStockText(ingredientName);
     }
+
+
+    public void ResetDailyOrderFlags()
+    {
+        orderedToday.Clear();
+    }
+
+    public bool HasOrderedToday(string name) => orderedToday.Contains(name);
+
 
     /// <summary>
     /// 현재 재고 반환
     /// </summary>
     public int GetStock(string ingredientName)
     {
-        return stock.TryGetValue(ingredientName, out var value) ? value : 0;
+        if (!stock.TryGetValue(ingredientName, out var entries))
+            return 0;
+
+        return entries.Sum(e => e.count);
     }
 
     /// <summary>
@@ -140,11 +202,24 @@ public class IngredientStockManager : MonoBehaviour
     /// </summary>
     public void UpdateStockText(string ingredientName)
     {
-        if (stockTexts.TryGetValue(ingredientName, out var ui))
+        if (!stockTexts.TryGetValue(ingredientName, out var ui))
+            return;
+
+        if (!stock.ContainsKey(ingredientName) || stock[ingredientName].Count == 0)
         {
-            ui.text = $"재고: {stock[ingredientName]}";
+            ui.text = "재고: 없음";
+            return;
         }
+
+        // 유통기한별로 그룹화
+        var grouped = stock[ingredientName]
+            .GroupBy(e => e.dayRemaining)
+            .OrderBy(g => g.Key)
+            .Select(g => $"{g.Sum(e => e.count)}개({g.Key}일)");
+
+        ui.text = "재고: " + string.Join(", ", grouped);
     }
+
 
     /// <summary>
     /// 전체 재고 텍스트 갱신
@@ -157,16 +232,53 @@ public class IngredientStockManager : MonoBehaviour
         }
     }
 
-    public Dictionary<string, int> GetCurrentStockCopy()
+    public void AdvanceDayAndDecay()
     {
-        return new Dictionary<string, int>(stock);
+        foreach (var pair in stock)
+        {
+            string ingredientName = pair.Key;
+            List<StockEntry> entries = pair.Value;
+
+            for (int i = entries.Count - 1; i >= 0; i--)
+            {
+                entries[i].dayRemaining--;
+
+                if (entries[i].dayRemaining <= 0)
+                {
+                    Debug.Log($"'{ingredientName}' 재고 {entries[i].count}개 폐기됨 (유통기한 만료)");
+                    entries.RemoveAt(i);
+                }
+            }
+        }
+
+        UpdateAllStockTexts(); // UI 갱신
     }
 
-    public void RestoreStock(Dictionary<string, int> savedStock)
+
+    public Dictionary<string, List<StockEntry>> GetCurrentStockForSave()
     {
+        // 깊은 복사
+        var result = new Dictionary<string, List<StockEntry>>();
+
+        foreach (var kv in stock)
+        {
+            result[kv.Key] = kv.Value
+                .Select(e => new StockEntry { count = e.count, dayRemaining = e.dayRemaining })
+                .ToList();
+        }
+
+        return result;
+    }
+
+    public void RestoreStock(Dictionary<string, List<StockEntry>> savedStock)
+    {
+        stock.Clear();
+
         foreach (var pair in savedStock)
         {
-            stock[pair.Key] = pair.Value;
+            stock[pair.Key] = pair.Value
+                .Select(e => new StockEntry { count = e.count, dayRemaining = e.dayRemaining })
+                .ToList();
         }
 
         UpdateAllStockTexts();

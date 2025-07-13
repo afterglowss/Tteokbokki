@@ -67,12 +67,12 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         {
             tooltip += $"{kv.Key} x{kv.Value}\n";
         }
-        TooltipManager.Instance.Show(tooltip);
+        TooltipManager.ShowFollowMouse(TooltipType.Info, tooltip);
     }
 
     private void HideTooltip()
     {
-        TooltipManager.Instance.Hide();
+        TooltipManager.Hide(TooltipType.Info);
     }
 
     // 마우스 올라갔을 때
@@ -133,7 +133,7 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             {
                 if (slot.foodStackParent.childCount >= slot.maxStackSize)
                 {
-                    TooltipManager.Instance.Show("포장 슬롯은 최대 4개까지 가능합니다!");
+                    TooltipManager.ShowFollowMouse(TooltipType.UI, "포장 슬롯은 최대 4개까지 가능합니다!");
 
                     // 복귀 처리
                     if (currentSlot != null)

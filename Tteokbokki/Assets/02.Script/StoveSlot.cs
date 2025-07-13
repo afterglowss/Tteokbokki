@@ -127,18 +127,18 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     {
         if (isCooking && currentIngredients != null)
         {
-            string tooltip = "조리 중인 재료:\n";
+            string tooltip = "조리 중:\n";
             foreach (var pair in currentIngredients)
             {
                 tooltip += $"{pair.Key} x{pair.Value}\n";
             }
-            TooltipManager.Instance.Show(tooltip);
+            TooltipManager.ShowFollowMouse(TooltipType.Info, tooltip);
         }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        TooltipManager.Instance.Hide();
+        TooltipManager.Hide(TooltipType.Info);
     }
     public Dictionary<string, int> GetRawIngredientsCopy()
     {

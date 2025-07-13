@@ -22,7 +22,7 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
                 food.currentSlot.RemoveFood(food);  // 리스트에서 제거 + 정렬
             }
 
-            TooltipManager.Instance.Hide();
+            TooltipManager.Hide(TooltipType.UI);
             Destroy(food.gameObject);
             Debug.Log("[휴지통] 음식카드가 버려졌습니다.");
             return;
@@ -34,9 +34,9 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
         {
             var receipt = receiptItem.GetReceipt();
             ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
-            ReceiptLineManager.Instance.RemoveReceipt(receiptItem);  
+            ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
 
-            TooltipManager.Instance.Hide();
+            TooltipManager.Hide(TooltipType.UI);
             Debug.Log($"[휴지통] 영수증 {receipt.OrderID}번이 포기되어 실패 목록에 추가되었습니다.");
             return;
         }
@@ -46,11 +46,11 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        TooltipManager.Instance.Show("휴지통에 버리기");
+        TooltipManager.ShowFollowMouse(TooltipType.UI, "휴지통에 버리기");
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        TooltipManager.Instance.Hide();
+        TooltipManager.Hide(TooltipType.UI);
     }
 }
