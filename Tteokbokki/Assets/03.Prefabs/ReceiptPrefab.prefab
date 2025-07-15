@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 2526940402768155187}
   - component: {fileID: 1705297464719231334}
   - component: {fileID: 8986962941596044032}
+  - component: {fileID: 4589638129478720298}
+  - component: {fileID: 5315316423906123581}
   m_Layer: 5
   m_Name: ReceiptPrefab
   m_TagString: Untagged
@@ -137,6 +139,30 @@ MonoBehaviour:
   receiptButton: {fileID: 1705297464719231334}
   orderIDText: {fileID: 1192050848182416696}
   cookTimeSeconds: 0
+--- !u!114 &4589638129478720298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4321631299712797681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2807cdeebea3797478134d06a4b94948, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!225 &5315316423906123581
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4321631299712797681}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7743978660799412832
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,7 +15,7 @@ public class GameClock : MonoBehaviour
 
     public static DateTime gameTime;
     private float elapsedTime = 0f;
-    private const float realSecondsPerGameMinute = 3f; // 현실 3초 = 게임 1분
+    private const float realSecondsPerGameMinute = 2f; // 현실 3초 = 게임 1분
     public DateTime GetCurrentGameTime() => gameTime;
     private void Awake()
     {
@@ -36,5 +36,9 @@ public class GameClock : MonoBehaviour
         }
 
         clockText.text = gameTime.ToString("HH:mm"); // UI 업데이트 (초 제외)
+    }
+    public static void SetGameTime(DateTime newTime)
+    {
+        gameTime = newTime;
     }
 }
