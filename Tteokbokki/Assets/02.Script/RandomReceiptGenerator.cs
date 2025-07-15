@@ -76,7 +76,7 @@ public class RandomReceiptGenerator : MonoBehaviour
 
     void Update()
     {
-        CheckAutoOrder();
+        //CheckAutoOrder();
     }
 
     private void CheckAutoOrder()
