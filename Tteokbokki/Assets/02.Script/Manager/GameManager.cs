@@ -2,9 +2,14 @@ using System;
 using System.Linq;
 using UnityEngine;
 
+
 public class GameManager : MonoBehaviour
 {
     public ReceiptLineManager receiptLineManager;
+
+    [Header("마감창 UI")]
+    public GameObject endOfDayPanel;
+    public EndOfDayUIHandler endOfDayUIHandler;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -54,6 +59,9 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[마감] 미완료 주문 {missed.Count}건 / 손실 금액: {missedTotal:N0}원");
         Debug.Log($"[마감] 세금 {Mathf.RoundToInt(successTotal * PlayerWalletManager.Instance.taxRate):N0}원 납부");
 
+        // 마감 UI 출력
+        ShowEndOfDayPanel();
+
         // 초기화
         receiptLineManager.ClearMissedReceipts();
         receiptLineManager.ClearSuccessfulReceipts(); // 성공 기록도 초기화!
@@ -62,5 +70,18 @@ public class GameManager : MonoBehaviour
 
         IngredientStockManager.Instance.AdvanceDayAndDecay();
         Debug.Log("[마감] 영업일이 종료되었습니다. 재고가 초기화되고 유통기한이 갱신되었습니다.");
+    }
+
+    private void ShowEndOfDayPanel()
+    {
+        //Panel_EndOfDay 활성화
+        endOfDayPanel.SetActive(true);
+
+        // 텍스트 채우기
+        endOfDayUIHandler.FillReceiptTexts();
+
+        // 초기화
+        receiptLineManager.ClearMissedReceipts();
+        receiptLineManager.ClearSuccessfulReceipts();
     }
 }
