@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using SaveData;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -176,6 +177,45 @@ public class ReceiptLineManager : MonoBehaviour
             //item.transform.localPosition = targetPosition;
         }
     }
+
+    public string GetTodaySuccessfulReceiptsText()  // 오늘 날짜의 성공한 영수증 텍스트로 가져오기
+    {
+        DateTime today = GameClock.gameTime.Date;
+        if (successfulReceipts.Count == 0)
+            return $"[{today:yyyy-MM-dd}] 성공한 영수증이 없습니다.\n";
+
+        string result = $"=== [성공한 영수증] {today:yyyy-MM-dd} ===\n\n";
+        int total = 0;
+
+        foreach (var receipt in successfulReceipts)
+        {
+            result += receipt.GetReceiptText() + "\n";
+            total += receipt.GetTotalPrice();
+        }
+
+        result += $"총 성공 금액: {total:N0}원\n";
+        return result;
+    }
+
+    public string GetTodayMissedReceiptsText()  // 오늘 날짜의 실패한 영수증 텍스트로 가져오기
+    {
+        DateTime today = GameClock.gameTime.Date;
+        if (missedReceipts.Count == 0)
+            return $"[{today:yyyy-MM-dd}] 실패한 영수증이 없습니다.\n";
+
+        string result = $"=== [실패한 영수증] {today:yyyy-MM-dd} ===\n\n";
+        int total = 0;
+
+        foreach (var receipt in missedReceipts)
+        {
+            result += receipt.GetReceiptText() + "\n";
+            total += receipt.GetTotalPrice();
+        }
+
+        result += $"총 손실 금액: {total:N0}원\n";
+        return result;
+    }
+
 
 
     public void RestoreMissed(List<Receipt> list)
