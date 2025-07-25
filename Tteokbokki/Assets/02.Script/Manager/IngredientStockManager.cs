@@ -59,7 +59,7 @@ public class IngredientStockManager : MonoBehaviour
 
     void Start()
     {
-        //OrderAllIngredientsOnce();
+        OrderAllIngredientsOnce();
     }
 
     /// <summary>

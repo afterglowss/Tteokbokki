@@ -14,6 +14,7 @@ public class IngredientButton : MonoBehaviour
         if (success)
         {
             playerWokManager.AddIngredient(ingredientName);
+            IngredientSpawner.Instance.SpawnIngredient(ingredientName); // 재료 사용 후 오브젝트 생성
         }
         else
         {
