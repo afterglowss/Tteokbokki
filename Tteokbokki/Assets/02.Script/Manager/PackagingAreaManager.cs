@@ -63,6 +63,11 @@ public class PackagingAreaManager : MonoBehaviour
             Destroy(food.gameObject);
         }
         currentFoods.Clear();
+
+        foreach (var slot in slots)
+        {
+            slot.ClearStackedFoods();
+        }
     }
 
     public void RemoveFoodFromAllSlots(CookedFoodUI food)
@@ -91,6 +96,8 @@ public class PackagingAreaManager : MonoBehaviour
 
         return result;
     }
+
+
     public void RestoreSlots(List<List<Dictionary<string, int>>> savedData)
     {
         ClearAllFoods(); // 기존 음식들 제거
