@@ -159,6 +159,18 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         food.currentSlot = this;
     }
 
+    public void ClearStackedFoods()
+    {
+        foreach (var food in stackedFoods)
+        {
+            if (food != null)
+            {
+                Destroy(food.gameObject);
+            }
+        }
+        stackedFoods.Clear();
+    }
+
     public bool IsTopOfStack(CookedFoodUI food)
     {
         return stackedFoods.Count > 0 && stackedFoods[stackedFoods.Count - 1] == food;
