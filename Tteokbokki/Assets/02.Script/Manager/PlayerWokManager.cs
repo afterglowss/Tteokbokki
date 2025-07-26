@@ -22,7 +22,7 @@ public class PlayerWokManager : MonoBehaviour
         Instance = this;
     }
 
-    public void OnCookButtonPressed()
+    public void OnCookButtonPressed()   // 완료 버튼 눌렀을 때
     {
         if (!stoveManager.HasSelectedSlot())
         {

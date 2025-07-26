@@ -9,6 +9,7 @@ public class PlayerWalletManager : MonoBehaviour
     public float taxRate = 0.25f; // 25% 세금
 
     public TextMeshProUGUI balanceText;
+    public TextMeshProUGUI endOfDayBalanceText;
 
     private void Awake()
     {
@@ -52,6 +53,8 @@ public class PlayerWalletManager : MonoBehaviour
     {
         if (balanceText != null)
             balanceText.text = $"잔고: {CurrentBalance:N0}원";
+        if (endOfDayBalanceText != null)
+            endOfDayBalanceText.text = $"현재 자산: {CurrentBalance:N0}원";
     }
 
     public void SetBalance(int newBalance)
