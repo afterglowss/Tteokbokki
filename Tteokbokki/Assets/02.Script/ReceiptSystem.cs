@@ -44,7 +44,7 @@ public static class IngredientDatabase
     //    { "유부", new Ingredient("유부", 1500) },
     //    { "곱창", new Ingredient("곱창", 4000) },
     //    { "마라 소스", new Ingredient("마라 소스", 0) },
-    //    { "로제 크림", new Ingredient("로제 크림", 0) }
+    //    { "로제 소스", new Ingredient("로제 소스", 0) }
     //};
     public static readonly Dictionary<string, Ingredient> Ingredients = CreateLegacyIngredientDict();
 
@@ -161,7 +161,47 @@ public static class MenuDatabase
                 { "파", 1 },
                 { "양배추", 1 },
                 { "군자 소스", 2 },
-                { "로제 크림", 1 }
+                { "로제 소스", 1 }
+            })
+        },
+        { "크림 군자 떡볶이", new MenuItem("크림 군자 떡볶이", 10000, new Dictionary<string, int>
+            {
+                { "떡", 2 },
+                { "오뎅", 2 },
+                { "파", 1 },
+                { "양배추", 1 },
+                { "군자 소스", 2 },
+                { "크림 소스", 1 }
+            })
+        },
+        { "간장 군자 떡볶이", new MenuItem("간장 군자 떡볶이", 10000, new Dictionary<string, int>
+            {
+                { "떡", 2 },
+                { "오뎅", 2 },
+                { "파", 1 },
+                { "양배추", 1 },
+                { "군자 소스", 2 },
+                { "간장 소스", 1 }
+            })
+        },
+        { "카레 군자 떡볶이", new MenuItem("카레 군자 떡볶이", 10000, new Dictionary<string, int>
+            {
+                { "떡", 2 },
+                { "오뎅", 2 },
+                { "파", 1 },
+                { "양배추", 1 },
+                { "군자 소스", 2 },
+                { "카레 소스", 1 }
+            })
+        },
+        { "짜장 군자 떡볶이", new MenuItem("짜장 군자 떡볶이", 10000, new Dictionary<string, int>
+            {
+                { "떡", 2 },
+                { "오뎅", 2 },
+                { "파", 1 },
+                { "양배추", 1 },
+                { "군자 소스", 2 },
+                { "짜장 소스", 1 }
             })
         }
     };

@@ -8,6 +8,7 @@ using Unity.VisualScripting;
 using UnityEngine.Windows;
 using System.Collections;
 using SaveData;
+using System.Linq;
 
 //[Serializable]
 //public class KeyValueStringInt
@@ -38,8 +39,20 @@ public class ReceiptsWrapper
     public List<ReceiptData> Receipts;
 }
 
+
+
 public class RandomReceiptGenerator : MonoBehaviour
 {
+    [SerializeField]
+    private static readonly HashSet<string> excludedExtras = new HashSet<string>
+{
+    "마라 소스",
+    "로제 소스",
+    "크림 소스",
+    "간장 소스",
+    "카레 소스",
+    "짜장 소스",
+};
     public TextMeshProUGUI receiptText;
     public TMP_InputField orderIDInput;
     public TMP_InputField dateInput;
@@ -126,40 +139,44 @@ public class RandomReceiptGenerator : MonoBehaviour
         DateTime orderTime = gameClock.GetCurrentGameTime();
         Receipt newReceipt = new Receipt(orderTime);
 
+        // 1. 메뉴 필터링
+        var availableMenus = GetAvailableMenus();
+        if (availableMenus.Count == 0)
+        {
+            Debug.LogWarning("재고로 조리 가능한 메뉴가 없습니다.");
+            return;
+        }
+
+
         int menuCount = GetRandomWeightedValue(new int[] { 70, 20, 5, 5 }) + 1;
 
         for (int i = 0; i < menuCount; i++)
         {
-            string menuName = GetRandomMenu();
+            string menuName = availableMenus[UnityEngine.Random.Range(0, availableMenus.Count)];
+
             bool hasExtras = GetRandomWeightedValue(new int[] { 40, 60 }) == 1;
 
-            Dictionary<string, int> extraCounts = new Dictionary<string, int>();
+            Dictionary<string, int> extras = new();
             if (hasExtras)
             {
+                var extrasStock = GetAvailableExtras(); // 현재 가능한 추가재료
                 int extraCount = GetRandomWeightedValue(new int[] { 20, 20, 20, 20, 10, 10 }) + 1;
-                extraCounts = GetRandomExtras(extraCount);
+                extras = GetRandomExtras(extraCount, extrasStock);
             }
 
-            newReceipt.AddOrder(menuName, extraCounts);
+            newReceipt.AddOrder(menuName, extras);
         }
 
         receiptManager.AddReceipt(newReceipt);
         receiptText.text = newReceipt.GetReceiptText();
 
-        //combinedIngredientManager.DisplayAllCombinedIngredients(newReceipt);  // 영수증 생성 후 바로 재료 합산리스트를 출력할 필요없음.
-                                                                                // 영수증이 활성화된 상태에서만 재료 합산 리스트를 출력하면 됨.
-
-        receiptLineManager.AddNewReceipt(newReceipt); // 신규 주문 들어옴
-        //ReceiptStateManager.Instance.SetActiveReceipt(newReceipt);// 영수증의 생성과 활성화 여부는 다름
-                                                                    // 영수증이 생성되었더라도, 플레이어가 영수증을 클릭하지 않는 이상 활성화되지 않음. 
-        //receiptUIManager.UpdateIsCookedDisplay(newReceipt);         // 새로 생성된 영수증의 조리 완료 여부 표시
+        receiptLineManager.AddNewReceipt(newReceipt); 
 
         foreach (var order in newReceipt.GetOrders())
         {
             int cost = order.GetTotalCostWithExtras();
             int profit = order.GetProfitWithExtras();
 
-            //Debug.Log($"[영수증 {newReceipt.OrderID}] {order.Menu.Name} - 판매가 {order.TotalPrice}원 / 원가 {cost}원 / 이윤 {profit}원");
         }
     }
 
@@ -273,21 +290,76 @@ public class RandomReceiptGenerator : MonoBehaviour
         var menuNames = new List<string>(MenuDatabase.Menus.Keys);
         return menuNames[UnityEngine.Random.Range(0, menuNames.Count)];
     }
+    
 
-    // 🔔 랜덤 추가재료 선택 (중복 허용, 개수 합산)
-    private Dictionary<string, int> GetRandomExtras(int count)
+    // 랜덤 추가재료 선택 (중복 허용, 개수 합산)
+    //private Dictionary<string, int> GetRandomExtras(int count)
+    //{
+    //    var extras = new Dictionary<string, int>();
+    //    var keys = new List<string>(IngredientDatabase.Ingredients.Keys);
+
+    //    for (int i = 0; i < count; i++)
+    //    {
+    //        string extra = keys[UnityEngine.Random.Range(0, keys.Count - 2)];       // 마라 소스와 로제 소스은 제외
+    //        if (extras.ContainsKey(extra))
+    //            extras[extra]++;
+    //        else
+    //            extras[extra] = 1;
+    //    }
+    //    return extras;
+    //}
+
+    // 재고 내에서 중복 허용하여 count개 뽑기
+    private Dictionary<string, int> GetRandomExtras(int count, Dictionary<string, int> stockMap)
     {
-        var extras = new Dictionary<string, int>();
-        var keys = new List<string>(IngredientDatabase.Ingredients.Keys);
+        Dictionary<string, int> extras = new();
 
         for (int i = 0; i < count; i++)
         {
-            string extra = keys[UnityEngine.Random.Range(0, keys.Count - 2)];       // 마라 소스와 로제 크림은 제외
-            if (extras.ContainsKey(extra))
-                extras[extra]++;
-            else
-                extras[extra] = 1;
+            if (stockMap.Count == 0) break;
+
+            var keys = stockMap.Keys.ToList();
+            string selected = keys[UnityEngine.Random.Range(0, keys.Count)];
+
+            // 추가
+            extras.TryAdd(selected, 0);
+            extras[selected]++;
+
+            stockMap[selected]--;
+            if (stockMap[selected] <= 0)
+                stockMap.Remove(selected);
         }
+
         return extras;
     }
+
+
+    // 기본 재료가 모두 재고에 있는 메뉴만 남김
+    private List<string> GetAvailableMenus()
+    {
+        return MenuDatabase.Menus
+            .Where(pair => HasEnoughStock(pair.Value.DefaultIngredients))
+            .Select(pair => pair.Key)
+            .ToList();
+    }
+
+    private bool HasEnoughStock(Dictionary<string, int> ingredients)
+    {
+        foreach (var pair in ingredients)
+        {
+            int current = IngredientStockManager.Instance.GetStock(pair.Key);
+            if (current < pair.Value)
+                return false;
+        }
+        return true;
+    }
+    // 현재 재고 수량이 1개 이상인 추가재료만 추출
+    private Dictionary<string, int> GetAvailableExtras()
+    {
+        return IngredientDatabase.Ingredients.Keys
+        .Where(name => IngredientStockManager.Instance.GetStock(name) > 0)
+        .Where(name => !excludedExtras.Contains(name))   // ❗제외 항목 제거
+        .ToDictionary(name => name, name => IngredientStockManager.Instance.GetStock(name));
+    }
+
 }
