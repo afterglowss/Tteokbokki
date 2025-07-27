@@ -12,6 +12,8 @@ public class IngredientMetaData
     public int CostPerServing => PricePerKg * GramsPerServing / 1000;
     public int ProfitPerServing => SalePricePerUse - CostPerServing;
     public int ServingsPerOrder => (OrderAmountKg * 1000) / GramsPerServing;
+
+    public int LowStockThreshold => ServingsPerOrder / 4;
 }
 
 public static class IngredientEconomyDatabase
@@ -35,6 +37,10 @@ public static class IngredientEconomyDatabase
         { "곱창", new IngredientMetaData { Name = "곱창", SalePricePerUse = 4000, OrderAmountKg = 4, PricePerKg = 30000, GramsPerServing = 100 } },
         { "군자 소스", new IngredientMetaData { Name = "군자 소스", SalePricePerUse = 500, OrderAmountKg = 4, PricePerKg = 4000, GramsPerServing = 50 } },
         { "마라 소스", new IngredientMetaData { Name = "마라 소스", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
-        { "로제 크림", new IngredientMetaData { Name = "로제 크림", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+        { "로제 소스", new IngredientMetaData { Name = "로제 소스", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+        { "크림 소스", new IngredientMetaData { Name = "크림 소스", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+        { "간장 소스", new IngredientMetaData { Name = "간장 소스", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 20000, GramsPerServing = 50 } },
+        { "카레 소스", new IngredientMetaData { Name = "카레 소스", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+        { "짜장 소스", new IngredientMetaData { Name = "짜장 소스", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
     };
 }

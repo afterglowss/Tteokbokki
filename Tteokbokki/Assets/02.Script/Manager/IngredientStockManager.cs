@@ -37,6 +37,9 @@ public class IngredientStockManager : MonoBehaviour
 
     private const int ShelfLifeDays = 5; // 모든 재료 유통기한 5일
 
+    private HashSet<string> purchasedAtLeastOnce = new();
+    private List<string> lowStockIngredients = new();
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -167,6 +170,9 @@ public class IngredientStockManager : MonoBehaviour
 
         Debug.Log($"'{ingredientName}' {servings}인분 (유통기한 {ShelfLifeDays}일) 주문 완료!");
         UpdateStockText(ingredientName);
+
+        // 주문 완료 시
+        purchasedAtLeastOnce.Add(ingredientName);
     }
 
 
@@ -230,6 +236,44 @@ public class IngredientStockManager : MonoBehaviour
         {
             UpdateStockText(kv.Key);
         }
+    }
+
+    public void UpdateLowStockList()
+    {
+        lowStockIngredients.Clear();
+
+        foreach (var name in purchasedAtLeastOnce)
+        {
+            int stockCount = GetStock(name);
+
+            if (IngredientEconomyDatabase.Data.TryGetValue(name, out var meta))
+            {
+                int threshold = meta.LowStockThreshold;
+
+                if (stockCount <= threshold)
+                {
+                    lowStockIngredients.Add(name);
+                }
+            }
+        }
+    }
+
+    public List<string> GetLowStockIngredients()
+    {
+        return new List<string>(lowStockIngredients);
+    }
+
+    public string GetLowStockText()
+    {
+        if (lowStockIngredients.Count == 0)
+            return "추가 주문이 필요한 재료가 없습니다.";
+
+        string result = "추가 주문 필요:\n";
+        foreach (var name in lowStockIngredients)
+        {
+            result += $"- {name} (재고: {GetStock(name)}개)\n";
+        }
+        return result;
     }
 
     public void AdvanceDayAndDecay()

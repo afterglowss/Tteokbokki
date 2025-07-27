@@ -36,6 +36,8 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     public bool IsCooked => isCooked;
     public float GetCookTimeRemaining() => cookTimeRemaining;
 
+    private GameObject spawnedFood;
+
     public void Initialize(StoveManager manager)
     {
         stoveManager = manager;
@@ -89,10 +91,16 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         isCooked = true;
         timerText.text = "완료!";
 
-        GameObject obj = Instantiate(cookedFoodPrefab, cookedFoodSpawnPoint);
-        obj.transform.localPosition = Vector3.zero;
+        if (spawnedFood != null)  // 혹시 이전 음식이 있다면 제거
+        {
+            Destroy(spawnedFood);
+            spawnedFood = null;
+        }
 
-        var foodUI = obj.GetComponent<CookedFoodUI>();
+        spawnedFood = Instantiate(cookedFoodPrefab, cookedFoodSpawnPoint);  // 여기!
+        spawnedFood.transform.localPosition = Vector3.zero;
+
+        var foodUI = spawnedFood.GetComponent<CookedFoodUI>();
         foodUI.Initialize(currentIngredients);
 
         // 툴팁 연결
@@ -119,6 +127,14 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         wokIcon.SetActive(false);
         timerText.text = "대기중";  // 필요 시 텍스트 갱신
         SetSelected(false);         // 선택 하이라이트 해제
+
+        // spawnedFood가 아직 화구 위에 있을 때만 파괴
+        if (spawnedFood != null && spawnedFood.transform.parent == cookedFoodSpawnPoint)
+        {
+            Destroy(spawnedFood);
+        }
+
+        spawnedFood = null;
     }
 
     public Dictionary<string, int> GetCookedIngredients() => isCooked ? currentIngredients : null;
@@ -152,16 +168,20 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         if (data.isCooked)
         {
+            if (spawnedFood != null)
+            {
+                Destroy(spawnedFood);
+            }
             // 조리 완료 상태만 복원 (음식 생성)
             currentIngredients = new Dictionary<string, int>(data.currentIngredients);
             isCooked = true;
             isCooking = false;
             timerText.text = "완료!";
 
-            GameObject obj = Instantiate(cookedFoodPrefab, cookedFoodSpawnPoint);
-            obj.transform.localPosition = Vector3.zero;
+            spawnedFood = Instantiate(cookedFoodPrefab, cookedFoodSpawnPoint);
+            spawnedFood.transform.localPosition = Vector3.zero;
 
-            var foodUI = obj.GetComponent<CookedFoodUI>();
+            var foodUI = spawnedFood.GetComponent<CookedFoodUI>();
             foodUI.Initialize(currentIngredients);
             foodUI.originStoveSlot = this;
         }
