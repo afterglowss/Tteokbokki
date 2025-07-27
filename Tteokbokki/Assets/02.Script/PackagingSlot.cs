@@ -94,7 +94,20 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         else
         {
             ReceiptLineManager.Instance.RecordSuccessfulReceipt(receipt);
-            PlayerWalletManager.Instance.AddIncome(receipt.GetTotalPrice());
+
+            int baseIncome = receipt.GetTotalPrice();
+            int bonus = 0;
+
+            foreach (var dish in cookedIngredients)
+            {
+                bonus += DailyBonusManager.Instance.CalculateBonusFromIngredients(dish);
+            }
+
+            int totalIncome = baseIncome + bonus;
+
+            PlayerWalletManager.Instance.AddIncome(totalIncome);
+            if (bonus > 0)
+                Debug.Log($"[보너스] {bonus:N0}원 보너스 지급 (보너스 재료 포함)");
         }
 
         TooltipManager.Hide(TooltipType.Info); // 툴팁 숨기기
