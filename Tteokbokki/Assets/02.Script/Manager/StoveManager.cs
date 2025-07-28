@@ -155,6 +155,24 @@ public class StoveManager : MonoBehaviour
         }
         return true;
     }
+    public void ClearAllStoves()
+    {
+        if (stoves == null || stoves.Length == 0)
+        {
+            Debug.LogWarning("[StoveManager] 스토브 슬롯이 없습니다.");
+            return;
+        }
+
+        foreach (var slot in stoves)
+        {
+            if (slot != null)
+            {
+                slot.ResetSlot();
+            }
+        }
+
+        Debug.Log("[StoveManager] 모든 화구 상태 초기화 완료");
+    }
 }
 
 
