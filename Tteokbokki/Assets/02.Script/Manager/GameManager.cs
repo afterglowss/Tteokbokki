@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 
@@ -79,6 +80,8 @@ public class GameManager : MonoBehaviour
 
         // 텍스트 채우기
         endOfDayUIHandler.FillReceiptTexts();
+        endOfDayUIHandler.FillIngredientTexts();
+        endOfDayUIHandler.FillTaxText();
 
         // 초기화
         receiptLineManager.ClearMissedReceipts();
