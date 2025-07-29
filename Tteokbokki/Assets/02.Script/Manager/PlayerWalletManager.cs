@@ -5,10 +5,14 @@ public class PlayerWalletManager : MonoBehaviour
 {
     public static PlayerWalletManager Instance { get; private set; }
 
+
     public int CurrentBalance { get; private set; } = 1000000; // 초기 잔고
     public float taxRate = 0.25f; // 25% 세금
 
+    public int LastPaidTaxAmount { get; private set; } = 0; //EndOfDayUIHandler <- 세금 기록용 프로퍼티
+
     public TextMeshProUGUI balanceText;
+    public TextMeshProUGUI endOfDayBalanceText;
 
     private void Awake()
     {
@@ -43,6 +47,8 @@ public class PlayerWalletManager : MonoBehaviour
     public void DeductDailyTaxes(int totalSales)
     {
         int taxAmount = Mathf.RoundToInt(totalSales * taxRate);
+        LastPaidTaxAmount = taxAmount;
+
         CurrentBalance -= taxAmount;
         Debug.Log($"세금 {taxAmount}원 납부됨 (세율 {taxRate * 100}%)");
         UpdateUI();
@@ -52,6 +58,8 @@ public class PlayerWalletManager : MonoBehaviour
     {
         if (balanceText != null)
             balanceText.text = $"잔고: {CurrentBalance:N0}원";
+        if (endOfDayBalanceText != null)
+            endOfDayBalanceText.text = $"현재 자산: {CurrentBalance:N0}원";
     }
 
     public void SetBalance(int newBalance)
