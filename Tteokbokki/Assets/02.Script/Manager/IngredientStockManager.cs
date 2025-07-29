@@ -275,6 +275,15 @@ public class IngredientStockManager : MonoBehaviour
         }
         return result;
     }
+    public int GetPurchasedIngredientCount()
+    {
+        return purchasedAtLeastOnce.Count;
+    }
+
+    public bool HasPurchasedBefore(string ingredientName)
+    {
+        return purchasedAtLeastOnce.Contains(ingredientName);
+    }
 
     public void AdvanceDayAndDecay()
     {

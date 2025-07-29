@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -8,15 +9,20 @@ public class GameManager : MonoBehaviour
 {
     public ReceiptLineManager receiptLineManager;
 
-    [Header("¸¶°¨Ã¢ UI")]
+    [Header("ë§ˆê°ì°½ UI")]
     public GameObject endOfDayPanel;
     public EndOfDayUIHandler endOfDayUIHandler;
 
-
+    public static GameManager Instance { get; private set; }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
-        
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
     }
 
     // Update is called once per frame
@@ -27,64 +33,123 @@ public class GameManager : MonoBehaviour
 
     public void StartOfDay()
     {
-        // ÇÏ·ç ½ÃÀÛ ½Ã ÃÊ±âÈ­
-        receiptLineManager.ClearMissedReceipts();
-        receiptLineManager.ClearSuccessfulReceipts();
+        GameClock.gameTime = GameClock.gameTime.AddDays(1);
+        GameClock.Instance.SetToStartOfDay();
+        GameClock.Instance.UpdateTimeAndDateDisplay();
 
         IngredientStockManager.Instance.ResetDailyOrderFlags();
-
         IngredientStockManager.Instance.AdvanceDayAndDecay();
 
-        // ·Î±× Ãâ·Â
-        Debug.Log("[½ÃÀÛ] »õ·Î¿î ¿µ¾÷ÀÏÀÌ ½ÃÀÛµÇ¾ú½À´Ï´Ù.");
+        StoveManager.Instance.ClearAllStoves(); // ì¡°ë¦¬ ìƒíƒœ ì´ˆê¸°í™” (í•„ìš” ì‹œ)
+        PackagingAreaManager.Instance.ClearAllFoods(); // í¬ì¥ëŒ€ ì´ˆê¸°í™”
+        PlayerWokManager.Instance.ClearWok(); // í”Œë ˆì´ì–´ ì› ì´ˆê¸°í™”
+        ReceiptLineManager.Instance.ClearAllReceipts(); // ì˜ìˆ˜ì¦ ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        ReceiptLineManager.Instance.ClearMissedReceipts(); // ì‹¤íŒ¨ ì˜ìˆ˜ì¦ ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        ReceiptLineManager.Instance.ClearSuccessfulReceipts(); // ì„±ê³µ ì˜ìˆ˜ì¦ ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
+
+        ReceiptSystem.CurrentReceiptID = 1; // ì£¼ë¬¸ ë²ˆí˜¸ ì´ˆê¸°í™”
+        ReceiptSystem.CurrentOrderItemID = 1; // ë©”ë‰´ ë²ˆí˜¸ ì´ˆê¸°í™”
+
+        DailyBonusManager.Instance.ApplyNewDayBonus();
+
+        GameClock.Resume();
+
+        OrderSpawner.Instance.RestartSpawning();
+
+        // ë¡œê·¸ ì¶œë ¥
+        Debug.Log("[ì‹œì‘] ìƒˆë¡œìš´ ì˜ì—…ì¼ì´ ì‹œì‘ë˜ì—ˆìŠµë‹ˆë‹¤.");
     }
 
     public void EndOfDay()
     {
-        var missed = receiptLineManager.GetMissedReceipts();
-        var successful = receiptLineManager.GetSuccessfulReceipts();
+        GameClock.Pause();
+        OrderSpawner.Instance.StopSpawning();
+
+        PackagingAreaManager.Instance.ClearAllFoods();
+
+        var missed = ReceiptLineManager.Instance.GetMissedReceipts();
+        var successful = ReceiptLineManager.Instance.GetSuccessfulReceipts();
         DateTime today = GameClock.gameTime.Date;
 
         ReceiptManager.SaveMissedReceipts(missed, today);
         ReceiptManager.SaveSuccessfulReceipts(successful, today);
 
-        // ÆÇ¸Å ÃÑ¾× °è»ê
+        // íŒë§¤ ì´ì•¡ ê³„ì‚°
         int successTotal = successful.Sum(r => r.GetTotalPrice());
-        int missedTotal = missed.Sum(r => r.GetOrders().Sum(o => o.TotalPrice));
-
-        // ¼¼±İ Â÷°¨
+        // ì„¸ê¸ˆ ì°¨ê°
         PlayerWalletManager.Instance.DeductDailyTaxes(successTotal);
+        // ì†ì‹¤ ì´ì•¡ ê³„ì‚°
+        int missedTotal = missed.Sum(r => r.GetOrders().Sum(o => o.TotalPrice));
+        // ì„±ê³µë¥  ê³„ì‚°
+        float successRate = successful.Count / (float)(successful.Count + missed.Count + 0.01f);
+        OrderSpawner.Instance.SetPreviousDaySuccessRate(successRate); // ë‹¤ìŒë‚  í™•ë¥  ë°˜ì˜ìš©
 
-        // ·Î±× Ãâ·Â
-        Debug.Log($"[¸¶°¨] ¼º°ø ÁÖ¹® {successful.Count}°Ç / ÃÑ ÆÇ¸Å±İ¾×: {successTotal:N0}¿ø");
-        Debug.Log($"[¸¶°¨] ¹Ì¿Ï·á ÁÖ¹® {missed.Count}°Ç / ¼Õ½Ç ±İ¾×: {missedTotal:N0}¿ø");
-        Debug.Log($"[¸¶°¨] ¼¼±İ {Mathf.RoundToInt(successTotal * PlayerWalletManager.Instance.taxRate):N0}¿ø ³³ºÎ");
+        // ë¡œê·¸ ì¶œë ¥
+        Debug.Log($"[ë§ˆê°] ì„±ê³µ ì£¼ë¬¸ {successful.Count}ê±´ / ì´ íŒë§¤ê¸ˆì•¡: {successTotal:N0}ì›");
+        Debug.Log($"[ë§ˆê°] ë¯¸ì™„ë£Œ ì£¼ë¬¸ {missed.Count}ê±´ / ì†ì‹¤ ê¸ˆì•¡: {missedTotal:N0}ì›");
+        Debug.Log($"[ë§ˆê°] ì„¸ê¸ˆ {Mathf.RoundToInt(successTotal * PlayerWalletManager.Instance.taxRate):N0}ì› ë‚©ë¶€");
 
-        // ¸¶°¨ UI Ãâ·Â
+        // ë§ˆê° UI ì¶œë ¥
         ShowEndOfDayPanel();
 
-        // ÃÊ±âÈ­
+        // ì´ˆê¸°í™”
         receiptLineManager.ClearMissedReceipts();
-        receiptLineManager.ClearSuccessfulReceipts(); // ¼º°ø ±â·Ïµµ ÃÊ±âÈ­!
+        receiptLineManager.ClearSuccessfulReceipts(); // ì„±ê³µ ê¸°ë¡ë„ ì´ˆê¸°í™”!
 
         IngredientStockManager.Instance.ResetDailyOrderFlags();
 
-        IngredientStockManager.Instance.AdvanceDayAndDecay();
-        Debug.Log("[¸¶°¨] ¿µ¾÷ÀÏÀÌ Á¾·áµÇ¾ú½À´Ï´Ù. Àç°í°¡ ÃÊ±âÈ­µÇ°í À¯Åë±âÇÑÀÌ °»½ÅµÇ¾ú½À´Ï´Ù.");
+        IngredientStockManager.Instance.UpdateLowStockList();
+        Debug.Log(IngredientStockManager.Instance.GetLowStockText());
+
+        DailyBonusManager.Instance.SetTomorrowBonusIngredients();
+
+        GameSaveManager.Instance.DeleteSaveFile();
+
+        GameClock.SaveLastPlayedDate(today);
+    }
+    public void OnClosingTimeReached()
+    {
+        OrderSpawner.Instance.StopSpawning(); // ì£¼ë¬¸ ìƒì„± ì¤‘ë‹¨
+
+        // ë‚¨ì€ ì˜ìˆ˜ì¦ì´ ì—†ë‹¤ë©´ ë°”ë¡œ ë§ˆê°
+        if (ReceiptLineManager.Instance.GetReceiptSlots().Count == 0)
+        {
+            EndOfDay();
+        }
+        else
+        {
+            // ê°ì‹œ ë£¨í‹´ ì‹œì‘
+            StartCoroutine(WaitForReceiptClearAndEnd());
+        }
     }
 
     private void ShowEndOfDayPanel()
     {
-        //Panel_EndOfDay È°¼ºÈ­
+        //Panel_EndOfDay í™œì„±í™”
         endOfDayPanel.SetActive(true);
 
-        // ÅØ½ºÆ® Ã¤¿ì±â
+        // í…ìŠ¤íŠ¸ ì±„ìš°ê¸°
         endOfDayUIHandler.FillReceiptTexts();
         endOfDayUIHandler.FillIngredientTexts();
         endOfDayUIHandler.FillTaxText();
 
-        // ÃÊ±âÈ­
+        // ì´ˆê¸°í™”
         receiptLineManager.ClearMissedReceipts();
         receiptLineManager.ClearSuccessfulReceipts();
     }
+    private IEnumerator WaitForReceiptClearAndEnd()
+    {
+        Debug.Log("[ë§ˆê° ëŒ€ê¸°] ì˜¤í›„ 9ì‹œ ì´í›„, ì˜ìˆ˜ì¦ ì²˜ë¦¬ ì™„ë£Œ ëŒ€ê¸° ì¤‘...");
+
+        // ë§¤ 0.5ì´ˆë§ˆë‹¤ í™•ì¸
+        while (ReceiptLineManager.Instance.GetReceiptSlots().Count > 0)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        Debug.Log("[ë§ˆê°] ëª¨ë“  ì˜ìˆ˜ì¦ ì²˜ë¦¬ ì™„ë£Œ. EndOfDay í˜¸ì¶œ!");
+
+        EndOfDay();
+    }
+
 }

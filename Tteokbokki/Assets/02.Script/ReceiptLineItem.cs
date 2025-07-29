@@ -86,6 +86,7 @@ public class ReceiptLineItem : MonoBehaviour
         if (elapsed.TotalMinutes >= cookTimeSeconds / 60f)
         {
             //Debug.LogWarning($"[영수증 {receipt.OrderID}] 시간이 초과되어 삭제됩니다.");
+            ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
             manager.RemoveReceipt(this);
             return;
         }
