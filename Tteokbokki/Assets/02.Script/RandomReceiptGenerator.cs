@@ -164,6 +164,13 @@ public class RandomReceiptGenerator : MonoBehaviour
                 extras = GetRandomExtras(extraCount, extrasStock);
             }
 
+            var totalIngredients = CombinedIngredientManager.GetCombinedIngredients(MenuDatabase.Menus[menuName], extras);
+            if (!HasEnoughStock(totalIngredients))
+            {
+                Debug.Log("[취소] 재고 부족으로 영수증 생성 안됨");
+                return;
+            }
+
             newReceipt.AddOrder(menuName, extras);
         }
 
@@ -357,9 +364,10 @@ public class RandomReceiptGenerator : MonoBehaviour
     private Dictionary<string, int> GetAvailableExtras()
     {
         return IngredientDatabase.Ingredients.Keys
-        .Where(name => IngredientStockManager.Instance.GetStock(name) > 0)
-        .Where(name => !excludedExtras.Contains(name))   // ❗제외 항목 제거
-        .ToDictionary(name => name, name => IngredientStockManager.Instance.GetStock(name));
+            .Where(name =>
+                IngredientStockManager.Instance.HasPurchasedBefore(name) &&   // 최소 1회 구매
+                IngredientStockManager.Instance.GetStock(name) > 0 &&        // 재고도 있음
+                !excludedExtras.Contains(name))                              // 제외 재료도 필터
+            .ToDictionary(name => name, name => IngredientStockManager.Instance.GetStock(name));
     }
-
 }

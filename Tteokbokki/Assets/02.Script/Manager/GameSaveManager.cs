@@ -34,8 +34,19 @@ public class StoveSlotSaveData
 
 public class GameSaveManager : MonoBehaviour
 {
+    public static GameSaveManager Instance { get; private set; }
     private const string SaveFilePath = "SaveData.json";
 
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
     public void SaveGame()
     {
         GameSaveData data = new GameSaveData
@@ -104,6 +115,21 @@ public class GameSaveManager : MonoBehaviour
         ReceiptLineManager.Instance.RestorePendingReceipts(data.pendingReceipts);
 
         Debug.Log("게임 불러오기 완료!");
+    }
+
+    public void DeleteSaveFile()
+    {
+        string fullPath = Path.Combine(Application.persistentDataPath, "SaveData.json");
+
+        if (File.Exists(fullPath))
+        {
+            File.Delete(fullPath);
+            Debug.Log("[저장] 하루 종료로 인해 기존 SaveData.json 삭제됨");
+        }
+        else
+        {
+            Debug.Log("[저장] 삭제할 SaveData.json이 존재하지 않습니다.");
+        }
     }
 
     public void OnSaveButtonPressed()
