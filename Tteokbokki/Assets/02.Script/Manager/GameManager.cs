@@ -7,8 +7,6 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public ReceiptLineManager receiptLineManager;
-
     [Header("마감창 UI")]
     public GameObject endOfDayPanel;
     public EndOfDayUIHandler endOfDayUIHandler;
@@ -56,6 +54,8 @@ public class GameManager : MonoBehaviour
 
         OrderSpawner.Instance.RestartSpawning();
 
+        HideEndOfDayPanel();
+
         // 로그 출력
         Debug.Log("[시작] 새로운 영업일이 시작되었습니다.");
     }
@@ -91,10 +91,6 @@ public class GameManager : MonoBehaviour
 
         // 마감 UI 출력
         ShowEndOfDayPanel();
-
-        // 초기화
-        receiptLineManager.ClearMissedReceipts();
-        receiptLineManager.ClearSuccessfulReceipts(); // 성공 기록도 초기화!
 
         IngredientStockManager.Instance.ResetDailyOrderFlags();
 
@@ -132,10 +128,10 @@ public class GameManager : MonoBehaviour
         endOfDayUIHandler.FillReceiptTexts();
         endOfDayUIHandler.FillIngredientTexts();
         endOfDayUIHandler.FillTaxText();
-
-        // 초기화
-        receiptLineManager.ClearMissedReceipts();
-        receiptLineManager.ClearSuccessfulReceipts();
+    }
+    private void HideEndOfDayPanel()
+    {
+        endOfDayPanel.SetActive(false);
     }
     private IEnumerator WaitForReceiptClearAndEnd()
     {
