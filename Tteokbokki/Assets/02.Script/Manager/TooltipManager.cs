@@ -1,12 +1,12 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using static UnityEngine.InputSystem.Controls.AxisControl;
 
-// Info:	À½½Ä Àç·á, Á¶¸®Áß Àç·á, CookedFoodUI, StoveSlot
-// UI:      ¹öÆ°, ¾È³» ¸Ş½ÃÁö, ¡°Àç°í ºÎÁ·¡± °æ°í, ÈŞÁöÅë ¾È³» µî
+// Info:	ìŒì‹ ì¬ë£Œ, ì¡°ë¦¬ì¤‘ ì¬ë£Œ, CookedFoodUI, StoveSlot
+// UI:      ë²„íŠ¼, ì•ˆë‚´ ë©”ì‹œì§€, â€œì¬ê³  ë¶€ì¡±â€ ê²½ê³ , íœ´ì§€í†µ ì•ˆë‚´ ë“±
 
 public enum TooltipType
 {
@@ -37,14 +37,14 @@ public class TooltipManager : MonoBehaviour
     private Vector3 followOffset;
     private static string currentMessage = "";
 
-    private float autoHideTime = -1f; // À½¼ö¸é ¹«ÇÑ Áö¼Ó
+    private float autoHideTime = -1f; // ìŒìˆ˜ë©´ ë¬´í•œ ì§€ì†
     private float showTimestamp = 0f;
 
     private void Awake()
     {
         if (instances.ContainsKey(type))
         {
-            Debug.LogWarning($"ÅøÆÁ Å¸ÀÔ '{type}'¿¡ ÇØ´çÇÏ´Â TooltipManager°¡ ÀÌ¹Ì Á¸ÀçÇÕ´Ï´Ù. ±âÁ¸ °ÍÀ» ´ëÃ¼ÇÕ´Ï´Ù.");
+            Debug.LogWarning($"íˆ´íŒ íƒ€ì… '{type}'ì— í•´ë‹¹í•˜ëŠ” TooltipManagerê°€ ì´ë¯¸ ì¡´ì¬í•©ë‹ˆë‹¤. ê¸°ì¡´ ê²ƒì„ ëŒ€ì²´í•©ë‹ˆë‹¤.");
             Destroy(instances[type].gameObject);
         }
 
@@ -61,60 +61,99 @@ public class TooltipManager : MonoBehaviour
     {
         if (!followMouse || !gameObject.activeSelf) return;
 
-        // ÀÚµ¿ ¼û±è Ã¼Å©
+        // ìë™ ìˆ¨ê¹€ ì²´í¬
         if (autoHideTime > 0f && Time.unscaledTime - showTimestamp >= autoHideTime)
         {
-            Hide(type);  // typeÀº ÀÎ½ºÅÏ½º°¡ µé°í ÀÖ¾î¾ß ÇÔ
+            Hide(type);  // typeì€ ì¸ìŠ¤í„´ìŠ¤ê°€ ë“¤ê³  ìˆì–´ì•¼ í•¨
             return;
         }
 
         Camera cam = canvas.worldCamera;
         Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
 
-        // ±âº» ¿ÀÇÁ¼Â: ¿ŞÂÊ À§
+        //// ê¸°ë³¸ ì˜¤í”„ì…‹: ì™¼ìª½ ìœ„
+        //Vector2 offset = new Vector2(50f, 50f);
+
+        //// World point ë³€í™˜
+        //Vector3 worldPos;
+        //RectTransformUtility.ScreenPointToWorldPointInRectangle(
+        //    canvasRect, mouseScreenPos + offset, cam, out worldPos
+        //);
+
+        //// íˆ´íŒ ìœ„ì¹˜ ì§€ì • (World ì¢Œí‘œ)
+        //backgroundRect.position = worldPos;
+
+        //// í™”ë©´ ë°–ìœ¼ë¡œ ë²—ì–´ë‚˜ëŠ” ê²½ìš° ìœ„ì¹˜ ë°˜ì „
+        //Vector2 tooltipSize = backgroundRect.sizeDelta;
+        //Vector2 canvasSize = canvasRect.sizeDelta;
+
+        //// anchoredPositionìœ¼ë¡œ ì¼ë‹¨ ìº”ë²„ìŠ¤ ê¸°ì¤€ ìœ„ì¹˜ë¥¼ ì–»ê¸°
+        //Vector2 localPoint;
+        //RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, mouseScreenPos + offset, cam, out localPoint);
+
+        //Vector2 targetPos = localPoint;
+
+        //float canvasHalfX = canvasSize.x / 2f;
+        //float canvasHalfY = canvasSize.y / 2f;
+
+        //// ë³´ì • ë¡œì§ (ë°˜ì „)
+        //if (targetPos.x + tooltipSize.x > canvasHalfX)  // ì˜¤ë¥¸ìª½ ë„˜ì¹¨
+        //    offset.x = Mathf.Abs(offset.x) * -1; // ì™¼ìª½ìœ¼ë¡œ
+        //if (targetPos.x < -canvasHalfX)           // ì™¼ìª½ ë„˜ì¹¨
+        //    offset.x = Mathf.Abs(offset.x);       // ì˜¤ë¥¸ìª½ìœ¼ë¡œ
+
+        //if (targetPos.y > canvasHalfY)            // ìœ„ ë„˜ì¹¨
+        //    offset.y = -Mathf.Abs(offset.y);      // ì•„ë˜ë¡œ
+        //if (targetPos.y - tooltipSize.y < -canvasHalfY) // ì•„ë˜ ë„˜ì¹¨
+        //    offset.y = Mathf.Abs(offset.y);       // ìœ„ë¡œ
+
+        //// ìµœì¢… ìœ„ì¹˜ ì¬ê³„ì‚°
+        //RectTransformUtility.ScreenPointToWorldPointInRectangle(
+        //    canvasRect, mouseScreenPos + offset, cam, out worldPos
+        //);
+        //backgroundRect.position = worldPos;
+
+        //// ë””ë²„ê·¸
+        //Debug.Log($"[Tooltip] Mouse: {mouseScreenPos}, Offset: {offset}, WorldPos: {worldPos}");
+
+        // ê¸°ë³¸ ì˜¤í”„ì…‹ (íˆ´íŒì„ ì•½ê°„ ìœ„/ì˜¤ë¥¸ìª½ì— ìœ„ì¹˜ì‹œí‚¤ê¸° ìœ„í•´)
         Vector2 offset = new Vector2(50f, 50f);
 
-        // World point º¯È¯
+        // íˆ´íŒ í¬ê¸°ì™€ ìº”ë²„ìŠ¤ í¬ê¸°
+        Vector2 tooltipSize = backgroundRect.sizeDelta;
+        Vector2 canvasSize = canvasRect.sizeDelta;
+
+        // ë§ˆìš°ìŠ¤ ìœ„ì¹˜ + ì˜¤í”„ì…‹ì„ ìº”ë²„ìŠ¤ ë¡œì»¬ ì¢Œí‘œë¡œ ë³€í™˜
+        Vector2 localPoint;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, mouseScreenPos + offset, cam, out localPoint);
+
+        Vector2 pivot = new Vector2(0f, 1f); // ê¸°ë³¸ì€ ì™¼ìª½ ìœ„
+
+        // ì˜¤ë¥¸ìª½ í™”ë©´ì„ ë„˜ìœ¼ë©´ pivot.x = 1 (íˆ´íŒì´ ì˜¤ë¥¸ìª½ ëì—ì„œ ì™¼ìª½ìœ¼ë¡œ íŠ)
+        if (localPoint.x + tooltipSize.x > canvasSize.x / 2f)
+            pivot.x = 1f;
+
+        // ì™¼ìª½ í™”ë©´ì„ ë„˜ìœ¼ë©´ pivot.x = 0
+        if (localPoint.x - tooltipSize.x < -canvasSize.x / 2f)
+            pivot.x = 0f;
+
+        // ì•„ë˜ë¡œ í™”ë©´ì„ ë„˜ìœ¼ë©´ pivot.y = 0 (íˆ´íŒì´ ì•„ë˜ ëì—ì„œ ìœ„ë¡œ ì˜¬ë¼ì˜´)
+        if (localPoint.y - tooltipSize.y < -canvasSize.y / 2f)
+            pivot.y = 0f;
+
+        // ìœ„ë¡œ í™”ë©´ì„ ë„˜ìœ¼ë©´ pivot.y = 1
+        if (localPoint.y > canvasSize.y / 2f)
+            pivot.y = 1f;
+
+        // ì ìš©
+        backgroundRect.pivot = pivot;
+
+        // pivotì„ ë°”ê¿¨ìœ¼ë‹ˆ ë‹¤ì‹œ World ì¢Œí‘œë¡œ ë³€í™˜í•´ ìœ„ì¹˜ ì§€ì •
         Vector3 worldPos;
         RectTransformUtility.ScreenPointToWorldPointInRectangle(
             canvasRect, mouseScreenPos + offset, cam, out worldPos
         );
-
-        // ÅøÆÁ À§Ä¡ ÁöÁ¤ (World ÁÂÇ¥)
         backgroundRect.position = worldPos;
-
-        // È­¸é ¹ÛÀ¸·Î ¹ş¾î³ª´Â °æ¿ì À§Ä¡ ¹İÀü
-        Vector2 tooltipSize = backgroundRect.sizeDelta;
-        Vector2 canvasSize = canvasRect.sizeDelta;
-
-        // anchoredPositionÀ¸·Î ÀÏ´Ü Äµ¹ö½º ±âÁØ À§Ä¡¸¦ ¾ò±â
-        Vector2 localPoint;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, mouseScreenPos + offset, cam, out localPoint);
-
-        Vector2 targetPos = localPoint;
-
-        float canvasHalfX = canvasSize.x / 2f;
-        float canvasHalfY = canvasSize.y / 2f;
-
-        // º¸Á¤ ·ÎÁ÷ (¹İÀü)
-        if (targetPos.x + tooltipSize.x > canvasHalfX)  // ¿À¸¥ÂÊ ³ÑÄ§
-            offset.x = Mathf.Abs(offset.x) * -1; // ¿ŞÂÊÀ¸·Î
-        if (targetPos.x < -canvasHalfX)           // ¿ŞÂÊ ³ÑÄ§
-            offset.x = Mathf.Abs(offset.x);       // ¿À¸¥ÂÊÀ¸·Î
-
-        if (targetPos.y > canvasHalfY)            // À§ ³ÑÄ§
-            offset.y = -Mathf.Abs(offset.y);      // ¾Æ·¡·Î
-        if (targetPos.y - tooltipSize.y < -canvasHalfY) // ¾Æ·¡ ³ÑÄ§
-            offset.y = Mathf.Abs(offset.y);       // À§·Î
-
-        // ÃÖÁ¾ À§Ä¡ Àç°è»ê
-        RectTransformUtility.ScreenPointToWorldPointInRectangle(
-            canvasRect, mouseScreenPos + offset, cam, out worldPos
-        );
-        backgroundRect.position = worldPos;
-
-        // µğ¹ö±×
-        Debug.Log($"[Tooltip] Mouse: {mouseScreenPos}, Offset: {offset}, WorldPos: {worldPos}");
     }
 
 
@@ -144,12 +183,12 @@ public class TooltipManager : MonoBehaviour
         manager.backgroundRect.sizeDelta = size + manager.padding;
 
 
-        // Á¤È®ÇÑ À§Ä¡ °è»ê
-        Camera cam = manager.canvas.worldCamera;  // ¹İµå½Ã ÇØ´ç CanvasÀÇ Ä«¸Ş¶ó!
+        // ì •í™•í•œ ìœ„ì¹˜ ê³„ì‚°
+        Camera cam = manager.canvas.worldCamera;  // ë°˜ë“œì‹œ í•´ë‹¹ Canvasì˜ ì¹´ë©”ë¼!
         Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(cam, worldPosition);
         RectTransformUtility.ScreenPointToLocalPointInRectangle(manager.canvasRect, screenPos, cam, out var localPoint);
 
-        // À§Ä¡ º¸Á¤: È­¸é °æ°è¸¦ ³ÑÁö ¾Ê°Ô Clamp
+        // ìœ„ì¹˜ ë³´ì •: í™”ë©´ ê²½ê³„ë¥¼ ë„˜ì§€ ì•Šê²Œ Clamp
         Vector2 clamped = localPoint;
         Vector2 canvasSize = manager.canvasRect.sizeDelta;
 
@@ -189,7 +228,7 @@ public class TooltipManager : MonoBehaviour
         manager.followMouse = true;
         manager.autoHideTime = hideAfterSeconds;
         manager.showTimestamp = Time.unscaledTime;
-        manager.type = type; // ¡ç Hide()¿¡¼­ ´Ù½Ã ÀÌ typeÀ» ¾µ ¼ö ÀÖ°Ô ÀúÀå
+        manager.type = type; // â† Hide()ì—ì„œ ë‹¤ì‹œ ì´ typeì„ ì“¸ ìˆ˜ ìˆê²Œ ì €ì¥
     }
 
 
