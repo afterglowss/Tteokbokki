@@ -1,9 +1,18 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
+using DG.Tweening;
+using System.Linq;
+
 
 public class PauseMenuUI : MonoBehaviour
 {
+    [Header("설정 패널")]
+    [SerializeField] private RectTransform panelPause;
+    private Button closeButton;
+
     [Header("임시 텍스트")]
     [SerializeField] private TextMeshProUGUI rightPanelText;
 
@@ -12,15 +21,52 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private Button buttonDisplay;
     [SerializeField] private Button buttonMenu;
     [SerializeField] private Button buttonMap;
+    [SerializeField] private Button buttonMoveToStart;
+
+    private bool isPauseOpen = false;
 
     private void Start()
     {
+        // Panel_Pause 안에서 close 버튼을 탐색
+        closeButton = panelPause.GetComponentsInChildren<Button>(true)
+            .FirstOrDefault(b => b.name == "Button_Close");
+
+        if (closeButton != null)
+            Debug.Log("닫기 버튼을 정상적으로 찾았습니다.");
+        else
+            Debug.Log("닫기 버튼을 찾을 수 없습니다.");
+
         ShowSound();  // 게임 시작 시 '소리' 탭 자동 활성화
+        closeButton.onClick.AddListener(TogglePausePanel);  // 닫기 버튼 연결
+        panelPause.anchoredPosition = new Vector2(0, 1000); // 시작 시 화면 위로 숨기기
+    }
+
+    private void Update()
+    {
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            TogglePausePanel();
+        }
+    }
+    public void TogglePausePanel()
+    {
+        isPauseOpen = !isPauseOpen;
+
+        if (isPauseOpen)
+        {
+            // 아래로 내려오기
+            panelPause.DOAnchorPosY(0, 0.4f).SetEase(Ease.OutCubic); 
+        }
+        else
+        {
+            // 위로 숨기기
+            panelPause.DOAnchorPosY(1000, 0.4f).SetEase(Ease.InCubic); 
+        }
     }
 
     private void SetActiveButton(Button selected)
     {
-        Button[] buttons = { buttonSound, buttonDisplay, buttonMenu, buttonMap };
+        Button[] buttons = { buttonSound, buttonDisplay, buttonMenu, buttonMap, buttonMoveToStart };
 
         foreach (var btn in buttons)
         {
@@ -63,5 +109,14 @@ public class PauseMenuUI : MonoBehaviour
     {
         rightPanelText.text = "주변약도 / 인수할 수 있는 건물 확인\r\n알바 채용 아이콘";
         SetActiveButton(buttonMap);
+    }
+
+    public void MoveStartScene()
+    {
+        //씬 이동 전 처리 필요?
+        SetActiveButton(buttonMoveToStart);
+        
+
+        SceneManager.LoadScene("StartScene");
     }
 }
