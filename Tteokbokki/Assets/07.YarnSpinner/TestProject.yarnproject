@@ -1,0 +1,18 @@
+{
+  "projectFileVersion": 3,
+  "sourceFiles": [
+    "**/*.yarn"
+  ],
+  "excludeFiles": [
+    "**/*~/*",
+    "./Samples/Yarn Spinner*/*"
+  ],
+  "localisation": {
+    "ko": {
+      "assets": "YarnScript"
+    }
+  },
+  "baseLanguage": "ko",
+  "compilerOptions": {},
+  "definitionsFiles": []
+}
