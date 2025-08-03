@@ -1,7 +1,8 @@
 ﻿title: TestYarnScript
 ---
-이건 테스트 스크립트에요
-잘 생각해봅시다
+<<set $Junk = "">>
+뱁새: 이건 테스트 스크립트에요
+뱁새: 잘 생각해봅시다
 <<waitInput>>
 사실 난 잘 모르겠고
 골라라
@@ -13,6 +14,7 @@
 3
 4
 5
+<<set $Junk = setFace("smile")>>
 6
 7
 77

@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI; // 만약 Image 사용할 경우 필요
 
 public class CharacterFaceManager : MonoBehaviour
 {
+    public static CharacterFaceManager Instance { get; private set; }
     [Header("표정을 표시할 이미지 컴포넌트")]
     public Image faceImage; // UI용
     // public SpriteRenderer faceRenderer; // 만약 SpriteRenderer 쓸 경우 대체 가능
@@ -20,6 +22,12 @@ public class CharacterFaceManager : MonoBehaviour
         {
             faceDictionary[sprite.name] = sprite;
         }
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
     }
 
     public void SetFace(string expressionName)

@@ -1,16 +1,12 @@
 using UnityEngine;
+using Yarn.Unity;
 
 public class CustomYarnFunctions : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [YarnFunction("setFace")]
+    public static string SetFace(string expression)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        CharacterFaceManager.Instance.SetFace(expression);
+        return ""; // Yarn 함수는 반환이 필요함
     }
 }
