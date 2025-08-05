@@ -275,6 +275,29 @@ public class IngredientStockManager : MonoBehaviour
         }
         return result;
     }
+    public int GetTotalCostForLowStockIngredients()
+    {
+        int totalCost = 0;
+
+        foreach (var ingredientName in lowStockIngredients)
+        {
+            if (IngredientEconomyDatabase.Data.TryGetValue(ingredientName, out var meta))
+            {
+                totalCost += meta.OrderCost;
+            }
+            else
+            {
+                Debug.LogWarning($"[재고 경고] '{ingredientName}'의 경제 정보를 찾을 수 없습니다.");
+            }
+        }
+
+        return totalCost;
+    }
+    public string GetLowStockCostSummaryText()
+    {
+        int total = GetTotalCostForLowStockIngredients();
+        return $"추가 주문 총 비용: {total:N0}원";
+    }
     public int GetPurchasedIngredientCount()
     {
         return purchasedAtLeastOnce.Count;
