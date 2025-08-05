@@ -122,7 +122,7 @@ public static class MenuDatabase
                 { "오뎅", 2 },
                 { "파", 1 },
                 { "양배추", 1 },
-                { "군자 소스", 2 }
+                { "군자 소스", 1 }
             })
         },
         { "성인 군자 떡볶이", new MenuItem("성인 군자 떡볶이", 8500, new Dictionary<string, int>
@@ -131,36 +131,26 @@ public static class MenuDatabase
                 { "오뎅", 2 },
                 { "파", 1 },
                 { "양배추", 1 },
-                { "군자 소스", 4 }
+                { "군자 소스", 3 }
             })
         },
-        { "곱창 군자 떡볶이", new MenuItem("곱창 군자 떡볶이", 12000, new Dictionary<string, int>
+        { "마라 군자 떡볶이", new MenuItem("마라 군자 떡볶이", 12000, new Dictionary<string, int>
             {
                 { "떡", 2 },
                 { "오뎅", 2 },
                 { "파", 1 },
                 { "양배추", 1 },
-                { "군자 소스", 2 },
-                { "곱창", 1 }
-            })
-        },
-        { "마라 군자 떡볶이", new MenuItem("마라 군자 떡볶이", 10000, new Dictionary<string, int>
-            {
-                { "떡", 2 },
-                { "오뎅", 2 },
-                { "파", 1 },
-                { "양배추", 1 },
-                { "군자 소스", 2 },
+                { "군자 소스", 1 },
                 { "마라 소스", 1 }
             })
         },
-        { "로제 군자 떡볶이", new MenuItem("로제 군자 떡볶이", 10000, new Dictionary<string, int>
+        { "로제 군자 떡볶이", new MenuItem("로제 군자 떡볶이", 12000, new Dictionary<string, int>
             {
                 { "떡", 2 },
                 { "오뎅", 2 },
                 { "파", 1 },
                 { "양배추", 1 },
-                { "군자 소스", 2 },
+                { "군자 소스", 1 },
                 { "로제 소스", 1 }
             })
         },
@@ -170,7 +160,6 @@ public static class MenuDatabase
                 { "오뎅", 2 },
                 { "파", 1 },
                 { "양배추", 1 },
-                { "군자 소스", 2 },
                 { "크림 소스", 1 }
             })
         },
@@ -180,7 +169,6 @@ public static class MenuDatabase
                 { "오뎅", 2 },
                 { "파", 1 },
                 { "양배추", 1 },
-                { "군자 소스", 2 },
                 { "간장 소스", 1 }
             })
         },
@@ -190,7 +178,7 @@ public static class MenuDatabase
                 { "오뎅", 2 },
                 { "파", 1 },
                 { "양배추", 1 },
-                { "군자 소스", 2 },
+                { "군자 소스", 1 },
                 { "카레 소스", 1 }
             })
         },
@@ -200,7 +188,7 @@ public static class MenuDatabase
                 { "오뎅", 2 },
                 { "파", 1 },
                 { "양배추", 1 },
-                { "군자 소스", 2 },
+                { "군자 소스", 1 },
                 { "짜장 소스", 1 }
             })
         }

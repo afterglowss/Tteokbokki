@@ -20,10 +20,11 @@ public static class IngredientEconomyDatabase
 {
     public static readonly Dictionary<string, IngredientMetaData> Data = new()
     {
-        { "떡", new IngredientMetaData { Name = "떡", SalePricePerUse = 1000, OrderAmountKg = 20, PricePerKg = 2500, GramsPerServing = 200 } },
-        { "오뎅", new IngredientMetaData { Name = "오뎅", SalePricePerUse = 1000, OrderAmountKg = 20, PricePerKg = 2500, GramsPerServing = 200 } },
+        // SalePricePerUse: 1인분 판매가, OrderAmountKg: 1회 주문 시 주문하는 양(kg), PricePerKg: 1kg 당 원가, GramsPerServing: 1인분 조리시 들어가는 양(g)
+        { "떡", new IngredientMetaData { Name = "떡", SalePricePerUse = 1500, OrderAmountKg = 20, PricePerKg = 2500, GramsPerServing = 200 } },
+        { "오뎅", new IngredientMetaData { Name = "오뎅", SalePricePerUse = 1500, OrderAmountKg = 20, PricePerKg = 2500, GramsPerServing = 200 } },
         { "파", new IngredientMetaData { Name = "파", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 1200, GramsPerServing = 50 } },
-        { "양배추", new IngredientMetaData { Name = "양배추", SalePricePerUse = 0, OrderAmountKg = 8, PricePerKg = 400, GramsPerServing = 200 } },
+        { "양배추", new IngredientMetaData { Name = "양배추", SalePricePerUse = 0, OrderAmountKg = 8, PricePerKg = 600, GramsPerServing = 200 } },
         { "체다치즈", new IngredientMetaData { Name = "체다치즈", SalePricePerUse = 1500, OrderAmountKg = 2, PricePerKg = 14000, GramsPerServing = 50 } },
         { "모짜렐라", new IngredientMetaData { Name = "모짜렐라", SalePricePerUse = 1500, OrderAmountKg = 2, PricePerKg = 14000, GramsPerServing = 50 } },
         { "중국당면", new IngredientMetaData { Name = "중국당면", SalePricePerUse = 2000, OrderAmountKg = 4, PricePerKg = 7000, GramsPerServing = 100 } },
@@ -35,6 +36,7 @@ public static class IngredientEconomyDatabase
         { "분모자", new IngredientMetaData { Name = "분모자", SalePricePerUse = 3000, OrderAmountKg = 5, PricePerKg = 14000, GramsPerServing = 125 } },
         { "유부", new IngredientMetaData { Name = "유부", SalePricePerUse = 1500, OrderAmountKg = 4, PricePerKg = 12000, GramsPerServing = 100 } },
         { "곱창", new IngredientMetaData { Name = "곱창", SalePricePerUse = 4000, OrderAmountKg = 4, PricePerKg = 30000, GramsPerServing = 100 } },
+        { "조랭이떡", new IngredientMetaData { Name = "조랭이떡", SalePricePerUse = 1500, OrderAmountKg = 4, PricePerKg = 2500, GramsPerServing = 100 } },
         { "군자 소스", new IngredientMetaData { Name = "군자 소스", SalePricePerUse = 500, OrderAmountKg = 4, PricePerKg = 4000, GramsPerServing = 50 } },
         { "마라 소스", new IngredientMetaData { Name = "마라 소스", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
         { "로제 소스", new IngredientMetaData { Name = "로제 소스", SalePricePerUse = 0, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
