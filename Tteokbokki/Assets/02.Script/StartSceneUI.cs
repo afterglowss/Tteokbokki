@@ -32,7 +32,7 @@ public class StartSceneUI : MonoBehaviour
     {
         // 게임 씬으로 이동
         // SceneManager.LoadScene("SampleScene");
-        SceneManager.LoadScene("SampleScene 1");
+        SceneManager.LoadScene("SampleScene 2");
     }
 
     private void OnContinueButtonClicked()

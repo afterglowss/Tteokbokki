@@ -1,4 +1,5 @@
 using System.Security.Policy;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +15,21 @@ public class EndOfDayUIHandler : MonoBehaviour
     [SerializeField] private Button buttonSettlement;
     [SerializeField] private Button buttonShop;
     [SerializeField] private Button buttonClosing;
+
+    [Header("성공/실패 영수증 텍스트")]
+    [SerializeField] private TextMeshProUGUI textSuccess;
+    [SerializeField] private TextMeshProUGUI textmissed;
+    [Header("주문 필요재료 텍스트")]
+    [SerializeField] private TextMeshProUGUI lowStockTextUI;
+    [Header("총 필요 재료 비용 텍스트")]
+    [SerializeField] private TextMeshProUGUI textLowStockCost;
+    [Header("정기 지출 텍스트")]
+    [SerializeField] private TextMeshProUGUI textTax;
+    [Header("하루 수익 텍스트")]
+    [SerializeField] private TextMeshProUGUI textTodayEarnings;
+
+    [SerializeField] private Button buttonPayTax;
+    [SerializeField] private TextMeshProUGUI textPayTaxButton;
 
     private void SetActiveTab(Button selected)
     {
@@ -39,25 +55,17 @@ public class EndOfDayUIHandler : MonoBehaviour
     }
 
 
-    [Header("성공/실패 영수증 텍스트")]
-    [SerializeField] private TextMeshProUGUI successText;
-    [SerializeField] private TextMeshProUGUI missedText;
-
-    [Header("주문 필요재료 텍스트")]
-    [SerializeField] private TextMeshProUGUI lowStockTextUI;
-
-    [Header("정기 지출 텍스트")]
-    [SerializeField] private TextMeshProUGUI taxText;
-
     private void Start()
     {
         // 버튼 클릭 이벤트 등록
         buttonSettlement.onClick.AddListener(OnClickShowSettlement);
         buttonShop.onClick.AddListener(OnClickShowShop);
         buttonClosing.onClick.AddListener(OnClickShowClosing);
+        buttonPayTax.onClick.AddListener(PayTax);
 
         // 초기 화면 = 정산 화면
         OnClickShowSettlement();
+        InitializeTaxPayButton();
     }
 
     private void ShowOnly(GameObject target)
@@ -90,8 +98,8 @@ public class EndOfDayUIHandler : MonoBehaviour
     {
         if (ReceiptLineManager.Instance != null)
         {
-            successText.text = ReceiptLineManager.Instance.GetTodaySuccessfulReceiptsText();
-            missedText.text = ReceiptLineManager.Instance.GetTodayMissedReceiptsText();
+            textSuccess.text = ReceiptLineManager.Instance.GetTodaySuccessfulReceiptsText();
+            textmissed.text = ReceiptLineManager.Instance.GetTodayMissedReceiptsText();
         }
     }
 
@@ -101,10 +109,55 @@ public class EndOfDayUIHandler : MonoBehaviour
         IngredientStockManager.Instance.UpdateLowStockList(); // 목록 갱신
         lowStockTextUI.text = IngredientStockManager.Instance.GetLowStockText();
     }
+    public void FillIngredientCostText()
+    {
+        string costText = IngredientStockManager.Instance.GetLowStockCostSummaryText();
+        textLowStockCost.text = costText;
+    }
 
     public void FillTaxText()
     {
-        int tax = PlayerWalletManager.Instance.LastPaidTaxAmount;
-        taxText.text = $"{tax:N0}원";    //정기 지출 내역
+        int tax = PlayerWalletManager.Instance.LastPaidTaxAmount;   //정기 지출 내역
+        textTax.text = $"세금: {tax:N0}원";  
     }
+
+    public void FillTodayEarningsText()
+    {
+        int earning = PlayerWalletManager.Instance.TodayEarnedAmount;   //하루 수익 내역
+        textTodayEarnings.text = $"+ {earning:N0}원";
+    }
+
+    public void PayTax()
+    {
+        // 이미 납부했다면 (버튼이 비활성화)
+        if (buttonPayTax == null || !buttonPayTax.interactable)
+            return;
+
+        int taxAmount = PlayerWalletManager.Instance.LastPaidTaxAmount;
+
+        if (PlayerWalletManager.Instance.Spend(taxAmount))
+        {
+            Debug.Log($"[세금 납부] {taxAmount:N0}원 납부 완료");
+
+            // 텍스트 변경 + 버튼 비활성화
+            if (textPayTaxButton != null)
+                textPayTaxButton.text = "납부 완료";
+            buttonPayTax.interactable = false;
+        }
+        else
+        {
+            Debug.LogWarning("[세금 납부 실패] 잔고 부족");
+        }
+    }
+
+    public void InitializeTaxPayButton()
+    {
+        if (textPayTaxButton != null)
+            textPayTaxButton.text = "납부하기";
+
+        if (buttonPayTax != null)
+            buttonPayTax.interactable = true;
+    }
+
+
 }
