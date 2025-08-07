@@ -4,6 +4,7 @@ using UnityEngine;
 public class PlayerWalletManager : MonoBehaviour
 {
     public static PlayerWalletManager Instance { get; private set; }
+    public int TodayEarnedAmount { get; private set; } = 0;     //하루동안 얻은 수익
 
 
     public int CurrentBalance { get; private set; } = 1000000; // 초기 잔고
@@ -28,7 +29,12 @@ public class PlayerWalletManager : MonoBehaviour
     public void AddIncome(int amount)
     {
         CurrentBalance += amount;
+        TodayEarnedAmount += amount;  // ← 하루 수익 누적
         UpdateUI();
+    }
+    public void ResetTodayEarnings()
+    {
+        TodayEarnedAmount = 0;
     }
 
     public bool Spend(int amount)
@@ -67,4 +73,7 @@ public class PlayerWalletManager : MonoBehaviour
         CurrentBalance = newBalance;
         UpdateUI();
     }
+
+
 }
+

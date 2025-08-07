@@ -57,6 +57,8 @@ public class GameManager : MonoBehaviour
 
         OrderSpawner.Instance.RestartSpawning();
 
+        PlayerWalletManager.Instance.ResetTodayEarnings();  // 하루 수익 초기화
+
         HideEndOfDayPanel();
 
         // 로그 출력
@@ -137,10 +139,12 @@ public class GameManager : MonoBehaviour
         //Panel_EndOfDay 활성화
         endOfDayPanel.SetActive(true);
 
-        // 텍스트 채우기
+        // 텍스트 채우기 -> UIHandler로 옮기는게..?(고민)
         endOfDayUIHandler.FillReceiptTexts();
         endOfDayUIHandler.FillIngredientTexts();
+        endOfDayUIHandler.FillIngredientCostText();
         endOfDayUIHandler.FillTaxText();
+        endOfDayUIHandler.FillTodayEarningsText();
     }
     private void HideEndOfDayPanel()
     {
