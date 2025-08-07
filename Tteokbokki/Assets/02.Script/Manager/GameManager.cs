@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using Yarn.Unity;
 
 
 public class GameManager : MonoBehaviour
@@ -12,7 +13,9 @@ public class GameManager : MonoBehaviour
     public EndOfDayUIHandler endOfDayUIHandler;
 
     public static GameManager Instance { get; private set; }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    public DialogueRunner dialogueRunner;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -65,6 +68,8 @@ public class GameManager : MonoBehaviour
         GameClock.Pause();
         OrderSpawner.Instance.StopSpawning();
 
+        GameSaveManager.Instance.SaveGame();
+
         PackagingAreaManager.Instance.ClearAllFoods();
 
         var missed = ReceiptLineManager.Instance.GetMissedReceipts();
@@ -99,7 +104,15 @@ public class GameManager : MonoBehaviour
 
         DailyBonusManager.Instance.SetTomorrowBonusIngredients();
 
-        GameSaveManager.Instance.DeleteSaveFile();
+        // Yarn 변수에 저장
+        var bonusList = DailyBonusManager.Instance.GetTomorrowBonusIngredients().ToList();
+        dialogueRunner.VariableStorage.SetValue("$bonus1", bonusList.Count > 0 ? bonusList[0] : "");
+        dialogueRunner.VariableStorage.SetValue("$bonus2", bonusList.Count > 1 ? bonusList[1] : "");
+
+        // Yarn 대화 시작
+        dialogueRunner.StartDialogue("TomorrowBonusLine");
+
+        //GameSaveManager.Instance.DeleteSaveFile();
 
         GameClock.SaveLastPlayedDate(today);
     }

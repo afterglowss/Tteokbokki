@@ -45,7 +45,7 @@ public class TooltipManager : MonoBehaviour
         if (instances.ContainsKey(type))
         {
             Debug.LogWarning($"툴팁 타입 '{type}'에 해당하는 TooltipManager가 이미 존재합니다. 기존 것을 대체합니다.");
-            Destroy(instances[type].gameObject);
+            //Destroy(instances[type].gameObject);
         }
 
         instances[type] = this;
