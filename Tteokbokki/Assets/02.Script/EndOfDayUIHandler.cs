@@ -31,6 +31,14 @@ public class EndOfDayUIHandler : MonoBehaviour
     [SerializeField] private Button buttonPayTax;
     [SerializeField] private TextMeshProUGUI textPayTaxButton;
 
+    [Header("마감 체크 토글 버튼")]
+    [SerializeField] private Toggle checkReciptToggle;
+    [SerializeField] private Toggle checkTaxToggle;
+    [SerializeField] private Toggle checkIngredientToggle;
+    [SerializeField] private Toggle checkAllToggle;
+
+    private bool isUpdating = false;
+
     private void SetActiveTab(Button selected)
     {
         Button[] buttons = { buttonSettlement, buttonShop, buttonClosing };
@@ -53,7 +61,7 @@ public class EndOfDayUIHandler : MonoBehaviour
             btn.colors = colors;
         }
     }
-
+    
 
     private void Start()
     {
@@ -66,6 +74,34 @@ public class EndOfDayUIHandler : MonoBehaviour
         // 초기 화면 = 정산 화면
         OnClickShowSettlement();
         InitializeTaxPayButton();
+
+        checkAllToggle.onValueChanged.AddListener(OnToggleAllChanged);
+        checkReciptToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
+        checkTaxToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
+        checkIngredientToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
+    }
+
+    private void OnToggleAllChanged(bool isOn)
+    {
+        if (isUpdating) return;
+        isUpdating = true;
+
+        checkReciptToggle.isOn = isOn;
+        checkTaxToggle.isOn = isOn;
+        checkIngredientToggle.isOn = isOn;
+
+        isUpdating = false;
+    }
+
+    private void OnIndividualToggleChanged()
+    {
+        if (isUpdating) return;
+        isUpdating = true;
+
+        bool allOn = checkReciptToggle.isOn && checkTaxToggle.isOn && checkIngredientToggle.isOn;
+        checkAllToggle.isOn = allOn;
+
+        isUpdating = false;
     }
 
     private void ShowOnly(GameObject target)
