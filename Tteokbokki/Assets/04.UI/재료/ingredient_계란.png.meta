@@ -116,10 +116,10 @@ TextureImporter:
       name: "ingredient_\uACC4\uB780_0"
       rect:
         serializedVersion: 2
-        x: 103
-        y: 116
-        width: 834
-        height: 792
+        x: 77
+        y: 81
+        width: 883
+        height: 862
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
