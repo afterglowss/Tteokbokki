@@ -4,41 +4,121 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 using DG.Tweening;
+using System.Collections.Generic;
 using System.Linq;
-
+using UnityEngine.Audio;
 
 public class PauseMenuUI : MonoBehaviour
 {
     [Header("설정 패널")]
     [SerializeField] private RectTransform panelPause;
-    private Button closeButton;
+    [Header("닫기 버튼")]
+    [SerializeField] private Button closeButton;
 
-    [Header("임시 텍스트")]
-    [SerializeField] private TextMeshProUGUI rightPanelText;
-
+    [Header("오른쪽 패널들")]
+    [SerializeField] private List<GameObject> rightPanels; // 오른쪽 패널 (Sound, Display, Achievement)
     [Header("메뉴 버튼들")]
-    [SerializeField] private Button buttonSound;
-    [SerializeField] private Button buttonDisplay;
-    [SerializeField] private Button buttonMenu;
-    [SerializeField] private Button buttonMap;
-    [SerializeField] private Button buttonMoveToStart;
+    [SerializeField] private List<Button> menuButtons; // 왼쪽 패널 (Button_Sound, Button_Display, Button_Achievement)
+
+    [Header("디스플레이 패널")]
+    [SerializeField] private Button buttonFullscreen;
+    [SerializeField] private Button buttonWindowed;
+    [SerializeField] private TMP_Dropdown resolutionDropdown;
+    [SerializeField] public Button applyButton;
+
+    private List<Resolution> resolutions = new List<Resolution>();
+    private int resolutionNum = 0;
 
     private bool isPauseOpen = false;
 
+    [Header("볼륨 슬라이더")]
+    [SerializeField] private Slider sliderMaster;
+    [SerializeField] private Slider sliderBGM;
+    [SerializeField] private Slider sliderSFX;
+
     private void Start()
     {
-        // Panel_Pause 안에서 close 버튼을 탐색
-        closeButton = panelPause.GetComponentsInChildren<Button>(true)
-            .FirstOrDefault(b => b.name == "Button_Close");
+        closeButton.onClick.AddListener(TogglePausePanel);
+        applyButton.onClick.AddListener(ApplyBtnClick);
+        buttonFullscreen.onClick.AddListener(() => SetFullscreen(true));
+        buttonWindowed.onClick.AddListener(() => SetFullscreen(false));
 
-        if (closeButton != null)
-            Debug.Log("닫기 버튼을 정상적으로 찾았습니다.");
-        else
-            Debug.Log("닫기 버튼을 찾을 수 없습니다.");
+        panelPause.anchoredPosition = new Vector2(0, 1530); // 시작 시 숨기기
 
-        ShowSound();  // 게임 시작 시 '소리' 탭 자동 활성화
-        closeButton.onClick.AddListener(TogglePausePanel);  // 닫기 버튼 연결
-        panelPause.anchoredPosition = new Vector2(0, 1000); // 시작 시 화면 위로 숨기기
+        // 기본 선택: 소리 탭
+        ShowPanel(0);
+        // 각 메뉴 버튼에 클릭 리스너 등록
+        for (int i = 0; i < menuButtons.Count; i++)
+        {
+            int index = i;
+            menuButtons[i].onClick.AddListener(() => ShowPanel(index));
+        }
+
+        // 지원하는 해상도 목록 필터링
+        for (int i = 0; i < Screen.resolutions.Length; i++)
+        {
+            if (Screen.resolutions[i].refreshRate == 60 && (Screen.resolutions[i].width * 9 == Screen.resolutions[i].height * 16) && Screen.resolutions[i].width >= 1280)
+            {
+                resolutions.Add(Screen.resolutions[i]);
+            }
+        }
+        // 현재 해상도 인덱스 찾기
+        int currentResIndex = 0;
+        for (int i = 0; i < resolutions.Count; i++)
+        {
+            if (resolutions[i].width == Screen.currentResolution.width &&
+                resolutions[i].height == Screen.currentResolution.height)
+            {
+                currentResIndex = i;
+                break;
+            }
+        }
+        resolutionDropdown.value = currentResIndex;
+        resolutionDropdown.RefreshShownValue();
+        resolutionNum = currentResIndex;
+
+        resolutionDropdown.ClearOptions();
+
+        List<string> options = new List<string>();
+        foreach (var res in resolutions)
+        {
+            options.Add($"{res.width} x {res.height}");
+        }
+
+        // TMP_Dropdown은 TMP_Dropdown.OptionData 사용
+        List<TMP_Dropdown.OptionData> optionDataList = new List<TMP_Dropdown.OptionData>();
+        foreach (string opt in options)
+        {
+            optionDataList.Add(new TMP_Dropdown.OptionData(opt));
+        }
+
+        resolutionDropdown.AddOptions(optionDataList);
+        // Dropdown 옵션 선택시 변경
+        resolutionDropdown.onValueChanged.AddListener(DropdownOptionChange);
+
+        // 초기 화면 상태(전체/창)
+        SetFullscreen(Screen.fullScreen);
+
+        //사운드 슬라이더 연결
+        sliderMaster.onValueChanged.AddListener((value) =>
+        {
+            AudioManager.Instance?.SetMasterVolume(value);
+        });
+
+        sliderBGM.onValueChanged.AddListener((value) =>
+        {
+            AudioManager.Instance?.SetBGMVolume(value);
+        });
+
+        sliderSFX.onValueChanged.AddListener((value) =>
+        {
+            AudioManager.Instance?.SetSFXVolume(value);
+        });
+
+        // 초기값 설정
+        sliderMaster.value = 1f;
+        sliderBGM.value = 0.5f;
+        sliderSFX.value = 0.5f;
     }
 
     private void Update()
@@ -48,75 +128,95 @@ public class PauseMenuUI : MonoBehaviour
             TogglePausePanel();
         }
     }
+
     public void TogglePausePanel()
     {
         isPauseOpen = !isPauseOpen;
 
         if (isPauseOpen)
         {
-            // 아래로 내려오기
-            panelPause.DOAnchorPosY(0, 0.4f).SetEase(Ease.OutCubic); 
+            panelPause.DOAnchorPosY(225, 0.4f).SetEase(Ease.OutCubic);
         }
         else
         {
-            // 위로 숨기기
-            panelPause.DOAnchorPosY(1000, 0.4f).SetEase(Ease.InCubic); 
+            panelPause.DOAnchorPosY(1530, 0.4f).SetEase(Ease.InCubic);
         }
     }
 
-    private void SetActiveButton(Button selected)
+    private void SetActiveButton(int selectedIndex)
     {
-        Button[] buttons = { buttonSound, buttonDisplay, buttonMenu, buttonMap, buttonMoveToStart };
+        Color selectedColor = Color.white; // 선택됐을 때 그대로 흰색
+        Color unselectedColor = new Color(1f, 0.976f, 0.231f, 0.3f); // fff93b + 낮은 투명도 (0.3f)
 
-        foreach (var btn in buttons)
+        for (int i = 0; i < menuButtons.Count; i++)
         {
-            var colors = btn.colors;
-            if (btn == selected)
+            var colors = menuButtons[i].colors;
+            if (i == selectedIndex)
             {
-                // 선택된 버튼: 원래 색상
-                colors.normalColor = Color.white;
-                colors.disabledColor = Color.white;
+                colors.normalColor = selectedColor;
+                colors.disabledColor = selectedColor;
             }
             else
             {
-                // 흐리게 (회색으로)
-                colors.normalColor = new Color(0.7f, 0.7f, 0.7f);
-                colors.disabledColor = new Color(0.7f, 0.7f, 0.7f);
+                colors.normalColor = unselectedColor;
+                colors.disabledColor = unselectedColor;
             }
-            btn.colors = colors;
+            menuButtons[i].colors = colors;
         }
     }
 
-    public void ShowSound()
+    public void ShowPanel(int index)
     {
-        rightPanelText.text = "전체음량\r\n배경음\r\n효과음";
-        SetActiveButton(buttonSound);
-    }
+        if (index < 0 || index >= rightPanels.Count)
+        {
+            Debug.LogWarning("ShowPanel: index out of range");
+            return;
+        }
 
-    public void ShowDisplay()
-    {
-        rightPanelText.text = "전체화면\r\n창화면\r\n레시피 끄기/켜기";
-        SetActiveButton(buttonDisplay);
-    }
+        // 오른쪽 패널 모두 비활성화 후, 선택된 것만 활성화
+        for (int i = 0; i < rightPanels.Count; i++)
+        {
+            rightPanels[i].SetActive(i == index);
+        }
 
-    public void ShowMenu()
-    {
-        rightPanelText.text = "마크 발전 과제처럼";
-        SetActiveButton(buttonMenu);
-    }
-
-    public void ShowMap()
-    {
-        rightPanelText.text = "주변약도 / 인수할 수 있는 건물 확인\r\n알바 채용 아이콘";
-        SetActiveButton(buttonMap);
+        SetActiveButton(index);
     }
 
     public void MoveStartScene()
     {
-        //씬 이동 전 처리 필요?
-        SetActiveButton(buttonMoveToStart);
-        
-
+        TogglePausePanel();
         SceneManager.LoadScene("StartScene");
     }
+    public void DropdownOptionChange(int index)
+    {
+        resolutionNum = index;
+    }
+    public void ApplyBtnClick()
+    {
+        Screen.SetResolution(resolutions[resolutionNum].width, resolutions[resolutionNum].height, Screen.fullScreen);
+    }
+
+    private void SetFullscreen(bool fullscreen)
+    {
+        Screen.fullScreen = fullscreen;
+
+        var fullImg = buttonFullscreen.GetComponent<Image>();
+        var windowImg = buttonWindowed.GetComponent<Image>();
+
+        Color selectedColor = Color.black;
+        Color unselectedColor = new Color(0.68f, 0.68f, 0.68f); // #AEAEAE
+
+        if (fullscreen)
+        {
+            fullImg.color = selectedColor;
+            windowImg.color = unselectedColor;
+        }
+        else
+        {
+            fullImg.color = unselectedColor;
+            windowImg.color = selectedColor;
+        }
+    }
+
 }
+
