@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 291a085d76e363b4e9b8af4c29590a40
+guid: 3e9460c969e681a48b5987d2453d4797
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3819183296745040910
-    second: "ChatGPT Image 2025\uB144 8\uC6D4 9\uC77C \uC624\uD6C4 05_15_09_0"
-  - first:
-      213: -7200099143786925184
-    second: "ChatGPT Image 2025\uB144 8\uC6D4 9\uC77C \uC624\uD6C4 05_15_09_1"
+      213: -2272777068228506179
+    second: KakaoTalk_20250807_144102457_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -99,49 +96,40 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "ChatGPT Image 2025\uB144 8\uC6D4 9\uC77C \uC624\uD6C4 05_15_09_0"
+      name: CheckMark
       rect:
         serializedVersion: 2
-        x: 11
-        y: 0
-        width: 1494
-        height: 1024
+        x: 269
+        y: 309
+        width: 469
+        height: 497
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e0ce79639f6700530800000000000000
-      internalID: 3819183296745040910
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: "ChatGPT Image 2025\uB144 8\uC6D4 9\uC77C \uC624\uD6C4 05_15_09_1"
-      rect:
-        serializedVersion: 2
-        x: 86
-        y: 817
-        width: 6
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0837cfaf9fb141c90800000000000000
-      internalID: -7200099143786925184
+      spriteID: dbd06925c497570e0800000000000000
+      internalID: -2272777068228506179
       vertices: []
       indices: 
       edges: []
@@ -150,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: e24833db2acb684439cb65af9946f08c
     internalID: 0
     vertices: []
     indices: 
@@ -160,8 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "ChatGPT Image 2025\uB144 8\uC6D4 9\uC77C \uC624\uD6C4 05_15_09_0": 3819183296745040910
-      "ChatGPT Image 2025\uB144 8\uC6D4 9\uC77C \uC624\uD6C4 05_15_09_1": -7200099143786925184
+      CheckMark: -2272777068228506179
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
