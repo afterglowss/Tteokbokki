@@ -37,6 +37,7 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private Slider sliderBGM;
     [SerializeField] private Slider sliderSFX;
 
+
     private void Start()
     {
         closeButton.onClick.AddListener(TogglePausePanel);
@@ -75,8 +76,9 @@ public class PauseMenuUI : MonoBehaviour
         sliderSFX.value = 0.5f;
 
         //화면 해상도 얻기
-        FilterResolutions();
-
+        FilterResolutions(); 
+        SetUpDropdown();
+        SetUpToggles();
     }
 
     private void Update()
@@ -145,9 +147,6 @@ public class PauseMenuUI : MonoBehaviour
                 break;
             //Display
             case 1:
-                FilterResolutions();
-                SetUpDropdown();
-                SetUpToggles();
                 break;
             //Achievement
             case 2:
@@ -225,23 +224,32 @@ public class PauseMenuUI : MonoBehaviour
     }
     void SetUpToggles()
     {
-        // 리스너 추가하기
-        toggleFull.onValueChanged.AddListener(delegate { ToggleChanged(toggleFull); });
-        toggleWindow.onValueChanged.AddListener(delegate { ToggleChanged(toggleWindow); });
+        // 기존 리스너 제거 (중복 방지)
+        toggleFull.onValueChanged.RemoveAllListeners();
+        toggleWindow.onValueChanged.RemoveAllListeners();
 
-        // 시작 시 전체 화면 모드인 경우
-        if (Screen.fullScreen)
+        // 현재 실제 상태 읽기
+        bool isFullScreen = Screen.fullScreen;
+
+        // 현재 화면 모드 상태 반영
+        if (isFullScreen)
         {
             toggleFull.isOn = true;
+            toggleWindow.isOn = false;
             activatedToggle = toggleFull;
-
+            screenMode = ScreenMode.Full;
         }
-        // 시작 시 창 모드인 경우
-        else
+    else
         {
+            toggleFull.isOn = false;
             toggleWindow.isOn = true;
             activatedToggle = toggleWindow;
+            screenMode = ScreenMode.Window;
         }
+
+        // 리스너 다시 추가
+        toggleFull.onValueChanged.AddListener(delegate { ToggleChanged(toggleFull); });
+        toggleWindow.onValueChanged.AddListener(delegate { ToggleChanged(toggleWindow); });
     }
     public void SetResolution()
     {
@@ -306,7 +314,7 @@ public class PauseMenuUI : MonoBehaviour
     {
         Resolution selectedResolution = resolutions[resolutionDropdown.value];
         Screen.SetResolution(selectedResolution.width, selectedResolution.height, Screen.fullScreen);
-        Debug.Log($"해상도 적용됨: {selectedResolution.width} x {selectedResolution.height} (주사율 기본)");
+        Debug.Log($"해상도 적용됨: {selectedResolution.width} x {selectedResolution.height}");
     }
 
 
