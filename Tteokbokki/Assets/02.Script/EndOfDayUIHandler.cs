@@ -16,6 +16,16 @@ public class EndOfDayUIHandler : MonoBehaviour
     [SerializeField] private Button buttonShop;
     [SerializeField] private Button buttonClosing;
 
+    [Header("탭 버튼 색상 설정")]
+    [SerializeField] private Color selectedNormalColor = Color.white;
+    [SerializeField] private Color selectedHighlightedColor = Color.white;
+    [SerializeField] private Color unselectedNormalColor = new Color(0.7f, 0.7f, 0.7f);
+    [SerializeField] private Color unselectedHighlightedColor = new Color(0.7f, 0.7f, 0.7f);
+
+    [Header("외곽선(Outline) 색상 설정")]
+    [SerializeField] private Color selectedOutlineColor = Color.white;
+    [SerializeField] private Color unselectedOutlineColor = Color.gray;
+
     [Header("성공/실패 영수증 텍스트")]
     [SerializeField] private TextMeshProUGUI textSuccess;
     [SerializeField] private TextMeshProUGUI textmissed;
@@ -49,16 +59,23 @@ public class EndOfDayUIHandler : MonoBehaviour
 
             if (btn == selected)
             {
-                colors.normalColor = Color.white;
-                colors.highlightedColor = Color.white;
+                colors.normalColor = selectedNormalColor;
+                colors.highlightedColor = selectedHighlightedColor;
             }
             else
             {
-                colors.normalColor = new Color(0.7f, 0.7f, 0.7f);
-                colors.highlightedColor = new Color(0.7f, 0.7f, 0.7f);
+                colors.normalColor = unselectedNormalColor;
+                colors.highlightedColor = unselectedHighlightedColor;
             }
 
             btn.colors = colors;
+
+            // Outline 색상 변경
+            var outline = btn.GetComponent<Outline>();
+            if (outline != null)
+            {
+                outline.effectColor = (btn == selected) ? selectedOutlineColor : unselectedOutlineColor;
+            }
         }
     }
     

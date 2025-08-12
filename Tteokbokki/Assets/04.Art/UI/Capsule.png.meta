@@ -159,6 +159,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Capsule_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4fe41a9197d25e240a8fa33dfae96f02
+      internalID: 1861393834
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline:
     - - {x: -33, y: 256}
       - {x: -95, y: 223}
@@ -186,6 +208,7 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       Capsule: -9095717837082945937
+      Capsule_0: 1861393834
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
