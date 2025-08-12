@@ -8392,7 +8392,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1001492325324290294, guid: 676fe79f0d1a418499704ccdaf814e27, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 70.000015
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 1001492325324290294, guid: 676fe79f0d1a418499704ccdaf814e27, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -9152,8 +9152,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -17757,7 +17757,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3141423597676629707, guid: 2d4b193198711324fbfe2056db5953a4, type: 3}
       propertyPath: m_Alpha
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3141423597676629707, guid: 2d4b193198711324fbfe2056db5953a4, type: 3}
       propertyPath: m_Interactable
@@ -19107,9 +19107,9 @@ RectTransform:
   - {fileID: 181349028}
   - {fileID: 975442194}
   - {fileID: 1416694764}
+  - {fileID: 1946697949}
   - {fileID: 610889259}
   - {fileID: 660822543}
-  - {fileID: 1946697949}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
