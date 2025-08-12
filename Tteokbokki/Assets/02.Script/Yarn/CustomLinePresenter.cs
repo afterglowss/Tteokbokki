@@ -218,6 +218,8 @@ namespace Yarn.Unity
             if (canvasGroup != null)
             {
                 canvasGroup.alpha = 0;
+                canvasGroup.blocksRaycasts = false;
+                canvasGroup.interactable = false;
             }
             return YarnTask.CompletedTask;
         }
@@ -228,6 +230,8 @@ namespace Yarn.Unity
             if (canvasGroup != null)
             {
                 canvasGroup.alpha = 0;
+                canvasGroup.blocksRaycasts = false;
+                canvasGroup.interactable = false;
             }
             return YarnTask.CompletedTask;
         }
@@ -322,11 +326,15 @@ namespace Yarn.Unity
                 if (useFadeEffect)
                 {
                     await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeDownDuration, token.HurryUpToken);
+                    canvasGroup.blocksRaycasts = true;
+                    canvasGroup.interactable = true;
                 }
                 else
                 {
                     // We're not fading up, so set the canvas group's alpha to 1 immediately.
                     canvasGroup.alpha = 1;
+                    canvasGroup.blocksRaycasts = true;
+                    canvasGroup.interactable = true;
                 }
             }
 
@@ -369,10 +377,14 @@ namespace Yarn.Unity
                 if (useFadeEffect)
                 {
                     await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken).SuppressCancellationThrow();
+                    canvasGroup.blocksRaycasts = false;
+                    canvasGroup.interactable = false;
                 }
                 else
                 {
                     canvasGroup.alpha = 0;
+                    canvasGroup.blocksRaycasts = false;
+                    canvasGroup.interactable = false;
                 }
             }
         }
