@@ -94,4 +94,8 @@ public class DailyBonusManager : MonoBehaviour
 
         return result;
     }
+    public HashSet<string> GetTomorrowBonusIngredients()
+    {
+        return new HashSet<string>(tomorrowBonusCandidates);
+    }
 }

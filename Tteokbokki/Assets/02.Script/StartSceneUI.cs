@@ -1,43 +1,91 @@
+using System;
+using System.IO;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+public static class GameLoadFlags
+{
+    public static bool shouldLoadFromSave = false;
+}
 public class StartSceneUI : MonoBehaviour
 {
-    [Header("¸ÞÀÎ ¹öÆ°")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°")]
     [SerializeField] private Button startButton;
     [SerializeField] private Button continueButton;
     [SerializeField] private Button settingButton;
     [SerializeField] private Button exitButton;
 
-    [Header("¼³Á¤Ã¢ UI")]
+    [Header("ï¿½ï¿½ï¿½ï¿½Ã¢ UI")]
     [SerializeField] private PauseMenuUI pauseMenuUI;
 
+    public TextMeshProUGUI continueDateText;
 
+    private string saveFilePath;
+
+    private void Awake()
+    {
+        saveFilePath = Path.Combine(Application.persistentDataPath, "SaveData.json");
+    }
 
     void Start()
     {
-        // ¹öÆ° Å¬¸¯ ÀÌº¥Æ® µî·Ï
+        // ï¿½ï¿½Æ° Å¬ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½
         startButton.onClick.AddListener(OnStartButtonClicked);
         if (true) 
         { 
-            // (³ªÁß¿¡) ½ÃÀÛ¹öÆ° ´©¸¥°Å Ã¼Å©µÇ¸é È°¼ºÈ­
+            // (ï¿½ï¿½ï¿½ß¿ï¿½) ï¿½ï¿½ï¿½Û¹ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¼Å©ï¿½Ç¸ï¿½ È°ï¿½ï¿½È­
             continueButton.onClick.AddListener(OnContinueButtonClicked);
         }
         settingButton.onClick.AddListener(OnSettingButtonClicked);
         exitButton.onClick.AddListener(OnExitButtonClicked);
+        UpdateContinueDateLabel();
+    }
+    private void UpdateContinueDateLabel()
+    {
+        DateTime? lastDate = GameClock.LoadLastPlayedDate();
+
+        if (File.Exists(saveFilePath))
+        {
+            // SaveData.jsonï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½
+            GameSaveData data = LoadSaveMetaOnly();
+            if (DateTime.TryParse(data.gameTime, out DateTime gameTime))
+            {
+                continueDateText.text = $"{gameTime.Month}ï¿½ï¿½ {gameTime.Day}ï¿½ï¿½ ï¿½Ì¾ï¿½ï¿½Ï±ï¿½";
+            }
+            continueButton.interactable = true;
+        }
+        else if (lastDate.HasValue)
+        {
+            // SaveData.jsonï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Â¥ ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+            continueDateText.text = $"{lastDate.Value.Month}ï¿½ï¿½ {lastDate.Value.Day}ï¿½ï¿½ ï¿½Ì¾ï¿½ï¿½Ï±ï¿½";
+            continueButton.interactable = true;
+        }
+        else
+        {
+            // ï¿½Ì¾ï¿½ï¿½Ï±ï¿½ ï¿½Ò°ï¿½ï¿½ï¿½
+            continueDateText.text = "ï¿½Ì¾ï¿½ï¿½Ï±ï¿½ (ï¿½ï¿½ï¿½ï¿½)";
+            continueButton.interactable = false;
+        }
+    }
+
+    private GameSaveData LoadSaveMetaOnly()
+    {
+        string json = File.ReadAllText(saveFilePath);
+        return Newtonsoft.Json.JsonConvert.DeserializeObject<GameSaveData>(json);
     }
 
     private void OnStartButtonClicked()
     {
-        // °ÔÀÓ ¾ÀÀ¸·Î ÀÌµ¿
-        // SceneManager.LoadScene("SampleScene");
-        SceneManager.LoadScene("SampleScene 2");
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+        SceneManager.LoadScene("SampleScene");
+        //SceneManager.LoadScene("SampleScene 1");
     }
 
     private void OnContinueButtonClicked()
     {
-        // ÀÌ¾îÇÏ±â ¹öÆ° ´­·¶À»¶§
+        GameLoadFlags.shouldLoadFromSave = true;
+        SceneManager.LoadScene("SampleScene");
     }
 
     private void OnSettingButtonClicked()
@@ -48,18 +96,18 @@ public class StartSceneUI : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("PauseMenuUI°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogWarning("PauseMenuUIï¿½ï¿½ ï¿½Ò´ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾Ò½ï¿½ï¿½Ï´ï¿½.");
         }
     }
 
 
     private void OnExitButtonClicked()
     {
-        // °ÔÀÓ Á¾·á
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
     #else
-        // ºôµåµÈ °ÔÀÓ¿¡¼­ ½ÇÇà ÁßÀÌ¸é ¾ÖÇÃ¸®ÄÉÀÌ¼Ç Á¾·á
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ó¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½
         Application.Quit();
     #endif
     }
