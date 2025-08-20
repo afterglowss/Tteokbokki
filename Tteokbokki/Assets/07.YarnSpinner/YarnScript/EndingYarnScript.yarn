@@ -32,3 +32,33 @@ title: HappyEndingScene
 -> 예
 뱁새: 잘 생각했어 ^^
 ===
+title: Variable
+---
+<<set $bool1 = false>>
+
+<<if $bool1>>
+뱁새: 튜토리얼은 넘어갈까?
+-> 예
+    <<jump StartGame>>
+-> 아니오
+    뱁새: 알겠어. 그럼 튜토리얼을 진행할게.
+<<endif>>
+
+
+
+
+
+튜토리얼 진행
+
+
+
+
+
+
+
+<<set $bool1 = true>>
+===
+title: StartGame
+---
+뱁새: 좋아! 그럼 이제 가게를 시작해볼까?
+===
