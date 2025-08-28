@@ -1,13 +1,18 @@
+using System;
 using UnityEngine;
+using UnityEngine.UI;
 using Yarn.Unity;
 
 public class TutorialManager : MonoBehaviour
 {
     private DialogueRunner dialogueRunner;
+    private ReceiptLineManager receiptLineManager;
+    private bool hasSpawned = false;
 
     void Start()
     {
-        //dialogueRunner = FindObjectOfType<DialogueRunner>();
+        dialogueRunner = FindObjectOfType<DialogueRunner>();
+        receiptLineManager = FindObjectOfType<ReceiptLineManager>();
     }
 
     // 다이얼로그 시작
@@ -44,12 +49,38 @@ public class TutorialManager : MonoBehaviour
             Debug.LogWarning("ObjectDelete 대상 오브젝트를 찾을 수 없음: " + objName);
     }
 
-    // 선택된 소스 반환
-    static string SelectedSauce = "임시소스";
-
-    [YarnFunction("getSelectedSauce")]
-    public static string GetSelectedSauce()
+    // 튜토리얼용 영수증 발행
+    [YarnCommand("spawnTutorialReceipt")]
+    public static void SpawnTutorialReceipt()
     {
-        return SelectedSauce;
+        // 필요한 매니저들 찾기
+        var receiptManager = GameObject.FindObjectOfType<ReceiptLineManager>();
+        var dialogueRunner = GameObject.FindObjectOfType<DialogueRunner>();
+        if (receiptManager == null || dialogueRunner == null)
+        {
+            Debug.LogError("ReceiptLineManager 또는 DialogueRunner를 찾을 수 없습니다.");
+            return;
+        }
+
+        // 이미 영수증이 있으면 생성하지 않음
+        if (receiptManager.GetReceiptSlots().Count > 0) return;
+
+        // 영수증 생성
+        Receipt tutorialReceipt = new Receipt(DateTime.Now, 1);
+        receiptManager.AddNewReceipt(tutorialReceipt);
+
+        // 마지막으로 생성된 ReceiptLineItem 가져오기
+        var lastReceiptItem = receiptManager.GetReceiptSlots()[receiptManager.GetReceiptSlots().Count - 1];
+        var btn = lastReceiptItem.GetComponent<Button>();
+
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() =>
+            {
+                // 클릭 시 Yarn 노드로 이동
+                dialogueRunner.StartDialogue("AddIngredientStep");
+            });
+        }
     }
 }
