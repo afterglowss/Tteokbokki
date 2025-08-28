@@ -11,9 +11,8 @@ public class TutorialManager : MonoBehaviour
 
     void Start()
     {
-        dialogueRunner = FindObjectOfType<DialogueRunner>();
-        receiptLineManager = FindObjectOfType<ReceiptLineManager>();
     }
+
 
     // 다이얼로그 시작
     public void OnObjectDialogueStart(string objectNode)
@@ -82,5 +81,18 @@ public class TutorialManager : MonoBehaviour
                 dialogueRunner.StartDialogue("AddIngredientStep");
             });
         }
+    }
+    [YarnFunction("getSawTutorial")]
+    public static bool GetSawTutorial()
+    {
+        return PlayerPrefs.GetInt("SawTutorial", 0) == 1;
+    }
+
+    // 튜토리얼 끝났을 때 호출
+    [YarnCommand("setSawTutorial")]
+    public static void SetSawTutorial()
+    {
+        PlayerPrefs.SetInt("SawTutorial", 1);
+        PlayerPrefs.Save();
     }
 }
