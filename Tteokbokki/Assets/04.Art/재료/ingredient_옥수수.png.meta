@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e38ea0327eaefcb47b5eedda473a4a34
+guid: b765598006625eb4b88eb2a930b8c443
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -9134236869957313028
-    second: "\uACE0\uAD6C\uB9C8_0"
+      213: -7830756420766943209
+    second: KakaoTalk_20260111_175558146_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uACE0\uAD6C\uB9C8_0"
+      name: "ingredient_\uC625\uC218\uC218_0"
       rect:
         serializedVersion: 2
-        x: 163
-        y: 76
-        width: 692
-        height: 851
+        x: 31
+        y: 181
+        width: 966
+        height: 688
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: cfd1be746fbac3180800000000000000
-      internalID: -9134236869957313028
+      spriteID: d1210915be679f34783f704b449f5f92
+      internalID: 2024990797
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 4e82c0d370abe09428c6c0a124f69df7
+    spriteID: f6af48ae7311f0b4680f7bd063b09259
     internalID: 0
     vertices: []
     indices: 
@@ -146,9 +146,11 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      "\uACE0\uAD6C\uB9C8_0": -9134236869957313028
+      "ingredient_\uC625\uC218\uC218_0": 2024990797
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
