@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 831d0fcb931803c49a812fdcf6df57d8
+guid: e8c94ed447f393d418b44608dc099117
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5177388603050735206
-    second: 9-Sliced
+      213: 1063795113777808667
+    second: "\uD3EC\uC7A5\uB300_2_0"
+  - first:
+      213: 151047945124719173
+    second: "\uD3EC\uC7A5\uB300_2_1"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -48,11 +51,11 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 256
-  spriteBorder: {x: 64, y: 64, z: 64, w: 64}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -68,7 +71,7 @@ TextureImporter:
   ignorePngGamma: 0
   applyGammaDecoding: 0
   swizzle: 50462976
-  cookieLightType: 1
+  cookieLightType: 0
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
@@ -109,106 +112,27 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 9-Sliced
+      name: "\uD3EC\uC7A5\uB300_2_1"
       rect:
         serializedVersion: 2
-        x: 2
-        y: 2
-        width: 252
-        height: 252
+        x: 13
+        y: 0
+        width: 437
+        height: 201
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 64, y: 64, z: 64, w: 64}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: a99410b1f783628b0800000000000000
-      internalID: -5177388603050735206
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 9-Sliced_0
-      rect:
-        serializedVersion: 2
-        x: 66
-        y: 2
-        width: 188
-        height: 252
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 64, z: 64, w: 64}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 6911adeca1aa0514593c47dd53797371
-      internalID: 1876260888
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 9-Sliced_1
-      rect:
-        serializedVersion: 2
-        x: 2
-        y: 2
-        width: 188
-        height: 252
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 64, y: 64, z: 0, w: 64}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: edad2ab517eed3e4eab02d311c5387d7
-      internalID: 341788896
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 9-Sliced_2
-      rect:
-        serializedVersion: 2
-        x: 2
-        y: 66
-        width: 252
-        height: 188
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 64, y: 0, z: 64, w: 64}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 536832dc52064814dae3d94148e5ba97
-      internalID: 1335438737
+      spriteID: 54a26394e41a81200800000000000000
+      internalID: 151047945124719173
       vertices: []
       indices: 
       edges: []
@@ -217,7 +141,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: e6a82ba7e8552474a86a430d574659e3
     internalID: 0
     vertices: []
     indices: 
@@ -227,10 +151,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      9-Sliced: -5177388603050735206
-      9-Sliced_0: 1876260888
-      9-Sliced_1: 341788896
-      9-Sliced_2: 1335438737
+      "\uD3EC\uC7A5\uB300_2_0": 1063795113777808667
+      "\uD3EC\uC7A5\uB300_2_1": 151047945124719173
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
