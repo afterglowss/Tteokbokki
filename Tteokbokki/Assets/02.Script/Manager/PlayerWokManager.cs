@@ -1,51 +1,63 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class PlayerWokManager : MonoBehaviour
 {
     public static PlayerWokManager Instance { get; private set; }
-
-    private Dictionary<string, int> playerIngredients = new Dictionary<string, int>();
-
     public TextMeshProUGUI playerIngredientsText;
-
-    public StoveManager stoveManager;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
     }
 
-    public void OnCookButtonPressed()   // ¿Ï·á ¹öÆ° ´­·¶À» ¶§
+    // âœ¨ [ë³€ê²½] ì¡°ë¦¬ ë²„íŠ¼ í´ë¦­ ì‹œ -> StoveManagerì—ê²Œ ìœ„ì„
+    public void OnCookButtonPressed()
     {
-        if (!stoveManager.HasSelectedSlot())
+        if (!StoveManager.Instance.HasSelectedSlot())
         {
-            Debug.LogWarning("[Wok] ¼±ÅÃµÈ È­±¸°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogWarning("ì„ íƒëœ í™”êµ¬ê°€ ì—†ìŠµë‹ˆë‹¤!");
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "í™”êµ¬ë¥¼ ë¨¼ì € ì„ íƒí•´ì£¼ì„¸ìš”!", 1f);
             return;
         }
 
-        var ingredients = GetPlayerIngredients();
-
-        if (!ContainsBaseIngredients(ingredients))
-        {
-            Debug.LogWarning("[Wok] ±âº» Àç·á°¡ ºÎÁ·ÇÏ¿© Á¶¸®ÇÒ ¼ö ¾ø½À´Ï´Ù!");
-            // TODO: ¿øÇÏ¸é UI¿¡ °æ°í ¸Ş½ÃÁö Ãâ·Âµµ °¡´É
-            return;
-        }
-
-        stoveManager.StartCookingOnSelectedSlot(ingredients);
-        ClearWok();  // Á¶¸® ½ÃÀÛ ÈÄ wok ÃÊ±âÈ­
+        // ì„ íƒëœ í™”êµ¬ì˜ ì¡°ë¦¬ë¥¼ ì‹œë„í•¨
+        StoveManager.Instance.TryCookSelectedSlot();
     }
 
+    // âœ¨ [ë³€ê²½] UI ì—…ë°ì´íŠ¸ ì „ìš© í•¨ìˆ˜ (ë°ì´í„°ëŠ” StoveSlotì—ì„œ ë°›ìŒ)
+    public void UpdateUI(Dictionary<string, int> ingredients)
+    {
+        if (playerIngredientsText == null) return;
+
+        if (ingredients == null || ingredients.Count == 0)
+        {
+            playerIngredientsText.text = "ì„ íƒëœ í™”êµ¬: ë¹„ì–´ìˆìŒ";
+            return;
+        }
+
+        string result = "í˜„ì¬ ë‹´ì€ ì¬ë£Œ:\n";
+        foreach (var item in ingredients)
+        {
+            result += $"{item.Key} x{item.Value}\n";
+        }
+        playerIngredientsText.text = result;
+    }
+
+    // âœ¨ [ë³€ê²½] ê²€ì¦ ë¡œì§ë§Œ ì œê³µ (StoveSlotì´ í˜¸ì¶œí•´ì„œ ì‚¬ìš©)
+    public bool CheckRecipe(Dictionary<string, int> pendingIngredients)
+    {
+        return ContainsBaseIngredients(pendingIngredients);
+    }
+
+    // ê¸°ì¡´ ê²€ì¦ ë¡œì§ ìœ ì§€
     private bool ContainsBaseIngredients(Dictionary<string, int> wok)
     {
-        var baseMenu = MenuDatabase.Menus["±ºÀÚ ¶±ººÀÌ"];
+        if (wok == null) return false;
+
+        var baseMenu = MenuDatabase.Menus["êµ°ì ë–¡ë³¶ì´"];
         var baseIngredients = baseMenu.DefaultIngredients;
 
         foreach (var pair in baseIngredients)
@@ -55,57 +67,8 @@ public class PlayerWokManager : MonoBehaviour
                 return false;
             }
         }
-
         return true;
     }
-    public void AddIngredient(string ingredientName)
-    {
-        if (!playerIngredients.ContainsKey(ingredientName))
-        {
-            playerIngredients[ingredientName] = 0;
-        }
-        playerIngredients[ingredientName]++;
-        UpdateIngredientText();
-    }
 
-    public Dictionary<string, int> GetPlayerIngredients()
-    {
-        return new Dictionary<string, int>(playerIngredients);
-    }
-
-    public void ClearWok()
-    {
-        playerIngredients.Clear();
-        UpdateIngredientText();
-    }
-
-    private void UpdateIngredientText()
-    {
-        if (playerIngredientsText == null) return;
-
-        if (playerIngredients.Count == 0)
-        {
-            playerIngredientsText.text = "ÇöÀç ´ãÀº Àç·á ¾øÀ½";
-            return;
-        }
-
-        string result = "ÇöÀç ´ãÀº Àç·á:\n";
-        foreach (var item in playerIngredients)
-        {
-            result += $"{item.Key} x{item.Value}\n";
-        }
-        playerIngredientsText.text = result;
-    }
-
-    public void RestoreWok(Dictionary<string, int> savedIngredients)
-    {
-        playerIngredients.Clear();
-
-        foreach (var pair in savedIngredients)
-        {
-            playerIngredients[pair.Key] = pair.Value;
-        }
-
-        UpdateIngredientText();
-    }
+    // ê¸°ì¡´ì˜ AddIngredient, ClearWok, GetPlayerIngredients ë“±ì€ ëª¨ë‘ ì‚­ì œë¨
 }

@@ -5,7 +5,6 @@ using TMPro;
 using UnityEngine;
 using Yarn.Unity;
 
-
 public class GameManager : MonoBehaviour
 {
     [Header("마감창 UI")]
@@ -26,12 +25,6 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void StartOfDay()
     {
         GameClock.gameTime = GameClock.gameTime.AddDays(1);
@@ -41,9 +34,13 @@ public class GameManager : MonoBehaviour
         IngredientStockManager.Instance.ResetDailyOrderFlags();
         IngredientStockManager.Instance.AdvanceDayAndDecay();
 
-        StoveManager.Instance.ClearAllStoves(); // 조리 상태 초기화 (필요 시)
+        // 조리 상태 초기화 (각 화구의 ResetSlot()이 호출되며 담겨있던 재료들도 함께 초기화됩니다)
+        StoveManager.Instance.ClearAllStoves();
+
         PackagingAreaManager.Instance.ClearAllFoods(); // 포장대 초기화
-        PlayerWokManager.Instance.ClearWok(); // 플레이어 웍 초기화
+
+        // ✨ [수정] PlayerWokManager.Instance.ClearWok(); -> 삭제됨 (더 이상 전역 Wok을 쓰지 않음)
+
         ReceiptLineManager.Instance.ClearAllReceipts(); // 영수증 리스트 초기화
         ReceiptLineManager.Instance.ClearMissedReceipts(); // 실패 영수증 리스트 초기화
         ReceiptLineManager.Instance.ClearSuccessfulReceipts(); // 성공 영수증 리스트 초기화
@@ -114,10 +111,9 @@ public class GameManager : MonoBehaviour
         // Yarn 대화 시작
         dialogueRunner.StartDialogue("TomorrowBonusLine");
 
-        //GameSaveManager.Instance.DeleteSaveFile();
-
         GameClock.SaveLastPlayedDate(today);
     }
+
     public void OnClosingTimeReached()
     {
         OrderSpawner.Instance.StopSpawning(); // 주문 생성 중단
@@ -139,17 +135,19 @@ public class GameManager : MonoBehaviour
         //Panel_EndOfDay 활성화
         endOfDayPanel.SetActive(true);
 
-        // 텍스트 채우기 -> UIHandler로 옮기는게..?(고민)
+        // 텍스트 채우기
         endOfDayUIHandler.FillReceiptTexts();
         endOfDayUIHandler.FillIngredientTexts();
         endOfDayUIHandler.FillIngredientCostText();
         endOfDayUIHandler.FillTaxText();
         endOfDayUIHandler.FillTodayEarningsText();
     }
+
     private void HideEndOfDayPanel()
     {
         endOfDayPanel.SetActive(false);
     }
+
     private IEnumerator WaitForReceiptClearAndEnd()
     {
         Debug.Log("[마감 대기] 오후 9시 이후, 영수증 처리 완료 대기 중...");
@@ -164,5 +162,4 @@ public class GameManager : MonoBehaviour
 
         EndOfDay();
     }
-
 }

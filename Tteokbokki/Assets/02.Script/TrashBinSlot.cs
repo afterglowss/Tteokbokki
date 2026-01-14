@@ -1,52 +1,47 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.EventSystems;
 
-/// <summary>
-/// À½½ÄÄ«µå(CookedFoodUI)³ª ¿µ¼öÁõ(ReceiptLineItem)À» µå·¡±×ÇØ¼­ ¹ö¸± ¼ö ÀÖ´Â ÈŞÁöÅë ½½·Ô
-/// </summary>
 public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public void OnDrop(PointerEventData eventData)
     {
-        // À½½ÄÄ«µå ¹ö¸®±â
+        // 1. ìŒì‹ ì¹´ë“œ ë²„ë¦¬ê¸° (ê¸°ì¡´ ë¡œì§)
         var food = eventData.pointerDrag?.GetComponent<CookedFoodUI>();
         if (food != null)
         {
-            if (food.originStoveSlot != null)
-            {
-                food.originStoveSlot.ResetSlot();  // È­±¸ ÃÊ±âÈ­
-            }
-
-            if (food.currentSlot != null)
-            {
-                food.currentSlot.RemoveFood(food);  // ¸®½ºÆ®¿¡¼­ Á¦°Å + Á¤·Ä
-            }
-
-            TooltipManager.Hide(TooltipType.UI);
+            // ... (ê¸°ì¡´ ìŒì‹ ë²„ë¦¬ê¸° ì½”ë“œ ìœ ì§€) ...
+            if (food.originStoveSlot != null) food.originStoveSlot.ResetSlot();
+            if (food.currentSlot != null) food.currentSlot.RemoveFood(food);
             Destroy(food.gameObject);
-            Debug.Log("[ÈŞÁöÅë] À½½ÄÄ«µå°¡ ¹ö·ÁÁ³½À´Ï´Ù.");
             return;
         }
 
-        // ¿µ¼öÁõ ¹ö¸®±â (ÁÖ¹® Æ÷±â)
+        // 2. ì˜ìˆ˜ì¦ ë²„ë¦¬ê¸° (ê¸°ì¡´ ë¡œì§)
         var receiptItem = eventData.pointerDrag?.GetComponent<ReceiptLineItem>();
         if (receiptItem != null)
         {
-            var receipt = receiptItem.GetReceipt();
-            ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
+            // ... (ê¸°ì¡´ ì˜ìˆ˜ì¦ ë²„ë¦¬ê¸° ì½”ë“œ ìœ ì§€) ...
+            ReceiptLineManager.Instance.RecordFailedReceipt(receiptItem.GetReceipt());
             ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
-
-            TooltipManager.Hide(TooltipType.UI);
-            Debug.Log($"[ÈŞÁöÅë] ¿µ¼öÁõ {receipt.OrderID}¹øÀÌ Æ÷±âµÇ¾î ½ÇÆĞ ¸ñ·Ï¿¡ Ãß°¡µÇ¾ú½À´Ï´Ù.");
             return;
         }
 
-        Debug.Log("[ÈŞÁöÅë] À¯È¿ÇÏÁö ¾ÊÀº µå·¡±× ´ë»óÀÔ´Ï´Ù.");
+        // âœ¨ 3. [NEW] í™”êµ¬ì˜ Wok(ì¬ë£Œ ë‹´ëŠ” ì¤‘) ë²„ë¦¬ê¸°
+        var stoveSlot = eventData.pointerDrag?.GetComponent<StoveSlot>();
+        // ë§Œì•½ StoveSlot ìì²´ê°€ ì•„ë‹ˆë¼ Wok ì•„ì´ì½˜ì— ìŠ¤í¬ë¦½íŠ¸ê°€ ìˆë‹¤ë©´ GetComponentInParent ì‚¬ìš© ë“± ì¡°ì • í•„ìš”
+        // ìœ„ StoveSlot ì½”ë“œì—ì„œëŠ” StoveSlot ì˜¤ë¸Œì íŠ¸ ìì²´ê°€ ë“œë˜ê·¸ í•¸ë“¤ëŸ¬ë¥¼ ê°€ì§.
+
+        if (stoveSlot != null)
+        {
+            Debug.Log($"[íœ´ì§€í†µ] {stoveSlot.name}ì˜ ì¬ë£Œë¥¼ ë¹„ì›ë‹ˆë‹¤.");
+            stoveSlot.ClearPending(); // ì¬ë£Œ ë¹„ìš°ê¸°
+            return;
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        TooltipManager.ShowFollowMouse(TooltipType.UI, "ÈŞÁöÅë¿¡ ¹ö¸®±â");
+        TooltipManager.ShowFollowMouse(TooltipType.UI, "íœ´ì§€í†µì— ë²„ë¦¬ê¸°");
     }
 
     public void OnPointerExit(PointerEventData eventData)

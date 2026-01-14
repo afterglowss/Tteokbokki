@@ -4,74 +4,82 @@ using UnityEngine;
 
 public class OrderChecker : MonoBehaviour
 {
-    public PlayerWokManager playerWokManager;
+    // public PlayerWokManager playerWokManager; // 더 이상 참조 안 함
     public TextMeshProUGUI resultText;
-    public StoveManager stoveManager;  // 화구 관리
+    public StoveManager stoveManager;
 
     public void CheckOrder()
     {
+        // 1. 활성 영수증 확인
         var activeReceipt = ReceiptStateManager.Instance.ActiveReceipt;
-
         if (activeReceipt == null)
         {
             resultText.text = "현재 활성화된 영수증이 없습니다!";
             return;
         }
 
-        var playerIngredients = playerWokManager.GetPlayerIngredients();
+        // 2. 선택된 화구 확인
+        if (!StoveManager.Instance.HasSelectedSlot())
+        {
+            resultText.text = "선택된 화구가 없습니다!";
+            return;
+        }
 
-        // 1️⃣ 모든 메뉴를 끝까지 체크하는 구조로 변경
+        // ✨ 수정됨: 선택된 화구의 대기 중인 재료를 가져옴 (GetPendingIngredientsCopy 메서드 필요 -> StoveSlot에 추가할 것)
+        // 만약 StoveSlot에 해당 getter가 없다면 아래 StoveSlot 수정 코드 참고
+        var currentStove = StoveManager.Instance.GetSelectedSlot();
+        var pendingIngredients = currentStove.GetPendingIngredientsCopy();
+
+        if (pendingIngredients.Count == 0)
+        {
+            resultText.text = "선택된 화구에 재료가 없습니다.";
+            return;
+        }
+
+        // 3. 메뉴 매칭 로직
         OrderItem targetOrder = null;
 
         foreach (var order in activeReceipt.GetOrders())
         {
             var combined = CombinedIngredientManager.GetCombinedIngredients(order.Menu, order.GetExtras());
 
-            if (AreIngredientsEqual(playerIngredients, combined))
+            if (AreIngredientsEqual(pendingIngredients, combined))
             {
                 if (order.IsCompleted)
                 {
-                    // 이미 완료된 메뉴는 스킵, 하지만 '이미 완료' 안내는 표시
                     resultText.text = $"[{order.ItemID}] {order.Menu.Name}는 이미 조리 완료된 메뉴입니다!";
-                    playerWokManager.ClearWok();
-                    continue;  // 즉시 종료 (이미 완료된 메뉴가 우선)
+                    // playerWokManager.ClearWok(); // 삭제됨 -> 화구 비우기는 수동 or 로직에 따름
+                    continue;
                 }
 
                 if (order.IsOnStove)
                 {
-                    // 이미 조리 중인 메뉴도 스킵, 하지만 '이미 조리중' 안내는 표시
                     resultText.text = $"[{order.ItemID}] {order.Menu.Name}는 이미 화구에서 조리 중입니다!";
-                    playerWokManager.ClearWok();
-                    continue;  // 즉시 종료 (이미 조리중 메뉴가 우선)
+                    continue;
                 }
 
-                // 미완료 + 미조리인 경우 일치하는 메뉴 발견
                 targetOrder = order;
-                break;  // 일치하는 메뉴 발견 시 반복 종료 (맨 앞에 있는 메뉴부터 처리)
+                break;
             }
         }
 
         if (targetOrder != null)
         {
-            // 2️⃣ 찾은 메뉴를 화구에 올리고 성공 처리
             resultText.text = $"성공! [{targetOrder.ItemID}] {targetOrder.Menu.Name} 조리 시작! 화구에 올렸습니다.";
 
-            //stoveManager.TryStartCooking(targetOrder, 5 * 60);  // 5분 조리
-
-            playerWokManager.ClearWok();
+            // ✨ 수정됨: 화구 스스로 조리 시작 시도
+            currentStove.TryStartCooking();
         }
         else
         {
-            // 3️⃣ 끝까지 뒤져도 해당하는 메뉴가 없을 때
-            resultText.text = "실패! 정확히 일치하는 미완료 메뉴가 없습니다.";
-            playerWokManager.ClearWok();
+            resultText.text = "실패! 재료가 일치하는 미완료 메뉴가 없습니다.";
+            // currentStove.ClearPending(); // 원하면 실패 시 비우기 가능
         }
     }
 
     private bool AreIngredientsEqual(Dictionary<string, int> a, Dictionary<string, int> b)
     {
-        if (a.Count != b.Count)
-            return false;
+        if (a.Count != b.Count) return false;
 
         foreach (var kvp in a)
         {
@@ -80,7 +88,6 @@ public class OrderChecker : MonoBehaviour
                 return false;
             }
         }
-
         return true;
     }
 }
