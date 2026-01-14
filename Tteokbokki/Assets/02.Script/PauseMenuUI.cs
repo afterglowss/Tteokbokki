@@ -1,82 +1,82 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 using DG.Tweening;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine.Audio;
+using UnityEngine.EventSystems;
 
 public class PauseMenuUI : MonoBehaviour
 {
-    [Header("¼³Á¤ ÆĞ³Î")]
+    [Header("ì„¤ì • íŒ¨ë„")]
     [SerializeField] private RectTransform panelPause;
-    [Header("´İ±â ¹öÆ°")]
+    [SerializeField] private Button optionButton;
     [SerializeField] private Button closeButton;
 
-    [Header("¿À¸¥ÂÊ ÆĞ³Îµé")]
-    [SerializeField] private List<GameObject> rightPanels; // ¿À¸¥ÂÊ ÆĞ³Î (Sound, Display, Achievement)
-    [Header("¸Ş´º ¹öÆ°µé")]
-    [SerializeField] private List<Button> menuButtons; // ¿ŞÂÊ ÆĞ³Î (Button_Sound, Button_Display, Button_Achievement)
+    [Header("ì˜¤ë¥¸ìª½ íŒ¨ë„ë“¤")]
+    [SerializeField] private List<GameObject> rightPanels;
+    [Header("ë©”ë‰´ ë²„íŠ¼ë“¤ (ì™¼ìª½)")]
+    [SerializeField] private List<Button> menuButtons;
 
-    [Header("µğ½ºÇÃ·¹ÀÌ ÆĞ³Î")]
-    [SerializeField] private Toggle toggleFull;                 //  ÀüÃ¼È­¸éÀ¸·Î
-    [SerializeField] private Toggle toggleWindow;               //  Ã¢¸ğµå·Î
-    [SerializeField] private TMP_Dropdown resolutionDropdown;   //  ÇØ»óµµ ¼±ÅÃ µå·Ó´Ù¿î
-    [SerializeField] public Button applyButton;                 //  ÇØ»óµµ Àû¿ë ¹öÆ°
+    // âœ¨ ìƒ‰ìƒ ë³€ìˆ˜ ë¶„ë¦¬ (ì¸ìŠ¤í™í„°ì—ì„œ ë”°ë¡œ ì„¤ì •í•˜ì„¸ìš”!)
+    [Header("ë²„íŠ¼ ë‚´ë¶€ ìƒ‰ìƒ (Image Color)")]
+    [SerializeField] private Color normalButtonColor = Color.white;       // í‰ì†Œ ë²„íŠ¼ ìƒ‰
+    [SerializeField] private Color selectedButtonColor = Color.white;     // ì„ íƒ/í˜¸ë²„ ë²„íŠ¼ ìƒ‰
 
-    private Resolution[] resolutions;   // °¡´ÉÇÑ ¸ğµç ÇØ»óµµ¸¦ ÀúÀåÇÒ ¹è¿­
-    private Toggle activatedToggle;         // È°¼ºÈ­µÈ ¸ğµå
-    enum ScreenMode{ Full, Window } ScreenMode screenMode;
+    [Header("í…Œë‘ë¦¬ ìƒ‰ìƒ (Outline Color)")]
+    [SerializeField] private Color normalOutlineColor = Color.gray;       // í‰ì†Œ í…Œë‘ë¦¬ ìƒ‰
+    [SerializeField] private Color selectedOutlineColor = new Color(1f, 0.976f, 0.231f); // ì„ íƒ/í˜¸ë²„ í…Œë‘ë¦¬ ìƒ‰ (ë…¸ë‘)
+
+    [Header("ë””ìŠ¤í”Œë ˆì´ íŒ¨ë„")]
+    [SerializeField] private Toggle toggleFull;
+    [SerializeField] private Toggle toggleWindow;
+    [SerializeField] private TMP_Dropdown resolutionDropdown;
+    [SerializeField] public Button applyButton;
+
+    private Resolution[] resolutions;
+    private Toggle activatedToggle;
+    enum ScreenMode { Full, Window }
+    ScreenMode screenMode;
 
     private bool isPauseOpen = false;
+    private int currentMenuIndex = 0;
 
-    [Header("º¼·ı ½½¶óÀÌ´õ")]
+    [Header("ë³¼ë¥¨ ìŠ¬ë¼ì´ë”")]
     [SerializeField] private Slider sliderMaster;
     [SerializeField] private Slider sliderBGM;
     [SerializeField] private Slider sliderSFX;
 
-
     private void Start()
     {
         closeButton.onClick.AddListener(TogglePausePanel);
+        if (optionButton != null)
+        {
+            optionButton.onClick.AddListener(TogglePausePanel);
+        }
         applyButton.onClick.AddListener(ApplyBtnClick);
 
-        panelPause.anchoredPosition = new Vector2(0, 1530); // ½ÃÀÛ ½Ã ¼û±â±â
+        panelPause.anchoredPosition = new Vector2(0, 1530);
 
-        // ±âº» ¼±ÅÃ: ¼Ò¸® ÅÇ
-        ShowPanel(0);
-        // °¢ ¸Ş´º ¹öÆ°¿¡ Å¬¸¯ ¸®½º³Ê µî·Ï
         for (int i = 0; i < menuButtons.Count; i++)
         {
             int index = i;
             menuButtons[i].onClick.AddListener(() => ShowPanel(index));
+            AddHoverEvents(menuButtons[i], index);
         }
 
-        // º¼·ı ½½¶óÀÌ´õ ¿¬°á
-        sliderMaster.onValueChanged.AddListener((value) =>
-        {
-            AudioManager.Instance?.SetMasterVolume(value);
-        });
+        // ê¸°ë³¸ ì„ íƒ: ì†Œë¦¬ íƒ­ (0ë²ˆ)
+        ShowPanel(0);
 
-        sliderBGM.onValueChanged.AddListener((value) =>
-        {
-            AudioManager.Instance?.SetBGMVolume(value);
-        });
+        sliderMaster.onValueChanged.AddListener((value) => { AudioManager.Instance?.SetMasterVolume(value); });
+        sliderBGM.onValueChanged.AddListener((value) => { AudioManager.Instance?.SetBGMVolume(value); });
+        sliderSFX.onValueChanged.AddListener((value) => { AudioManager.Instance?.SetSFXVolume(value); });
 
-        sliderSFX.onValueChanged.AddListener((value) =>
-        {
-            AudioManager.Instance?.SetSFXVolume(value);
-        });
-
-        // ÃÊ±â ½½¶óÀÌ´õ °ª.. »ç¿îµå ¸Å´ÏÀú¿¡¼­ °ü¸® ÇØ¾ßÇÒ±î¿ä?
         sliderMaster.value = 1f;
         sliderBGM.value = 0.5f;
         sliderSFX.value = 0.5f;
 
-        //È­¸é ÇØ»óµµ ¾ò±â
-        FilterResolutions(); 
+        FilterResolutions();
         SetUpDropdown();
         SetUpToggles();
     }
@@ -86,6 +86,57 @@ public class PauseMenuUI : MonoBehaviour
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             TogglePausePanel();
+        }
+    }
+
+    private void AddHoverEvents(Button btn, int index)
+    {
+        EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>();
+        if (trigger == null) trigger = btn.gameObject.AddComponent<EventTrigger>();
+
+        EventTrigger.Entry entryEnter = new EventTrigger.Entry();
+        entryEnter.eventID = EventTriggerType.PointerEnter;
+        entryEnter.callback.AddListener((data) => { OnButtonHover(index, true); });
+        trigger.triggers.Add(entryEnter);
+
+        EventTrigger.Entry entryExit = new EventTrigger.Entry();
+        entryExit.eventID = EventTriggerType.PointerExit;
+        entryExit.callback.AddListener((data) => { OnButtonHover(index, false); });
+        trigger.triggers.Add(entryExit);
+    }
+
+    private void OnButtonHover(int index, bool isHover)
+    {
+        if (index == currentMenuIndex) return;
+
+        // í˜¸ë²„ ì¤‘ì´ë©´ 'ì„ íƒëœ ìƒ‰ìƒ(Selected)', ì•„ë‹ˆë©´ 'í‰ì†Œ ìƒ‰ìƒ(Normal)' ì ìš©
+        SetButtonVisual(index, isHover);
+    }
+
+    // âœ¨ í•µì‹¬ ìˆ˜ì •: ë²„íŠ¼ ìƒ‰ê³¼ í…Œë‘ë¦¬ ìƒ‰ì„ ê°ê°ì˜ ë³€ìˆ˜ì—ì„œ ê°€ì ¸ì™€ ì ìš©
+    private void SetButtonVisual(int index, bool isSelectedOrHover)
+    {
+        // 1. í…Œë‘ë¦¬(Outline) ìƒ‰ìƒ ì„¤ì •
+        var outline = menuButtons[index].GetComponent<Outline>();
+        if (outline != null)
+        {
+            outline.effectColor = isSelectedOrHover ? selectedOutlineColor : normalOutlineColor;
+        }
+
+        // 2. ë²„íŠ¼ ë‚´ë¶€(Image) ìƒ‰ìƒ ì„¤ì •
+        var image = menuButtons[index].GetComponent<Image>();
+        if (image != null)
+        {
+            image.color = isSelectedOrHover ? selectedButtonColor : normalButtonColor;
+        }
+    }
+
+    private void UpdateAllButtonVisuals(int selectedIndex)
+    {
+        for (int i = 0; i < menuButtons.Count; i++)
+        {
+            // ì„ íƒëœ ì¸ë±ìŠ¤ëŠ” true(Selected ìƒ‰ìƒ), ë‚˜ë¨¸ì§€ëŠ” false(Normal ìƒ‰ìƒ)
+            SetButtonVisual(i, i == selectedIndex);
         }
     }
 
@@ -103,162 +154,66 @@ public class PauseMenuUI : MonoBehaviour
         }
     }
 
-    private void SetActiveButton(int selectedIndex)
-    {
-        Color selectedColor = Color.white; // ¼±ÅÃµÆÀ» ¶§ ±×´ë·Î Èò»ö
-        Color unselectedColor = new Color(1f, 0.976f, 0.231f); // fff93b
-
-        for (int i = 0; i < menuButtons.Count; i++)
-        {
-            var colors = menuButtons[i].colors;
-            if (i == selectedIndex)
-            {
-                colors.normalColor = selectedColor;
-                colors.disabledColor = selectedColor;
-            }
-            else
-            {
-                colors.normalColor = unselectedColor;
-                colors.disabledColor = unselectedColor;
-            }
-            menuButtons[i].colors = colors;
-        }
-    }
-
     public void ShowPanel(int index)
     {
-        if (index < 0 || index >= rightPanels.Count)
-        {
-            Debug.LogWarning("ShowPanel: index out of range");
-            return;
-        }
+        if (index < 0 || index >= rightPanels.Count) return;
 
-        // ¿À¸¥ÂÊ ÆĞ³Î ¸ğµÎ ºñÈ°¼ºÈ­ ÈÄ, ¼±ÅÃµÈ °Í¸¸ È°¼ºÈ­
+        currentMenuIndex = index;
+
         for (int i = 0; i < rightPanels.Count; i++)
         {
             rightPanels[i].SetActive(i == index);
         }
 
-        switch (index)
-        {
-            //Sound
-            case 0:
-                
-                break;
-            //Display
-            case 1:
-                break;
-            //Achievement
-            case 2:
-                
-                break;
-        }
-        SetActiveButton(index);
-
-        //  µğ¹ö±×¿ë
-        Debug.Log("Display ÆĞ³Î È°¼º »óÅÂ: " + rightPanels[1].activeSelf);
-        Debug.Log("Dropdown È°¼º »óÅÂ: " + resolutionDropdown.gameObject.activeSelf);
-        Debug.Log("Dropdown Template È°¼º »óÅÂ: " + resolutionDropdown.template.gameObject.activeSelf);
-        Debug.Log("Dropdown ¿É¼Ç °³¼ö: " + resolutionDropdown.options.Count);
-
+        // ë²„íŠ¼ ìƒ‰ìƒ ì¼ê´„ ì—…ë°ì´íŠ¸
+        UpdateAllButtonVisuals(index);
     }
 
+    // ... (ì´í•˜ ì½”ë“œ ë™ì¼) ...
     public void MoveStartScene()
     {
         TogglePausePanel();
         SceneManager.LoadScene("StartScene");
     }
-    void FilterResolutions()
-    {
-        //  ÇØ»óµµ ÀüºÎ °¡Á®¿À±â
-        resolutions = Screen.resolutions;
 
-        ////  ÇØ»óµµ ÇÊÅÍ¸µ
-        //List<Resolution> filtered = new List<Resolution>();
-
-        //foreach (var r in Screen.resolutions)
-        //{
-        //    float hz = (float)r.refreshRateRatio.value;
-        //    bool is60Hz = Mathf.Abs(hz - 60f) < 0.5f;
-        //    bool is16by9 = (r.width * 9 == r.height * 16);
-        //    bool isLargeEnough = (r.width >= 1280);
-
-        //    if (is60Hz && is16by9 && isLargeEnough)
-        //    {
-        //        filtered.Add(r);
-        //    }
-        //}
-        //resolutions = filtered.ToArray();
-
-        //  µğ¹ö±×¿ë    > ¾Æ Á¦ ¸ğ´ÏÅÍ´Â ÇØ»óµµ 74HZ¶ó ¾ÈµÊ ¾Æ¤¿
-        Debug.Log($"FilterResolutions: {resolutions.Length}°³ ÇÊÅÍ¸µµÊ");
-        foreach (var res in resolutions)
-        {
-            Debug.Log($"{res.width} x {res.height} @ {(float)res.refreshRateRatio.value}Hz");
-        }
-    }
+    void FilterResolutions() { resolutions = Screen.resolutions; }
 
     void SetUpDropdown()
     {
-        resolutionDropdown.ClearOptions(); // ÃÊ±âÈ­
-
+        resolutionDropdown.ClearOptions();
         HashSet<string> options = new HashSet<string>();
-
         int currentResolutionIndex = 0;
         for (int i = 0; i < resolutions.Length; i++)
         {
             string option = resolutions[i].width + " X " + resolutions[i].height;
             options.Add(option);
-
             if (resolutions[i].width == Screen.currentResolution.width &&
                 resolutions[i].height == Screen.currentResolution.height)
-            {
                 currentResolutionIndex = i;
-            }
         }
-
-        resolutionDropdown.AddOptions(new List<string>(options)); // ¼±ÅÃÁö µî·Ï
-        resolutionDropdown.value = currentResolutionIndex; // ÇöÀç ÇØ»óµµ Ç¥½Ã
-        resolutionDropdown.RefreshShownValue(); // °ª °»½Å
-
+        resolutionDropdown.AddOptions(new List<string>(options));
+        resolutionDropdown.value = currentResolutionIndex;
+        resolutionDropdown.RefreshShownValue();
     }
+
     void SetUpToggles()
     {
-        // ±âÁ¸ ¸®½º³Ê Á¦°Å (Áßº¹ ¹æÁö)
         toggleFull.onValueChanged.RemoveAllListeners();
         toggleWindow.onValueChanged.RemoveAllListeners();
-
-        // ÇöÀç ½ÇÁ¦ »óÅÂ ÀĞ±â
         bool isFullScreen = Screen.fullScreen;
 
-        // ÇöÀç È­¸é ¸ğµå »óÅÂ ¹İ¿µ
-        if (isFullScreen)
-        {
-            toggleFull.isOn = true;
-            toggleWindow.isOn = false;
-            activatedToggle = toggleFull;
-            screenMode = ScreenMode.Full;
-        }
-    else
-        {
-            toggleFull.isOn = false;
-            toggleWindow.isOn = true;
-            activatedToggle = toggleWindow;
-            screenMode = ScreenMode.Window;
-        }
+        if (isFullScreen) { toggleFull.isOn = true; toggleWindow.isOn = false; activatedToggle = toggleFull; screenMode = ScreenMode.Full; }
+        else { toggleFull.isOn = false; toggleWindow.isOn = true; activatedToggle = toggleWindow; screenMode = ScreenMode.Window; }
 
-        // ¸®½º³Ê ´Ù½Ã Ãß°¡
         toggleFull.onValueChanged.AddListener(delegate { ToggleChanged(toggleFull); });
         toggleWindow.onValueChanged.AddListener(delegate { ToggleChanged(toggleWindow); });
     }
+
     public void SetResolution()
     {
         int resolutionIndex = resolutionDropdown.value;
         Resolution resolution = resolutions[resolutionIndex];
-
         Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
-
-        Debug.Log(Screen.width + " X " + Screen.height);
     }
 
     void ToggleChanged(Toggle changedToggle)
@@ -266,57 +221,22 @@ public class PauseMenuUI : MonoBehaviour
         if (changedToggle.isOn)
         {
             activatedToggle = changedToggle;
-
-            // ÀüÃ¼ È­¸é ¸ğµå on
-            if (changedToggle == toggleFull)
-            {
-                // Ã¢ ¸ğµå off
-                toggleWindow.isOn = false;
-                screenMode = ScreenMode.Full;
-            }
-
-            // Ã¢ ¸ğµå on
-            else
-            {
-                // ÀüÃ¼ È­¸é ¸ğµå off
-                toggleFull.isOn = false;
-                screenMode = ScreenMode.Window;
-            }
+            if (changedToggle == toggleFull) { toggleWindow.isOn = false; screenMode = ScreenMode.Full; }
+            else { toggleFull.isOn = false; screenMode = ScreenMode.Window; }
         }
-
-        // changedToggleÀ» µÎ ¹ø Å¬¸¯ÇÑ °æ¿ì ÇØÁ¦ ¹æÁöÇÏ±â
-        else
-        {
-            // ÀÌ¹Ì È°¼ºÈ­µÈ Åä±ÛÀ» ´Ù½Ã Å¬¸¯ÇØ¼­ ²ô·Á´Â °æ¿ì, ´Ù½Ã ÄÑ±â
-            if (activatedToggle == changedToggle)
-            {
-                activatedToggle.isOn = true;
-            }
-        }
-
+        else if (activatedToggle == changedToggle) activatedToggle.isOn = true;
         SetScreenMode();
     }
+
     void SetScreenMode()
     {
-        if (screenMode == ScreenMode.Full)
-        {
-            Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
-            Screen.fullScreen = true;
-        }
-        else
-        {
-            Screen.fullScreenMode = FullScreenMode.Windowed;
-            Screen.fullScreen = false;
-        }
+        if (screenMode == ScreenMode.Full) { Screen.fullScreenMode = FullScreenMode.FullScreenWindow; Screen.fullScreen = true; }
+        else { Screen.fullScreenMode = FullScreenMode.Windowed; Screen.fullScreen = false; }
     }
 
     public void ApplyBtnClick()
     {
         Resolution selectedResolution = resolutions[resolutionDropdown.value];
         Screen.SetResolution(selectedResolution.width, selectedResolution.height, Screen.fullScreen);
-        Debug.Log($"ÇØ»óµµ Àû¿ëµÊ: {selectedResolution.width} x {selectedResolution.height}");
     }
-
-
 }
-

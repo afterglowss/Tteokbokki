@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 using TMPro;
 using System.Data;
@@ -13,28 +13,35 @@ public class DateWrapper
 public class GameClock : MonoBehaviour
 {
     public static GameClock Instance { get; private set; }
-    public TextMeshProUGUI clockText; // UI TextMeshPro ¿ä¼Ò ¿¬°á
-    public TextMeshProUGUI dateText;
-    public float realSecondsPerGameMinute = 2f; // Çö½Ç 3ÃÊ = °ÔÀÓ 1ºĞ
 
-    [Header("¿µ¾÷ ½Ã°£")]
+    [Header("UI ì—°ê²°")]
+    public TextMeshProUGUI dateTimeText; // âœ¨ í•˜ë‚˜ë¡œ í•©ì¹œ í…ìŠ¤íŠ¸ ë³€ìˆ˜
+
+    // ê¸°ì¡´ ë³€ìˆ˜ë“¤ì€ í˜¹ì‹œ ëª°ë¼ ë‚¨ê²¨ë‘ê±°ë‚˜ ì£¼ì„ ì²˜ë¦¬ (ì‚­ì œí•´ë„ ë¬´ë°©)
+    // public TextMeshProUGUI clockText; 
+    // public TextMeshProUGUI dateText;
+
+    public float realSecondsPerGameMinute = 2f; // í˜„ì‹¤ 3ì´ˆ = ê²Œì„ 1ë¶„
+
+    [Header("ì˜ì—… ì‹œê°„")]
     public static int openingHour = 12;
     public static int closingHour = 21;
 
     public static bool isPaused = false;
     private bool hasReachedClosingTime = false;
 
-    [Header("ÃÊ±â ³¯Â¥ ¹× ½Ã°£ ¼³Á¤")]
+    [Header("ì´ˆê¸° ë‚ ì§œ ë° ì‹œê°„ ì„¤ì •")]
     public int startYear = 2025;
-    public int startMonth = 1;
-    public int startDay = 1;
+    public int startMonth = 8; // ì´ë¯¸ì§€ì— ë§ì¶° 8ì›”ë¡œ ì˜ˆì‹œ ë³€ê²½
+    public int startDay = 25;  // ì´ë¯¸ì§€ì— ë§ì¶° 25ì¼ë¡œ ì˜ˆì‹œ ë³€ê²½
     public int startHour = 12;
     public int startMinute = 0;
 
     public static DateTime gameTime;
     public DateTime GetCurrentGameTime() => gameTime;
-    // ¸¶Áö¸· ÇÃ·¹ÀÌ ³¯Â¥ ÀúÀå °æ·Î
+
     private const string LastDateFileName = "LastPlayedDate.json";
+
     private void Awake()
     {
         gameTime = new DateTime(startYear, startMonth, startDay, startHour, startMinute, 0);
@@ -46,6 +53,7 @@ public class GameClock : MonoBehaviour
         }
         Instance = this;
     }
+
     void Start()
     {
         UpdateTimeAndDateDisplay();
@@ -65,9 +73,11 @@ public class GameClock : MonoBehaviour
 
         float gameMinutesToAdd = realSecondsElapsed / realSecondsPerGameMinute;
         gameTime = gameTime.AddMinutes(gameMinutesToAdd);
-        clockText.text = gameTime.ToString("HH:mm");
 
-        // ¸¶°¨ ½Ã°£ µµ´Ş °¨Áö
+        // âœ¨ ë§¤ í”„ë ˆì„ ì‹œê°„ ê°±ì‹  ì‹œì—ë„ í†µí•©ëœ í¬ë§· ì‚¬ìš©
+        UpdateDateTimeText();
+
+        // ë§ˆê° ì‹œê°„ ë„ë‹¬ ê°ì§€
         if (!hasReachedClosingTime && gameTime.Hour >= closingHour)
         {
             hasReachedClosingTime = true;
@@ -84,41 +94,44 @@ public class GameClock : MonoBehaviour
     {
         isPaused = false;
     }
+
     public static void SetGameTime(DateTime newTime)
     {
         gameTime = newTime;
     }
+
     public void SetToStartOfDay()
     {
-        // ³¯Â¥´Â À¯ÁöÇÏ°í ½Ã°£¸¸ 12½Ã·Î ¼³Á¤
         DateTime dateOnly = gameTime.Date;
         gameTime = dateOnly.AddHours(openingHour);
-
         hasReachedClosingTime = false;
-
         UpdateTimeAndDateDisplay();
     }
 
     public void SetToEightFiftyNine()
     {
         DateTime dateOnly = gameTime.Date;
-        gameTime = dateOnly.AddHours(20).AddMinutes(59);  // ¿ÀÈÄ 8½Ã 59ºĞ
-
-        Debug.Log($"[DEBUG] °ÔÀÓ ½Ã°£ÀÌ ¿ÀÈÄ 8½Ã 59ºĞÀ¸·Î ¼³Á¤µÊ: {gameTime:yyyy-MM-dd HH:mm}");
-
+        gameTime = dateOnly.AddHours(20).AddMinutes(59);
+        Debug.Log($"[DEBUG] ê²Œì„ ì‹œê°„ì´ ì˜¤í›„ 8ì‹œ 59ë¶„ìœ¼ë¡œ ì„¤ì •ë¨: {gameTime:yyyy-MM-dd HH:mm}");
         UpdateTimeAndDateDisplay();
     }
+
+    // ì™¸ë¶€ì—ì„œ í˜¸ì¶œí•˜ê±°ë‚˜ ë‚ ì§œê°€ í¬ê²Œ ë°”ë€Œì—ˆì„ ë•Œ
     public void UpdateTimeAndDateDisplay()
     {
-        DateTime gameTime = GameClock.gameTime;
-        string[] koreanDays = { "ÀÏ", "¿ù", "È­", "¼ö", "¸ñ", "±İ", "Åä" };
-        string formatted = $"{gameTime:yyyy³â M¿ù dÀÏ} ({koreanDays[(int)gameTime.DayOfWeek]})";
-
-        if (dateText != null)
-            dateText.text = formatted;
-        if (clockText != null)
-            clockText.text = gameTime.ToString("HH:mm");
+        UpdateDateTimeText();
     }
+
+    // âœ¨ í…ìŠ¤íŠ¸ ê°±ì‹  ë¡œì§ì„ í•˜ë‚˜ë¡œ í†µí•©
+    private void UpdateDateTimeText()
+    {
+        if (dateTimeText != null)
+        {
+            // "2025 - 08 - 25 12:00" í˜•ì‹ìœ¼ë¡œ í¬ë§·íŒ…
+            dateTimeText.text = gameTime.ToString("yyyy - MM - dd HH:mm");
+        }
+    }
+
     public static void SaveLastPlayedDate(DateTime date)
     {
         string json = JsonUtility.ToJson(new DateWrapper { dateString = date.ToString("yyyy-MM-dd") });
@@ -141,5 +154,4 @@ public class GameClock : MonoBehaviour
 
         return null;
     }
-
 }

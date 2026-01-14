@@ -1,9 +1,8 @@
-using Newtonsoft.Json;
+ï»¿using Newtonsoft.Json;
 using SaveData;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
 using UnityEngine;
 
 [Serializable]
@@ -12,7 +11,7 @@ public class GameSaveData
     public string gameTime;
     public int playerBalance;
     public Dictionary<string, List<StockEntry>> ingredientStocks;
-    public Dictionary<string, int> playerWok;
+    // public Dictionary<string, int> playerWok; // âœ¨ ì‚­ì œë¨: ì „ì—­ ì› ë°ì´í„° ì—†ìŒ
     public List<List<Dictionary<string, int>>> packagingArea;
     public List<StoveSlotSaveData> stoveStates;
     public int lastReceiptID;
@@ -29,14 +28,14 @@ public class StoveSlotSaveData
     public bool isCooking;
     public bool isCooked;
     public float cookTimeRemaining;
-    public Dictionary<string, int> currentIngredients;
+    public Dictionary<string, int> currentIngredients; // ì¡°ë¦¬ ì¤‘ì¸ ì¬ë£Œ
+    public Dictionary<string, int> pendingIngredients; // âœ¨ ì¶”ê°€ë¨: ë‹´ê³  ìˆëŠ”(ëŒ€ê¸° ì¤‘) ì¬ë£Œ
 }
 
 public class GameSaveManager : MonoBehaviour
 {
     public static GameSaveManager Instance { get; private set; }
     private const string SaveFilePath = "SaveData.json";
-
 
     private void Awake()
     {
@@ -47,6 +46,7 @@ public class GameSaveManager : MonoBehaviour
         }
         Instance = this;
     }
+
     public void SaveGame()
     {
         GameSaveData data = new GameSaveData
@@ -54,11 +54,12 @@ public class GameSaveManager : MonoBehaviour
             gameTime = GameClock.gameTime.ToString("yyyy-MM-dd HH:mm"),
             playerBalance = PlayerWalletManager.Instance.CurrentBalance,
             ingredientStocks = IngredientStockManager.Instance.GetCurrentStockForSave(),
-            playerWok = PlayerWokManager.Instance.GetPlayerIngredients(),
+            // playerWok = PlayerWokManager.Instance.GetPlayerIngredients(), // âœ¨ ì‚­ì œ
             packagingArea = PackagingAreaManager.Instance.GetSlotWiseCookedFoods(),
             stoveStates = new List<StoveSlotSaveData>()
         };
 
+        // í™”êµ¬ ìƒíƒœ ì €ì¥ (Pending í¬í•¨)
         foreach (var slot in StoveManager.Instance.stoves)
         {
             StoveSlotSaveData slotData = new StoveSlotSaveData
@@ -66,7 +67,8 @@ public class GameSaveManager : MonoBehaviour
                 isCooking = slot.IsCooking,
                 isCooked = slot.IsCooked,
                 cookTimeRemaining = slot.GetCookTimeRemaining(),
-                currentIngredients = slot.GetRawIngredientsCopy()
+                currentIngredients = slot.GetRawIngredientsCopy(), // ì¡°ë¦¬ì¤‘ ì¬ë£Œ
+                pendingIngredients = slot.GetPendingIngredientsCopy() // âœ¨ ëŒ€ê¸°ì¤‘ ì¬ë£Œ ì €ì¥
             };
             data.stoveStates.Add(slotData);
         }
@@ -81,7 +83,7 @@ public class GameSaveManager : MonoBehaviour
         string json = JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
         File.WriteAllText(Path.Combine(Application.persistentDataPath, SaveFilePath), json);
 
-        Debug.Log("°ÔÀÓ ÀúÀå ¿Ï·á!");
+        Debug.Log("ê²Œì„ ì €ì¥ ì™„ë£Œ!");
     }
 
     public void LoadGame()
@@ -89,7 +91,7 @@ public class GameSaveManager : MonoBehaviour
         string fullPath = Path.Combine(Application.persistentDataPath, SaveFilePath);
         if (!File.Exists(fullPath))
         {
-            Debug.LogWarning("ÀúÀå ÆÄÀÏÀÌ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+            Debug.LogWarning("ì €ì¥ íŒŒì¼ì´ ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -99,9 +101,10 @@ public class GameSaveManager : MonoBehaviour
         GameClock.SetGameTime(DateTime.Parse(data.gameTime));
         PlayerWalletManager.Instance.SetBalance(data.playerBalance);
         IngredientStockManager.Instance.RestoreStock(data.ingredientStocks);
-        PlayerWokManager.Instance.RestoreWok(data.playerWok);
+        // PlayerWokManager.Instance.RestoreWok(data.playerWok); // âœ¨ ì‚­ì œ
         PackagingAreaManager.Instance.RestoreSlots(data.packagingArea);
 
+        // í™”êµ¬ ë³µì›
         for (int i = 0; i < data.stoveStates.Count; i++)
         {
             StoveManager.Instance.stoves[i].RestoreFromSave(data.stoveStates[i]);
@@ -114,31 +117,13 @@ public class GameSaveManager : MonoBehaviour
         ReceiptSystem.RestoreReceipts(data.missedReceipts, data.successfulReceipts);
         ReceiptLineManager.Instance.RestorePendingReceipts(data.pendingReceipts);
 
-        Debug.Log("°ÔÀÓ ºÒ·¯¿À±â ¿Ï·á!");
+        Debug.Log("ê²Œì„ ë¶ˆëŸ¬ì˜¤ê¸° ì™„ë£Œ!");
     }
 
+    // ... DeleteSaveFile ë“± ë‚˜ë¨¸ì§€ ê¸°ì¡´ ì½”ë“œ ìœ ì§€ ...
     public void DeleteSaveFile()
     {
         string fullPath = Path.Combine(Application.persistentDataPath, "SaveData.json");
-
-        if (File.Exists(fullPath))
-        {
-            File.Delete(fullPath);
-            Debug.Log("[ÀúÀå] ÇÏ·ç Á¾·á·Î ÀÎÇØ ±âÁ¸ SaveData.json »èÁ¦µÊ");
-        }
-        else
-        {
-            Debug.Log("[ÀúÀå] »èÁ¦ÇÒ SaveData.jsonÀÌ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
-        }
-    }
-
-    public void OnSaveButtonPressed()
-    {
-        SaveGame();
-    }
-
-    public void OnLoadButtonPressed()
-    {
-        LoadGame();
+        if (File.Exists(fullPath)) File.Delete(fullPath);
     }
 }

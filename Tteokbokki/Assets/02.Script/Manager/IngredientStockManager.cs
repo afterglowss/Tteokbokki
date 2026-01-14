@@ -22,6 +22,13 @@ public class IngredientStockManager : MonoBehaviour
 {
     public static IngredientStockManager Instance { get; private set; }
 
+    [Header("Debug / Settings")]
+    [Tooltip("체크하면 게임 시작 시 기본 재료(떡, 오뎅, 파, 양배추)를 1회 주문한 상태로 시작합니다.")]
+    public bool startWithBasicIngredients = true; // 여기에 추가된 옵션
+
+    [Tooltip("체크하면 모든 재료를 '구매한 적 있음' 상태로 만듭니다. (재고는 0개 유지 -> 빨간 아웃라인 테스트용)")]
+    public bool debugUnlockAllIngredients = false;
+
     // 현재 재고
     private Dictionary<string, List<StockEntry>> stock = new();
 
@@ -62,7 +69,15 @@ public class IngredientStockManager : MonoBehaviour
 
     void Start()
     {
-        //OrderAllIngredientsOnce();
+        if (debugUnlockAllIngredients)
+        {
+            UnlockAllIngredientsHistory();
+        }
+
+        if (startWithBasicIngredients)
+        {
+            OrderBasicIngredients();
+        }
     }
 
     /// <summary>
@@ -358,5 +373,46 @@ public class IngredientStockManager : MonoBehaviour
         }
 
         UpdateAllStockTexts();
+    }
+
+    private void OrderBasicIngredients()
+    {
+        // 기본 재료 목록 정의
+        string[] basicIngredients = { "떡", "오뎅", "파", "양배추", "군자 소스" }; // 군자 소스도 기본에 포함되면 좋아서 넣었습니다. 필요 없으면 빼세요.
+
+        foreach (string ingredientName in basicIngredients)
+        {
+            // 돈이 없어도 강제로 재고를 채워넣기 위해 내부 로직을 살짝 우회하거나,
+            // OrderIngredient 함수를 무료로 호출할 수 있게 수정해야 합니다.
+            // 여기서는 '무료로 초기 지급' 하는 방식으로 직접 구현합니다.
+
+            if (!IngredientEconomyDatabase.Data.TryGetValue(ingredientName, out var meta)) continue;
+
+            // 재고 추가
+            if (!stock.ContainsKey(ingredientName))
+                stock[ingredientName] = new List<StockEntry>();
+
+            stock[ingredientName].Add(new StockEntry
+            {
+                count = meta.ServingsPerOrder,
+                dayRemaining = 5 // 유통기한 5일
+            });
+
+            // 1회 이상 주문 목록에 등록 (이게 중요! 그래야 나중에 빨간 테두리 뜸)
+            purchasedAtLeastOnce.Add(ingredientName);
+
+            // UI 갱신
+            UpdateStockText(ingredientName);
+        }
+
+        Debug.Log("[System] 기본 재료가 초기 지급되었습니다.");
+    }
+    private void UnlockAllIngredientsHistory()
+    {
+        foreach (var key in IngredientEconomyDatabase.Data.Keys)
+        {
+            purchasedAtLeastOnce.Add(key);
+        }
+        Debug.Log("[Debug] 모든 재료의 '구매 이력'이 해금되었습니다. (재고는 0일 수 있음)");
     }
 }

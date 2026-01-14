@@ -1,30 +1,26 @@
 ﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using System;
 
 public class StoveManager : MonoBehaviour
 {
     public static StoveManager Instance { get; private set; }
     public StoveSlot[] stoves;
     public TextMeshProUGUI resultText;
-    public ReceiptLineManager receiptLineManager;
 
     private StoveSlot selectedSlot;
+
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
     }
+
     private void Start()
     {
         foreach (var slot in stoves)
         {
-            slot.Initialize(this);  // 자기 자신 넘김
+            slot.Initialize(this);
         }
     }
 
@@ -35,144 +31,68 @@ public class StoveManager : MonoBehaviour
             DeselectCurrentSlot();
             return;
         }
-        DeselectCurrentSlot();
+
+        // 기존 슬롯 선택 해제
+        if (selectedSlot != null) selectedSlot.SetSelected(false);
+
+        // 새 슬롯 선택
         selectedSlot = slot;
         selectedSlot.SetSelected(true);
     }
+
     public void DeselectCurrentSlot()
     {
         if (selectedSlot != null)
         {
             selectedSlot.SetSelected(false);
+            // 선택 해제 시 UI도 비워줌
+            PlayerWokManager.Instance.UpdateUI(null);
             selectedSlot = null;
         }
     }
+
     public bool HasSelectedSlot() => selectedSlot != null;
 
-    public void StartCookingOnSelectedSlot(Dictionary<string, int> playerIngredients)
+    // 유틸리티: 현재 이 슬롯이 선택된 상태인지 확인 (StoveSlot에서 호출)
+    public bool IsSelected(StoveSlot slot) => selectedSlot == slot;
+
+    // ✨ [NEW] 선택된 슬롯에 재료 추가
+    public void AddIngredientToSelectedSlot(string ingredientName)
     {
-        if (selectedSlot != null && selectedSlot.IsAvailable)
+        if (selectedSlot != null)
         {
-            selectedSlot.StartCooking(playerIngredients, 5 * 60f, OnStoveFreed);
-            DeselectCurrentSlot();  // 조리 시작 후 선택 해제
+            selectedSlot.AddIngredient(ingredientName);
         }
         else
         {
-            Debug.LogWarning("[StoveManager] 선택된 화구가 없거나 사용 불가능합니다.");
+            Debug.LogWarning("선택된 화구가 없어 재료를 넣을 수 없습니다.");
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "화구를 먼저 선택해주세요!", 1f);
         }
     }
 
-    private void OnStoveFreed(Dictionary<string, int> cookedDish)
+    // ✨ [NEW] 선택된 슬롯 조리 시도
+    public void TryCookSelectedSlot()
     {
-        // 포장대로 전달하는 로직은 Packaging 단계에서 처리
-        if (resultText != null)
+        if (selectedSlot != null)
         {
-            resultText.text = $"조리 완료! 포장대로 이동 가능";
+            selectedSlot.TryStartCooking();
+        }
+        else
+        {
+            Debug.LogWarning("선택된 화구가 없습니다.");
         }
     }
 
-    //public void TryStartCooking(OrderItem order, float cookTimeSeconds = 5 * 60)
-    //{
-    //    var emptySlot = FindEmptyStove();
-    //    if (emptySlot != null)
-    //    {
-    //        emptySlot.StartCooking(order, cookTimeSeconds, OnStoveFreed);
-
-    //        var activeReceipt = ReceiptStateManager.Instance.ActiveReceipt; 
-    //        if (AllMenusHandled(activeReceipt))     //메뉴를 올리는 순간 모든 메뉴가 조리 중이거나 완료 상태일 경우, 영수증 제거하기
-    //        {
-    //            Debug.Log($"[StoveManager] 모든 메뉴 처리됨 → 영수증 제거 시도: {activeReceipt.OrderID}");
-    //            receiptLineManager.RemoveReceiptByOrderID(activeReceipt.OrderID);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        Debug.LogWarning("비어있는 화구가 없습니다.");
-    //    }
-    //}
-    //private StoveSlot FindEmptyStove()
-    //{
-    //    foreach (var slot in stoves)
-    //    {
-    //        if (slot.IsAvailable)
-    //        {
-    //            return slot;
-    //        }
-    //    }
-    //    return null;  // 비어있는 슬롯이 없으면 null 반환
-    //}
-
-    //private void OnStoveFreed(OrderItem completedOrder)
-    //{
-    //    if (resultText != null)
-    //    {
-    //        resultText.text = $"[{completedOrder.ItemID}] {completedOrder.Menu.Name} 조리 완료!";
-    //    }
-
-    //    var activeReceipt = ReceiptStateManager.Instance.ActiveReceipt;
-    //    if (activeReceipt == null) return;
-
-    //    // 특정 메뉴 완료 체크 후 영수증의 전체 완료 여부 체크
-    //    // 여기서 오류가!!!!!!!!!
-    //    //if (AllMenusCompleted(activeReceipt))
-    //    //{
-    //    //    FindObjectOfType<ReceiptLineManager>().RemoveReceiptByOrderID(activeReceipt.OrderID);
-    //    //}
-        
-    //}
-
-    private bool AllMenusCompleted(Receipt receipt) //영수증의 모든 메뉴가 완료되었음을 확인
-    {
-        foreach (var order in receipt.GetOrders())
-        {
-            if (!order.IsCompleted)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    private bool AllMenusHandled(Receipt receipt) //영수증의 모든 메뉴가 조리 중이거나 조리 완료 되었음을 확인
-    {
-        foreach (var order in receipt.GetOrders())
-        {
-            if (!order.IsOnStove && !order.IsCompleted)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static bool AllMenusHandledStatic(Receipt receipt)
-    {
-        foreach (var order in receipt.GetOrders())
-        {
-            if (!order.IsOnStove && !order.IsCompleted)
-                return false;
-        }
-        return true;
-    }
     public void ClearAllStoves()
     {
-        if (stoves == null || stoves.Length == 0)
-        {
-            Debug.LogWarning("[StoveManager] 스토브 슬롯이 없습니다.");
-            return;
-        }
-
         foreach (var slot in stoves)
         {
-            if (slot != null)
-            {
-                slot.ResetSlot();
-            }
+            if (slot != null) slot.ResetSlot();
         }
+    }
 
-        Debug.Log("[StoveManager] 모든 화구 상태 초기화 완료");
+    public StoveSlot GetSelectedSlot()
+    {
+        return selectedSlot;
     }
 }
-
-
