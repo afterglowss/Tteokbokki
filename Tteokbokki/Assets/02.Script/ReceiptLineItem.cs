@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
@@ -23,7 +23,7 @@ public class ReceiptLineItem : MonoBehaviour
 
     private int originalSiblingIndex;
 
-    public int CurrentSlotIndex { get; set; }  // ¸®½ºÆ® »ó ÀÚ½ÅÀÇ À§Ä¡ ÀÎµ¦½º
+    public int CurrentSlotIndex { get; set; }  // ë¦¬ìŠ¤íŠ¸ ìƒ ìì‹ ì˜ ìœ„ì¹˜ ì¸ë±ìŠ¤
 
     public bool IsBeingDragged { get; private set; }
 
@@ -38,22 +38,25 @@ public class ReceiptLineItem : MonoBehaviour
 
     public void ReturnToOriginalPosition(float duration = 0.25f)
     {
-        transform.SetParent(originalParent);
-        transform.SetSiblingIndex(originalSiblingIndex);
-        isTweening = true;
-        GetComponent<RectTransform>().DOAnchorPos(originalPosition, duration).SetEase(Ease.OutCubic)
-            .OnComplete(() => isTweening = false);
+        // ì´ í•¨ìˆ˜ëŠ” ì´ì œ í˜¸ì¶œë˜ì§€ ì•Šê±°ë‚˜, í˜¸ì¶œë˜ì–´ë„ ë§¤ë‹ˆì €ì—ê²Œ ìœ„ì„í•´ì•¼ í•©ë‹ˆë‹¤.
+        // ì—¬ê¸°ì„œëŠ” ì‚­ì œí•˜ê±°ë‚˜ ë¹„ì›Œë‘ëŠ” ê²ƒì„ ì¶”ì²œí•˜ì§€ë§Œ, 
+        // ì™¸ë¶€ í˜¸ì¶œ ì˜ì¡´ì„±ì´ ìˆë‹¤ë©´ ì•„ë˜ì²˜ëŸ¼ ë§¤ë‹ˆì €ë¥¼ ë¶€ë¥´ê²Œ ë³€ê²½í•˜ì„¸ìš”.
+        ReceiptLineManager.Instance.RepositionAll();
     }
 
-    // µå·¡±× ½ÃÀÛ ½Ã È£Ãâ
+    // ë“œë˜ê·¸ ì‹œì‘ ì‹œ í˜¸ì¶œ
     public void OnBeginDrag()
     {
-        if (isTweening) return;  // ÀÌ¹Ì Æ®À©ÀÌ ÁøÇà ÁßÀÌ¸é ¹«½Ã
+        if (isTweening) return;
 
         GetComponent<RectTransform>().DOComplete();
-
         IsBeingDragged = true;
-        CachePosition();
+
+        // CachePosition(); // êµ³ì´ ì¢Œí‘œë¥¼ ê¸°ì–µí•  í•„ìš”ê°€ ì—†ì–´ì§
+
+        // ë“œë˜ê·¸ ì‹œì‘ ì‹œ ë¶€ëª¨ ë³€ê²½ (ë§¨ ì•ìœ¼ë¡œ ê°€ì ¸ì˜¤ê¸° ìœ„í•´)
+        originalParent = transform.parent;
+        // originalSiblingIndex = transform.GetSiblingIndex(); // í•„ìš”í•˜ë‹¤ë©´ ìœ ì§€
     }
     public void OnEndDrag()
     {
@@ -64,13 +67,13 @@ public class ReceiptLineItem : MonoBehaviour
     {
         this.receipt = receipt;
         this.manager = manager;
-        this.receiptPopup = popup;  // ÀÇÁ¸¼º ÁÖÀÔ
-        this.combinedIngredientManager = ingredientManager;  // ÀÇÁ¸¼º ÁÖÀÔ
+        this.receiptPopup = popup;  // ì˜ì¡´ì„± ì£¼ì…
+        this.combinedIngredientManager = ingredientManager;  // ì˜ì¡´ì„± ì£¼ì…
         cookTimeSeconds = cookMinutes * 60f;
-        orderIDText.text = $"ÁÖ¹®¹øÈ£: {receipt.OrderID}";
+        orderIDText.text = $"{receipt.OrderID}";
         orderStartTime = receipt.OrderDateTime;
 
-        CachePosition();    // µå·¡±× ÀÌÀü ÀÚ¸® ±â¾ï
+        CachePosition();    // ë“œë˜ê·¸ ì´ì „ ìë¦¬ ê¸°ì–µ
 
         receiptButton.onClick.AddListener(OnClick);
     }
@@ -81,11 +84,11 @@ public class ReceiptLineItem : MonoBehaviour
 
         TimeSpan elapsed = now - orderStartTime;
 
-        //Debug.Log($"[¿µ¼öÁõ {receipt.OrderID}] °æ°ú ½Ã°£: {elapsed.TotalMinutes:F2}ºĞ / Á¦ÇÑ: {cookTimeSeconds / 60f}ºĞ");
+        //Debug.Log($"[ì˜ìˆ˜ì¦ {receipt.OrderID}] ê²½ê³¼ ì‹œê°„: {elapsed.TotalMinutes:F2}ë¶„ / ì œí•œ: {cookTimeSeconds / 60f}ë¶„");
 
         if (elapsed.TotalMinutes >= cookTimeSeconds / 60f)
         {
-            //Debug.LogWarning($"[¿µ¼öÁõ {receipt.OrderID}] ½Ã°£ÀÌ ÃÊ°úµÇ¾î »èÁ¦µË´Ï´Ù.");
+            //Debug.LogWarning($"[ì˜ìˆ˜ì¦ {receipt.OrderID}] ì‹œê°„ì´ ì´ˆê³¼ë˜ì–´ ì‚­ì œë©ë‹ˆë‹¤.");
             ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
             manager.RemoveReceipt(this);
             return;
@@ -97,7 +100,7 @@ public class ReceiptLineItem : MonoBehaviour
     {
         if (receiptPopup == null || combinedIngredientManager == null)
         {
-            Debug.LogError("ReceiptPopup ¶Ç´Â CombinedIngredientManager°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogError("ReceiptPopup ë˜ëŠ” CombinedIngredientManagerê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -107,9 +110,16 @@ public class ReceiptLineItem : MonoBehaviour
     }
     public Receipt GetReceipt() { return receipt; }
 
-    public Vector3 GetSlotPosition(float spacing)
+    public Vector3 GetSlotPosition()
     {
-        return new Vector3(-CurrentSlotIndex * spacing, 0f, 0f);
+        var mgr = ReceiptLineManager.Instance;
+        int col = CurrentSlotIndex % mgr.gridColumns;
+        int row = CurrentSlotIndex / mgr.gridColumns;
+
+        float x = mgr.startOffset.x + (col * mgr.slotSpacingX);
+        float y = mgr.startOffset.y - (row * mgr.slotSpacingY);
+
+        return new Vector3(x, y, 0f);
     }
     public float GetRemainingTime()
     {
@@ -123,21 +133,21 @@ public class ReceiptLineItem : MonoBehaviour
     }
     public void OverrideRemainingTime(float remaining)
     {
-        // 1. À¯È¿¼º °Ë»ç
+        // 1. ìœ íš¨ì„± ê²€ì‚¬
         if (cookTimeSeconds <= 0f)
         {
-            Debug.LogWarning("cookTimeSeconds°¡ ¾ÆÁ÷ ¼³Á¤µÇÁö ¾Ê¾Ò°Å³ª 0ÀÔ´Ï´Ù.");
+            Debug.LogWarning("cookTimeSecondsê°€ ì•„ì§ ì„¤ì •ë˜ì§€ ì•Šì•˜ê±°ë‚˜ 0ì…ë‹ˆë‹¤.");
             return;
         }
 
-        // 2. ³²Àº ½Ã°£ °ª Å¬·¥ÇÁ
+        // 2. ë‚¨ì€ ì‹œê°„ ê°’ í´ë¨í”„
         float clampedRemaining = Mathf.Clamp(remaining, 0f, cookTimeSeconds);
 
-        // 3. ½ÃÀÛ ½Ã°£ ¿ª»êÇÏ¿© ¼³Á¤
+        // 3. ì‹œì‘ ì‹œê°„ ì—­ì‚°í•˜ì—¬ ì„¤ì •
         orderStartTime = GameClock.gameTime.AddSeconds(-(cookTimeSeconds - clampedRemaining));
 
-        // 4. µğ¹ö±ë ·Î±× (¼±ÅÃ)
-        // Debug.Log($"Á¦ÇÑ½Ã°£: {cookTimeSeconds}, ³²Àº½Ã°£: {clampedRemaining}, ¿ª»êµÈ ½ÃÀÛ½Ã°£: {orderStartTime}");
+        // 4. ë””ë²„ê¹… ë¡œê·¸ (ì„ íƒ)
+        // Debug.Log($"ì œí•œì‹œê°„: {cookTimeSeconds}, ë‚¨ì€ì‹œê°„: {clampedRemaining}, ì—­ì‚°ëœ ì‹œì‘ì‹œê°„: {orderStartTime}");
     }
 
 }

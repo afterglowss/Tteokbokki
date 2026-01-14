@@ -35,6 +35,13 @@ public class ReceiptLineManager : MonoBehaviour
     public int maxSlots = 15;
     private List<ReceiptLineItem> receiptSlots = new();  // 고정된 순서 유지
     public List<ReceiptLineItem> GetReceiptSlots() => new(receiptSlots); // 슬롯 리스트 반환
+
+    [Header("Grid Layout Settings")]
+    public int gridColumns = 5;      // 한 줄에 몇 개의 영수증을 둘 것인가?
+    public float slotSpacingX = 160f; // 가로 간격 (기존 slotSpacing 대체)
+    public float slotSpacingY = 200f; // 세로 간격
+    public Vector2 startOffset = new Vector2(50f, -50f); // 시작 위치 (왼쪽 위 여백)
+
     public void ClearAllReceipts()
     {
         foreach (var item in receiptSlots)
@@ -151,30 +158,39 @@ public class ReceiptLineManager : MonoBehaviour
         pendingCountText.text = count > 0 ? $"대기 중: {count}건" : "";
     }
 
-    private void RepositionAll()
+    public Vector3 GetGridPosition(int index)
+    {
+        int col = index % gridColumns;
+        int row = index / gridColumns;
+
+        float xPos = startOffset.x + (col * slotSpacingX);
+        float yPos = startOffset.y - (row * slotSpacingY);
+
+        return new Vector3(xPos, yPos, 0f);
+    }
+
+    public void RepositionAll()
     {
         int count = receiptSlots.Count;
-
-        RectTransform rectTransform = GetComponent<RectTransform>();
-
-        // 시작 기준점을 오른쪽 끝으로 이동시키기 위한 x 오프셋
-        float offsetX = rectTransform.rect.width;
 
         for (int i = 0; i < count; i++)
         {
             var item = receiptSlots[i];
             if (item == null || item.gameObject == null) continue;
 
-            if (item.IsBeingDragged || DOTween.IsTweening(item.GetComponent<RectTransform>()))
-                continue;
-
-            RectTransform rt = item.GetComponent<RectTransform>();
-
-            Vector3 targetPosition = new Vector3(-i * slotSpacing + offsetX, rectTransform.position.y, 0f);
+            // 인덱스 갱신은 무조건 수행
             item.CurrentSlotIndex = i;
 
+            // 드래그 중인 아이템은 물리적 이동(Tween)에서 제외
+            if (item.IsBeingDragged) continue;
+
+            RectTransform rt = item.GetComponent<RectTransform>();
+            Vector3 targetPosition = GetGridPosition(i); // 이전 답변에서 만든 함수
+
+            // ✨ 핵심: 현재 진행 중인 트윈이 있다면 즉시 중단하고(Kill) 새로운 목적지로 보냄
+            // 이렇게 해야 "이전 위치로 가려던 관성"이 사라지고 "최신 위치"로 즉시 턴합니다.
+            rt.DOKill();
             rt.DOAnchorPos(targetPosition, 0.3f).SetEase(Ease.OutCubic);
-            //item.transform.localPosition = targetPosition;
         }
     }
 

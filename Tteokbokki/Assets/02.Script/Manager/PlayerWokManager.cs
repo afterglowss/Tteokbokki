@@ -9,11 +9,14 @@ public class PlayerWokManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
         Instance = this;
     }
 
-    // ✨ [변경] 조리 버튼 클릭 시 -> StoveManager에게 위임
     public void OnCookButtonPressed()
     {
         if (!StoveManager.Instance.HasSelectedSlot())
@@ -23,22 +26,22 @@ public class PlayerWokManager : MonoBehaviour
             return;
         }
 
-        // 선택된 화구의 조리를 시도함
         StoveManager.Instance.TryCookSelectedSlot();
     }
 
-    // ✨ [변경] UI 업데이트 전용 함수 (데이터는 StoveSlot에서 받음)
-    public void UpdateUI(Dictionary<string, int> ingredients)
+    // ✨ [수정] 제목(statusTitle)을 받을 수 있도록 매개변수 추가 (기본값 설정)
+    public void UpdateUI(Dictionary<string, int> ingredients, string statusTitle = "현재 담은 재료")
     {
         if (playerIngredientsText == null) return;
 
         if (ingredients == null || ingredients.Count == 0)
         {
-            playerIngredientsText.text = "선택된 화구: 비어있음";
+            // 재료가 없을 때도 제목은 반영
+            playerIngredientsText.text = $"{statusTitle}:\n없음";
             return;
         }
 
-        string result = "현재 담은 재료:\n";
+        string result = $"{statusTitle}:\n";
         foreach (var item in ingredients)
         {
             result += $"{item.Key} x{item.Value}\n";
@@ -46,13 +49,11 @@ public class PlayerWokManager : MonoBehaviour
         playerIngredientsText.text = result;
     }
 
-    // ✨ [변경] 검증 로직만 제공 (StoveSlot이 호출해서 사용)
     public bool CheckRecipe(Dictionary<string, int> pendingIngredients)
     {
         return ContainsBaseIngredients(pendingIngredients);
     }
 
-    // 기존 검증 로직 유지
     private bool ContainsBaseIngredients(Dictionary<string, int> wok)
     {
         if (wok == null) return false;
@@ -69,6 +70,4 @@ public class PlayerWokManager : MonoBehaviour
         }
         return true;
     }
-
-    // 기존의 AddIngredient, ClearWok, GetPlayerIngredients 등은 모두 삭제됨
 }

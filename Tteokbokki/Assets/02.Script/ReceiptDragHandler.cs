@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -24,7 +24,7 @@ public class ReceiptDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
 
         var receipt = GetComponent<ReceiptLineItem>();
         receipt?.OnBeginDrag();
-        // ���� ��ġ�� �θ� ����
+        // 원래 위치와 부모 저장
         originalPosition = rectTransform.anchoredPosition;
         originalParent = transform.parent;
 
@@ -55,21 +55,33 @@ public class ReceiptDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
                 if (slot != null && slot.HasAnyFood())
                 {
                     var receiptItem = GetComponent<ReceiptLineItem>();
-                    slot.HandleReceiptDrop(receiptItem);  // ���ο��� manager.RemoveReceipt() ȣ��
+                    slot.HandleReceiptDrop(receiptItem);  // 내부에서 manager.RemoveReceipt() 호출
                     return;
                 }
             }
         }
 
-        // ��� ���� �� �ٽ� ����ġ ���� (����Ʈ ����!)
+        // 드롭 실패 → 다시 원위치 복귀 (리스트 유지!)
         //transform.SetParent(originalParent);
         //rectTransform.DOAnchorPos(originalPosition, 0.25f).SetEase(Ease.OutCubic);
 
         var receipt = GetComponent<ReceiptLineItem>();
-        receipt?.OnEndDrag();
+        // 1. 드래그 상태 해제
         if (receipt != null)
         {
-            receipt.ReturnToOriginalPosition();  // ���� ��ġ�� ����
+            receipt.OnEndDrag(); // IsBeingDragged = false 설정
         }
+
+        // 2. 부모를 원래 리스트(ScrollContent 등)로 복귀
+        // (드래그 중에 Canvas 최상단 등으로 옮겼었다면 여기서 원래 부모로 되돌려놔야 함)
+        if (originalParent != null)
+        {
+            transform.SetParent(originalParent);
+        }
+
+        // 3. ✨ 스스로 움직이지 말고, 매니저에게 전체 정렬 명령!
+        // 이렇게 하면 방금 드롭된 녀석도 RepositionAll 로직에 의해
+        // 정확한 Grid 위치(targetPosition)로 부드럽게 이동합니다.
+        ReceiptLineManager.Instance.RepositionAll();
     }
 }
