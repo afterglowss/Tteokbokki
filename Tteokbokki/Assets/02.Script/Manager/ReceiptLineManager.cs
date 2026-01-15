@@ -232,7 +232,17 @@ public class ReceiptLineManager : MonoBehaviour
         return result;
     }
 
+    // [NEW] 총 성공 금액 반환 함수 (UI가 리스트를 몰라도 됨)
+    public int GetTotalSuccessfulAmount()
+    {
+        return successfulReceipts.Sum(r => r.GetTotalPrice());
+    }
 
+    // [NEW] 총 실패(손실) 금액 반환 함수
+    public int GetTotalMissedAmount()
+    {
+        return missedReceipts.Sum(r => r.GetTotalPrice());
+    }
 
     public void RestoreMissed(List<Receipt> list)
     {
