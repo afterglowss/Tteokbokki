@@ -345,8 +345,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1689289668}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &266633302
@@ -447,6 +446,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 220333315201811024, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 707293374723320919, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 707293374723320919, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 707293374723320919, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
+      propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 995616754821393620, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
@@ -597,6 +608,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4288904881917158978, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4539402349045091411, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -744,6 +759,10 @@ PrefabInstance:
     - target: {fileID: 6890132058421122528, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7861640766807775410, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.0000076293945
       objectReference: {fileID: 0}
     - target: {fileID: 8424788001650049883, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1027,7 +1046,7 @@ MonoBehaviour:
   continueButton: {fileID: 1036975691}
   settingButton: {fileID: 906581105}
   exitButton: {fileID: 1813286350}
-  pauseMenuUI: {fileID: 0}
+  pauseMenuUI: {fileID: 1125764339}
   continueDateText: {fileID: 2105282633}
 --- !u!4 &531636862
 Transform:
@@ -1529,6 +1548,17 @@ MonoBehaviour:
   m_EffectColor: {r: 0.52156866, g: 0.45098042, b: 0.40784317, a: 1}
   m_EffectDistance: {x: 5, y: 5}
   m_UseGraphicAlpha: 1
+--- !u!114 &1125764339 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7894510869662648781, guid: c840fa88bc6d81c448de8406c559d511, type: 3}
+  m_PrefabInstance: {fileID: 289245464}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a1d13e6470c1dd49b053679cd16c6c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1227114880
 GameObject:
   m_ObjectHideFlags: 0
@@ -1776,7 +1806,7 @@ RectTransform:
   - {fileID: 2134165823}
   - {fileID: 289245465}
   - {fileID: 1227114881}
-  m_Father: {fileID: 266633301}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1812,10 +1842,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -1832,8 +1862,8 @@ Canvas:
   m_GameObject: {fileID: 1689289667}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_RenderMode: 1
+  m_Camera: {fileID: 266633300}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -2340,5 +2370,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 266633301}
+  - {fileID: 1689289668}
   - {fileID: 438352304}
   - {fileID: 531636862}
