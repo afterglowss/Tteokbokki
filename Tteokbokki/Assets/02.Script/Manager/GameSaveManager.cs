@@ -11,7 +11,7 @@ public class GameSaveData
     public string gameTime;
     public int playerBalance;
     public Dictionary<string, List<StockEntry>> ingredientStocks;
-    // public Dictionary<string, int> playerWok; // ✨ 삭제됨: 전역 웍 데이터 없음
+    public List<string> unlockedIngredients;
     public List<List<Dictionary<string, int>>> packagingArea;
     public List<StoveSlotSaveData> stoveStates;
     public int lastReceiptID;
@@ -54,7 +54,7 @@ public class GameSaveManager : MonoBehaviour
             gameTime = GameClock.gameTime.ToString("yyyy-MM-dd HH:mm"),
             playerBalance = PlayerWalletManager.Instance.CurrentBalance,
             ingredientStocks = IngredientStockManager.Instance.GetCurrentStockForSave(),
-            // playerWok = PlayerWokManager.Instance.GetPlayerIngredients(), // ✨ 삭제
+            unlockedIngredients = IngredientStockManager.Instance.GetPurchasedHistoryForSave(),
             packagingArea = PackagingAreaManager.Instance.GetSlotWiseCookedFoods(),
             stoveStates = new List<StoveSlotSaveData>()
         };
@@ -100,8 +100,10 @@ public class GameSaveManager : MonoBehaviour
 
         GameClock.SetGameTime(DateTime.Parse(data.gameTime));
         PlayerWalletManager.Instance.SetBalance(data.playerBalance);
+        // ✨ [NEW] 재고 복원 전에 해금 목록을 먼저 복원 (중요: 순서)
+        // 그래야 재고가 0인 재료도 버튼을 생성할 수 있음
+        IngredientStockManager.Instance.RestorePurchasedHistory(data.unlockedIngredients);
         IngredientStockManager.Instance.RestoreStock(data.ingredientStocks);
-        // PlayerWokManager.Instance.RestoreWok(data.playerWok); // ✨ 삭제
         PackagingAreaManager.Instance.RestoreSlots(data.packagingArea);
 
         // 화구 복원

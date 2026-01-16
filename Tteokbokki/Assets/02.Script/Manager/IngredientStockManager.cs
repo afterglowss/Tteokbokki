@@ -25,6 +25,7 @@ public class IngredientStockManager : MonoBehaviour
 
     [Header("UI Generation Settings")]
     public GameObject ingredientButtonPrefab;
+    public GameObject sauceButtonPrefab;
     public Transform ingredientGridParent; // ✨ 일반 재료용 Grid (위쪽 선반)
     public Transform sauceGridParent;      // ✨ 소스용 Grid (아래쪽 선반)
     public bool autoGenerateButtons = true;
@@ -62,26 +63,22 @@ public class IngredientStockManager : MonoBehaviour
 
     void Start()
     {
+        if (debugUnlockAllIngredients) UnlockAllIngredientsHistory();
+        if (startWithBasicIngredients) OrderBasicIngredients();
+
         // ✨ 자동 생성 옵션이 켜져있다면 여기서 버튼을 쫙 만듭니다.
         if (autoGenerateButtons)
         {
             GenerateIngredientButtons();
         }
-
-        if (debugUnlockAllIngredients) UnlockAllIngredientsHistory();
-        if (startWithBasicIngredients) OrderBasicIngredients();
     }
 
-    // ✨ [핵심] 조건에 맞춰 버튼을 생성하고 분류하는 함수
     public void GenerateIngredientButtons()
     {
-        // 1. 기존 버튼들 싹 지우기 (일반 재료 & 소스)
         ClearGrid(ingredientGridParent);
         ClearGrid(sauceGridParent);
-
         registeredButtons.Clear();
 
-        // 2. 스프라이트 검색을 빠르게 하기 위해 딕셔너리로 변환
         Dictionary<string, Sprite> spriteMap = new Dictionary<string, Sprite>();
         foreach (var data in kitchenSprites)
         {
@@ -89,33 +86,31 @@ public class IngredientStockManager : MonoBehaviour
                 spriteMap.Add(data.ingredientName, data.kitchenButtonSprite);
         }
 
-        // 3. DB 순서대로 생성 시도
         foreach (var ingredientName in IngredientEconomyDatabase.Data.Keys)
         {
-            // [조건 1] 해금 여부 확인 (구매 내역 없음 & 기본 재료 아님 -> 생성 X)
-            // (기본 재료는 구매 내역 없어도 보여야 함, OrderBasicIngredients에서 처리되지만 안전하게)
-            if (!purchasedAtLeastOnce.Contains(ingredientName))
-            {
-                continue;
-            }
+            // 해금 안 됐으면 패스
+            if (!purchasedAtLeastOnce.Contains(ingredientName)) continue;
 
-            // [조건 2] 소스인지 확인하여 부모 결정
+            // 소스 여부 판별
             bool isSauce = ingredientName.Contains("소스");
+
+            // ✨ [핵심 수정] 소스 여부에 따라 부모와 프리팹을 다르게 설정
             Transform targetParent = isSauce ? sauceGridParent : ingredientGridParent;
+            GameObject prefabToUse = isSauce ? sauceButtonPrefab : ingredientButtonPrefab;
 
-            if (targetParent == null) continue;
+            // 안전장치: 소스 프리팹을 연결 안 했다면 그냥 일반 프리팹 사용
+            if (isSauce && prefabToUse == null) prefabToUse = ingredientButtonPrefab;
 
-            // 4. 생성
-            GameObject obj = Instantiate(ingredientButtonPrefab, targetParent);
+            if (targetParent == null || prefabToUse == null) continue;
+
+            // 생성
+            GameObject obj = Instantiate(prefabToUse, targetParent);
             IngredientButton btn = obj.GetComponent<IngredientButton>();
 
             if (btn != null)
             {
-                // 스프라이트 찾기
                 Sprite icon = null;
                 if (spriteMap.TryGetValue(ingredientName, out Sprite s)) icon = s;
-
-                // Setup 호출
                 btn.Setup(ingredientName, icon);
             }
         }
@@ -423,14 +418,38 @@ public class IngredientStockManager : MonoBehaviour
         {
             stock[pair.Key] = pair.Value.Select(e => new StockEntry { count = e.count, dayRemaining = e.dayRemaining }).ToList();
         }
-        // 로드된 데이터에는 구매 이력이 포함되어있지 않을 수 있음(별도 저장이 아니라면).
-        // 만약 구매 이력도 저장 대상이라면 로드해야 하지만, 
-        // 일단 재고가 있는 아이템은 구매한 것으로 간주하여 복구하는 로직 추가
+
+        // 안전장치: 혹시 해금 목록 저장이 누락되었더라도, 현재 재고가 있다면 해금 처리
         foreach (var key in stock.Keys)
         {
             if (stock[key].Count > 0) purchasedAtLeastOnce.Add(key);
         }
+
+        // ✨ [중요] 로드 후에는 해금 목록(`purchasedAtLeastOnce`)이 갱신되었으므로
+        // 주방의 버튼들도 다시 생성해서 보여줘야 함 (재고 0개인 해금 재료 포함)
+        if (autoGenerateButtons)
+        {
+            GenerateIngredientButtons();
+        }
+
         UpdateAllStockTexts();
+    }
+
+    public List<string> GetPurchasedHistoryForSave()
+    {
+        return new List<string>(purchasedAtLeastOnce);
+    }
+
+    // ✨ [NEW] 로드용: 해금된 재료 목록 복원
+    public void RestorePurchasedHistory(List<string> savedHistory)
+    {
+        if (savedHistory == null) return;
+
+        purchasedAtLeastOnce.Clear();
+        foreach (var name in savedHistory)
+        {
+            purchasedAtLeastOnce.Add(name);
+        }
     }
 
     private void OrderBasicIngredients()
