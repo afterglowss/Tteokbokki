@@ -1,26 +1,65 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class IngredientButton : MonoBehaviour
 {
-    // public PlayerWokManager playerWokManager; // 이제 필요 없음 (StoveManager 싱글톤 사용)
+    [Header("Data")]
+    public string ingredientName;
+
+    [Header("UI References")]
+    public TextMeshProUGUI nameText;
+    public TextMeshProUGUI stockText;
+    public Image iconImage; // ✨ [NEW] 재료 이미지를 표시할 Image 컴포넌트
+
+    private void Start()
+    {
+        IngredientStockManager.Instance.RegisterIngredientButton(this);
+        IngredientStockManager.Instance.UpdateStockText(ingredientName);
+    }
+
+    public void UpdateStockDisplay(string text)
+    {
+        if (stockText != null) stockText.text = text;
+    }
 
     public void OnButtonClick()
     {
-        string ingredientName = this.name;
+        if (string.IsNullOrEmpty(ingredientName)) return;
 
-        // 1. 재고 확인 및 차감
         bool success = IngredientStockManager.Instance.UseIngredient(ingredientName);
 
         if (success)
         {
-            // ✨ [변경] StoveManager를 통해 현재 선택된 화구에 추가
             StoveManager.Instance.AddIngredientToSelectedSlot(ingredientName);
         }
         else
         {
             TooltipManager.ShowFollowMouse(TooltipType.UI, $"{ingredientName} 재고가 부족합니다!", 1f);
-            Debug.LogWarning($"'{ingredientName}' 재고 부족 - 추가 실패");
         }
+    }
+
+    // ✨ [수정] 외부에서 이미지까지 받아서 세팅
+    public void Setup(string name, Sprite sprite)
+    {
+        ingredientName = name;
+
+        if (nameText != null) nameText.text = name;
+
+        if (iconImage != null)
+        {
+            if (sprite != null)
+            {
+                iconImage.sprite = sprite;
+                iconImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                // 이미지가 없으면 텍스트만 보여주기 위해 끔 (선택사항)
+                iconImage.gameObject.SetActive(false);
+            }
+        }
+
+        gameObject.name = $"{name}_Button";
     }
 }

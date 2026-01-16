@@ -12,6 +12,12 @@ public class EndOfDayUIHandler : MonoBehaviour
     [SerializeField] private float fadeDuration = 0.5f;
     [Range(0f, 1f)][SerializeField] private float curtainMaxAlpha = 0.7f; // 커튼의 최대 불투명도
 
+    [Header("Shutter Animation")]
+    [SerializeField] private RectTransform shutterRect; // 셔터 이미지 (반드시 Anchor가 화면 꽉 차게 설정)
+    [SerializeField] private float shutterMoveDuration = 0.6f; // 셔터 이동 시간
+    [SerializeField] private float shutterStayDelay = 0.5f;    // 셔터가 내려와서 머무는 시간
+    private float screenHeight; // 화면 높이 계산용
+
     [Header("Animation References")]
     [SerializeField] private RectTransform mainWindowRect; // 창 전체의 RectTransform (배경 포함)
     [SerializeField] private Image[] macDecorationButtons; // 빨, 노, 초 장식 이미지들 (없으면 비워도 됨)
@@ -52,21 +58,46 @@ public class EndOfDayUIHandler : MonoBehaviour
     private bool isTaxPaid = false;
     private bool isUpdating = false;
 
+    private void Awake()
+    {
+        if (blackCurtainImage != null) blackCurtainImage.gameObject.SetActive(false);
+        if (shutterRect != null) shutterRect.gameObject.SetActive(false);
+    }
+
     // ... Start 함수 기존 유지 ...
     private void Start()
     {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas != null)
+        {
+            screenHeight = canvas.GetComponent<RectTransform>().rect.height;
+        }
+        else
+        {
+            screenHeight = 1920f; // 기본값 (FHD 기준)
+        }
         buttonPayTaxAndNext.onClick.AddListener(OnPayTaxAndNextClicked);
-        buttonOrderAndNext.onClick.AddListener(OnOrderAndNextClicked);
+        //buttonOrderAndNext.onClick.AddListener(OnOrderAndNextClicked);
+
+        // ✨ [수정] 상점 UI의 내부 버튼 이벤트에 "다음 단계로 이동" 기능을 연결
+        if (IngredientShop != null)
+        {
+            // 상점에서 "주문하기" 또는 "넘어가기"를 누르면 OnOrderAndNextClicked가 실행됨
+            IngredientShop.OnShopProcessFinished.AddListener(OnOrderAndNextClicked);
+        }
+        // 혹시 모르니 기존 외부 버튼도 유지
+        if (buttonOrderAndNext != null)
+        {
+            buttonOrderAndNext.onClick.AddListener(OnOrderAndNextClicked);
+        }
+
         buttonFinalClose.onClick.AddListener(OnFinalCloseClicked);
 
         checkAllToggle.onValueChanged.AddListener(OnToggleAllChanged);
         checkReciptToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
         checkTaxToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
         checkIngredientToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
-        if (blackCurtainImage != null)
-        {
-            blackCurtainImage.gameObject.SetActive(false);
-        }
+        
     }
 
     private void OnEnable()
@@ -79,6 +110,7 @@ public class EndOfDayUIHandler : MonoBehaviour
         {
             // 1. 오브젝트를 먼저 켭니다 (Raycast를 막기 위해)
             blackCurtainImage.gameObject.SetActive(true);
+            Debug.Log("검은 천막 활성화");
 
             // 2. 투명하게 초기화 (알파 0)
             Color c = blackCurtainImage.color;
@@ -147,8 +179,8 @@ public class EndOfDayUIHandler : MonoBehaviour
             // ✨ 숫자 카운팅 연출 (성공 금액)
             if (textSuccessAmount != null)
             {
-                if (animate) AnimateMoneyText(textSuccessAmount, 0, successTotal, "총 성공 금액", "green", "+");
-                else textSuccessAmount.text = $"총 성공 금액: <color=green>+{successTotal:N0}원</color>";
+                if (animate) AnimateMoneyText(textSuccessAmount, 0, successTotal, "총 성공 금액", "#008000", "+");
+                else textSuccessAmount.text = $"총 성공 금액: <color=#008000>+{successTotal:N0}원</color>";
             }
 
             // ✨ 숫자 카운팅 연출 (실패 금액)
@@ -173,12 +205,12 @@ public class EndOfDayUIHandler : MonoBehaviour
             // 순수익 카운팅 (0 -> netIncome)
             DOVirtual.Float(0, netIncome, 1.5f, (value) =>
             {
-                textNetIncome.text = $"순수익: <color=green>+{(int)value:N0}원</color>";
+                textNetIncome.text = $"순수익: <color=#008000>+{(int)value:N0}원</color>";
             }).SetEase(Ease.OutCubic).SetDelay(0.5f); // 창 뜨고 0.5초 뒤 시작
         }
         else
         {
-            textNetIncome.text = $"순수익: <color=green>+{netIncome:N0}원</color>";
+            textNetIncome.text = $"순수익: <color=#008000>+{netIncome:N0}원</color>";
         }
 
 
@@ -248,34 +280,74 @@ public class EndOfDayUIHandler : MonoBehaviour
             return;
         }
 
-        Debug.Log("[마감] 영업 종료. 연출 후 다음 날로 넘어갑니다.");
-
-        // 중복 클릭 방지
+        Debug.Log("[마감] 영업 종료. 셔터 연출 시작");
         buttonFinalClose.interactable = false;
 
-        // 퇴장 연출 시퀀스
-        Sequence closeSeq = DOTween.Sequence();
+        // ✨ [중요] 게임 시간이 멈춰있을 수 있으므로 시퀀스도 Unscaled Time을 쓰도록 설정
+        Sequence closeSeq = DOTween.Sequence().SetUpdate(true);
 
-        // 1. 창이 작아지며 사라짐 (InBack 이징으로 빨려들어가듯이)
+        // --- 1. 셔터 내리기 준비 ---
+        if (shutterRect != null)
+        {
+            shutterRect.DOKill();
+            shutterRect.gameObject.SetActive(true);
+            shutterRect.SetAsLastSibling();
+
+            Image shutterImg = shutterRect.GetComponent<Image>();
+            if (shutterImg != null)
+            {
+                Color c = shutterImg.color;
+                shutterImg.color = new Color(c.r, c.g, c.b, 1f);
+            }
+
+            // 높이 재계산 (화면 크기가 바뀔 수 있으므로 여기서 계산 추천)
+            float height = shutterRect.rect.height;
+            if (height == 0) height = 1920f; // 안전장치
+
+            // 시작 위치: 화면 위쪽 (화면 높이만큼 위로)
+            shutterRect.anchoredPosition = new Vector2(0, height);
+
+            // 셔터 내려오기 (0,0 으로)
+            // ✨ .SetUpdate(true)는 위에서 Sequence에 걸었으므로 자식 트윈에도 적용됨
+            closeSeq.Append(shutterRect.DOAnchorPos(Vector2.zero, shutterMoveDuration).SetEase(Ease.OutBounce));
+        }
+
+        // --- 2. 셔터 내려오는 동안 뒤쪽 정리 ---
         if (mainWindowRect != null)
         {
-            closeSeq.Append(mainWindowRect.DOScale(0f, windowPopDuration * 0.8f).SetEase(Ease.InBack));
+            closeSeq.Join(mainWindowRect.DOScale(0f, 0.3f));
         }
-
-        // ✨ [수정] 페이드 아웃 로직
         if (blackCurtainImage != null)
         {
-            closeSeq.Join(blackCurtainImage.DOFade(0f, fadeDuration).SetEase(Ease.OutQuad));
+            closeSeq.Join(blackCurtainImage.DOFade(0f, 0.3f));
         }
 
-        // ✨ [중요] 연출이 다 끝나면(OnComplete) 그제서야 커튼을 끄고 다음날로 넘어감
+        // --- 3. 다음 날 로직 실행 ---
+        closeSeq.AppendCallback(() =>
+        {
+            GameManager.Instance.StartOfDay();
+        });
+
+        // --- 4. 대기 후 셔터 올리기 ---
+        closeSeq.AppendInterval(shutterStayDelay);
+
+        if (shutterRect != null)
+        {
+            // 다시 화면 위로 (height 만큼)
+            // 안전하게 다시 계산하거나 저장된 height 사용
+            float height = shutterRect.rect.height;
+            closeSeq.Append(shutterRect.DOAnchorPos(new Vector2(0, height), shutterMoveDuration).SetEase(Ease.InQuad));
+        }
+
+        // --- 5. 종료 및 비활성화 ---
         closeSeq.OnComplete(() =>
         {
-            if (blackCurtainImage != null)
-                blackCurtainImage.gameObject.SetActive(false); // 여기서 끕니다!
+            if (blackCurtainImage != null) blackCurtainImage.gameObject.SetActive(false);
+            if (shutterRect != null) shutterRect.gameObject.SetActive(false);
 
             gameObject.SetActive(false);
-            GameManager.Instance.StartOfDay();
+
+            GameManager.Instance.StartDayGameplay();
         });
     }
     private void OnPayTaxAndNextClicked()

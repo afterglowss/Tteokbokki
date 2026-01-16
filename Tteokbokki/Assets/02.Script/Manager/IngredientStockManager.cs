@@ -3,11 +3,12 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
+// ✨ [NEW] 주방용 버튼 이미지를 Inspector에서 연결하기 위한 데이터 구조
 [System.Serializable]
-public class IngredientStockEntry
+public struct IngredientVisualData
 {
     public string ingredientName;
-    public TextMeshProUGUI textUI;
+    public Sprite kitchenButtonSprite; // 상점 이미지와 다른, 주방용 이미지
 }
 
 [System.Serializable]
@@ -22,31 +23,31 @@ public class IngredientStockManager : MonoBehaviour
 {
     public static IngredientStockManager Instance { get; private set; }
 
-    [Header("Debug / Settings")]
-    [Tooltip("체크하면 게임 시작 시 기본 재료(떡, 오뎅, 파, 양배추)를 1회 주문한 상태로 시작합니다.")]
-    public bool startWithBasicIngredients = true; // 여기에 추가된 옵션
+    [Header("UI Generation Settings")]
+    public GameObject ingredientButtonPrefab;
+    public Transform ingredientGridParent; // ✨ 일반 재료용 Grid (위쪽 선반)
+    public Transform sauceGridParent;      // ✨ 소스용 Grid (아래쪽 선반)
+    public bool autoGenerateButtons = true;
 
-    [Tooltip("체크하면 모든 재료를 '구매한 적 있음' 상태로 만듭니다. (재고는 0개 유지 -> 빨간 아웃라인 테스트용)")]
+    [Header("Kitchen Visuals")]
+    // ✨ 재료 이름과 주방용 스프라이트를 매핑할 리스트
+    public List<IngredientVisualData> kitchenSprites;
+
+    [Header("Debug / Settings")]
+    public bool startWithBasicIngredients = true;
     public bool debugUnlockAllIngredients = false;
 
-    // 현재 재고
+    // 현재 재고 데이터
     private Dictionary<string, List<StockEntry>> stock = new();
 
-    public List<IngredientStockEntry> stockTextEntries;
+    // ✨ [변경] 텍스트를 직접 관리하지 않고, 등록된 버튼들을 관리함
+    private Dictionary<string, IngredientButton> registeredButtons = new();
 
-    // UI 연결 (재료별 텍스트 표시)
-    public Dictionary<string, TextMeshProUGUI> stockTexts = new();
-
-    // 총 사용된 돈 기록 (Optional)
     public int TotalSpent { get; private set; } = 0;
-
     private HashSet<string> orderedToday = new();
-
-    private const int ShelfLifeDays = 5; // 모든 재료 유통기한 5일
-
+    private const int ShelfLifeDays = 5;
     private HashSet<string> purchasedAtLeastOnce = new();
     private List<string> lowStockIngredients = new();
-
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -56,27 +57,87 @@ public class IngredientStockManager : MonoBehaviour
         }
         Instance = this;
 
-        foreach (var entry in stockTextEntries)
-        {
-            if (!stockTexts.ContainsKey(entry.ingredientName))
-            {
-                stockTexts.Add(entry.ingredientName, entry.textUI);
-            }
-        }
-
         InitializeStock();
     }
 
     void Start()
     {
-        if (debugUnlockAllIngredients)
+        // ✨ 자동 생성 옵션이 켜져있다면 여기서 버튼을 쫙 만듭니다.
+        if (autoGenerateButtons)
         {
-            UnlockAllIngredientsHistory();
+            GenerateIngredientButtons();
         }
 
-        if (startWithBasicIngredients)
+        if (debugUnlockAllIngredients) UnlockAllIngredientsHistory();
+        if (startWithBasicIngredients) OrderBasicIngredients();
+    }
+
+    // ✨ [핵심] 조건에 맞춰 버튼을 생성하고 분류하는 함수
+    public void GenerateIngredientButtons()
+    {
+        // 1. 기존 버튼들 싹 지우기 (일반 재료 & 소스)
+        ClearGrid(ingredientGridParent);
+        ClearGrid(sauceGridParent);
+
+        registeredButtons.Clear();
+
+        // 2. 스프라이트 검색을 빠르게 하기 위해 딕셔너리로 변환
+        Dictionary<string, Sprite> spriteMap = new Dictionary<string, Sprite>();
+        foreach (var data in kitchenSprites)
         {
-            OrderBasicIngredients();
+            if (!spriteMap.ContainsKey(data.ingredientName))
+                spriteMap.Add(data.ingredientName, data.kitchenButtonSprite);
+        }
+
+        // 3. DB 순서대로 생성 시도
+        foreach (var ingredientName in IngredientEconomyDatabase.Data.Keys)
+        {
+            // [조건 1] 해금 여부 확인 (구매 내역 없음 & 기본 재료 아님 -> 생성 X)
+            // (기본 재료는 구매 내역 없어도 보여야 함, OrderBasicIngredients에서 처리되지만 안전하게)
+            if (!purchasedAtLeastOnce.Contains(ingredientName))
+            {
+                continue;
+            }
+
+            // [조건 2] 소스인지 확인하여 부모 결정
+            bool isSauce = ingredientName.Contains("소스");
+            Transform targetParent = isSauce ? sauceGridParent : ingredientGridParent;
+
+            if (targetParent == null) continue;
+
+            // 4. 생성
+            GameObject obj = Instantiate(ingredientButtonPrefab, targetParent);
+            IngredientButton btn = obj.GetComponent<IngredientButton>();
+
+            if (btn != null)
+            {
+                // 스프라이트 찾기
+                Sprite icon = null;
+                if (spriteMap.TryGetValue(ingredientName, out Sprite s)) icon = s;
+
+                // Setup 호출
+                btn.Setup(ingredientName, icon);
+            }
+        }
+    }
+
+    private void ClearGrid(Transform grid)
+    {
+        if (grid == null) return;
+        foreach (Transform child in grid)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+    // ✨ [NEW] 버튼이 스스로를 등록할 때 호출하는 함수
+    public void RegisterIngredientButton(IngredientButton btn)
+    {
+        if (string.IsNullOrEmpty(btn.ingredientName)) return;
+
+        if (!registeredButtons.ContainsKey(btn.ingredientName))
+        {
+            registeredButtons.Add(btn.ingredientName, btn);
         }
     }
 
@@ -90,7 +151,7 @@ public class IngredientStockManager : MonoBehaviour
             stock[name] = new List<StockEntry>();
         }
 
-        UpdateAllStockTexts();
+        //UpdateAllStockTexts();
     }
 
     public void OrderAllIngredientsOnce()
@@ -146,48 +207,28 @@ public class IngredientStockManager : MonoBehaviour
     /// </summary>
     public void OrderIngredient(string ingredientName)
     {
-        //Debug.Log($"OrderIngredient 호출됨: {ingredientName}");
-
-        if (orderedToday.Contains(ingredientName))
-        {
-            Debug.LogWarning($"'{ingredientName}'은(는) 이미 오늘 주문했습니다!");
-            return;
-        }
-
-        if (!IngredientEconomyDatabase.Data.TryGetValue(ingredientName, out var meta))
-        {
-            Debug.LogWarning($"'{ingredientName}'은(는) 경제 정보에 없습니다.");
-            return;
-        }
+        if (orderedToday.Contains(ingredientName)) return;
+        if (!IngredientEconomyDatabase.Data.TryGetValue(ingredientName, out var meta)) return;
 
         int servings = meta.ServingsPerOrder;
         int cost = meta.OrderCost;
 
         bool paid = PlayerWalletManager.Instance.Spend(cost);
-        if (!paid)
-        {
-            Debug.LogWarning($"'{ingredientName}' 주문 실패 - 잔고 부족!");
-            return;
-        }
+        if (!paid) return;
 
-        // 유통기한이 있는 새로운 재고 항목 추가
-        if (!stock.ContainsKey(ingredientName))
-            stock[ingredientName] = new List<StockEntry>();
-
-        stock[ingredientName].Add(new StockEntry
-        {
-            count = servings,
-            dayRemaining = ShelfLifeDays
-        });
+        if (!stock.ContainsKey(ingredientName)) stock[ingredientName] = new List<StockEntry>();
+        stock[ingredientName].Add(new StockEntry { count = servings, dayRemaining = ShelfLifeDays });
 
         TotalSpent += cost;
         orderedToday.Add(ingredientName);
 
-        Debug.Log($"'{ingredientName}' {servings}인분 (유통기한 {ShelfLifeDays}일) 주문 완료!");
-        UpdateStockText(ingredientName);
+        // ✨ [중요] 구매 시 해금 목록에 추가
+        if (!purchasedAtLeastOnce.Contains(ingredientName))
+        {
+            purchasedAtLeastOnce.Add(ingredientName);
+        }
 
-        // 주문 완료 시
-        purchasedAtLeastOnce.Add(ingredientName);
+        UpdateStockText(ingredientName);
     }
 
 
@@ -221,24 +262,38 @@ public class IngredientStockManager : MonoBehaviour
     /// <summary>
     /// 특정 재료의 텍스트 갱신
     /// </summary>
+    // ✨ [수정] 텍스트 갱신 로직: 등록된 버튼에게 텍스트를 전달
     public void UpdateStockText(string ingredientName)
     {
-        if (!stockTexts.TryGetValue(ingredientName, out var ui))
+        // 1. 해당 재료의 버튼이 등록되어 있는지 확인
+        if (!registeredButtons.TryGetValue(ingredientName, out var btn))
             return;
 
+        // 2. 텍스트 내용 계산
+        string displayText;
         if (!stock.ContainsKey(ingredientName) || stock[ingredientName].Count == 0)
         {
-            ui.text = "재고: 없음";
-            return;
+            displayText = "0"; // 혹은 "재고: 없음"
+        }
+        else
+        {
+            // 유통기한별 그룹화 (기존 로직 유지)
+            // 예: "10(5일), 3(2일)" 처럼 표시하거나 단순히 총합만 표시할 수도 있음
+            // 여기서는 총합만 표시하는 걸로 간소화 예시 (원하시면 기존 그룹화 로직 쓰셔도 됨)
+
+            // var totalCount = stock[ingredientName].Sum(e => e.count);
+            // displayText = totalCount.ToString();
+
+            // 기존처럼 상세 표시를 원한다면:
+            var grouped = stock[ingredientName]
+               .GroupBy(e => e.dayRemaining)
+               .OrderBy(g => g.Key)
+               .Select(g => $"{g.Sum(e => e.count)}({g.Key}일)");
+            displayText = string.Join("\n", grouped); // 줄바꿈으로 구분
         }
 
-        // 유통기한별로 그룹화
-        var grouped = stock[ingredientName]
-            .GroupBy(e => e.dayRemaining)
-            .OrderBy(g => g.Key)
-            .Select(g => $"{g.Sum(e => e.count)}개({g.Key}일)");
-
-        ui.text = "재고: " + string.Join(", ", grouped);
+        // 3. 버튼에게 전달
+        btn.UpdateStockDisplay(displayText);
     }
 
 
@@ -364,48 +419,35 @@ public class IngredientStockManager : MonoBehaviour
     public void RestoreStock(Dictionary<string, List<StockEntry>> savedStock)
     {
         stock.Clear();
-
         foreach (var pair in savedStock)
         {
-            stock[pair.Key] = pair.Value
-                .Select(e => new StockEntry { count = e.count, dayRemaining = e.dayRemaining })
-                .ToList();
+            stock[pair.Key] = pair.Value.Select(e => new StockEntry { count = e.count, dayRemaining = e.dayRemaining }).ToList();
         }
-
+        // 로드된 데이터에는 구매 이력이 포함되어있지 않을 수 있음(별도 저장이 아니라면).
+        // 만약 구매 이력도 저장 대상이라면 로드해야 하지만, 
+        // 일단 재고가 있는 아이템은 구매한 것으로 간주하여 복구하는 로직 추가
+        foreach (var key in stock.Keys)
+        {
+            if (stock[key].Count > 0) purchasedAtLeastOnce.Add(key);
+        }
         UpdateAllStockTexts();
     }
 
     private void OrderBasicIngredients()
     {
-        // 기본 재료 목록 정의
-        string[] basicIngredients = { "떡", "오뎅", "파", "양배추", "군자 소스" }; // 군자 소스도 기본에 포함되면 좋아서 넣었습니다. 필요 없으면 빼세요.
-
+        string[] basicIngredients = { "떡", "오뎅", "파", "양배추", "군자 소스" };
         foreach (string ingredientName in basicIngredients)
         {
-            // 돈이 없어도 강제로 재고를 채워넣기 위해 내부 로직을 살짝 우회하거나,
-            // OrderIngredient 함수를 무료로 호출할 수 있게 수정해야 합니다.
-            // 여기서는 '무료로 초기 지급' 하는 방식으로 직접 구현합니다.
-
             if (!IngredientEconomyDatabase.Data.TryGetValue(ingredientName, out var meta)) continue;
+            if (!stock.ContainsKey(ingredientName)) stock[ingredientName] = new List<StockEntry>();
 
-            // 재고 추가
-            if (!stock.ContainsKey(ingredientName))
-                stock[ingredientName] = new List<StockEntry>();
+            stock[ingredientName].Add(new StockEntry { count = meta.ServingsPerOrder, dayRemaining = 5 });
 
-            stock[ingredientName].Add(new StockEntry
-            {
-                count = meta.ServingsPerOrder,
-                dayRemaining = 5 // 유통기한 5일
-            });
-
-            // 1회 이상 주문 목록에 등록 (이게 중요! 그래야 나중에 빨간 테두리 뜸)
+            // ✨ 기본 재료도 해금 처리를 해놔야 버튼이 생성됨
             purchasedAtLeastOnce.Add(ingredientName);
 
-            // UI 갱신
             UpdateStockText(ingredientName);
         }
-
-        Debug.Log("[System] 기본 재료가 초기 지급되었습니다.");
     }
     private void UnlockAllIngredientsHistory()
     {

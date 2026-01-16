@@ -34,6 +34,10 @@ public class GameManager : MonoBehaviour
         IngredientStockManager.Instance.ResetDailyOrderFlags();
         IngredientStockManager.Instance.AdvanceDayAndDecay();
 
+        // ✨ [NEW] 어제 구매 내역을 반영하여 주방 버튼(재료통) 새로고침!
+        // (일반 재료와 소스도 이때 분리되어 생성됨)
+        IngredientStockManager.Instance.GenerateIngredientButtons();
+
         // 조리 상태 초기화
         StoveManager.Instance.ClearAllStoves();
 
@@ -48,15 +52,23 @@ public class GameManager : MonoBehaviour
 
         DailyBonusManager.Instance.ApplyNewDayBonus();
 
-        GameClock.Resume();
+        //GameClock.Resume();
 
-        OrderSpawner.Instance.RestartSpawning();
+        //OrderSpawner.Instance.RestartSpawning();
 
         PlayerWalletManager.Instance.ResetTodayEarnings();  // 하루 수익 초기화
 
-        HideEndOfDayPanel();
+        //HideEndOfDayPanel();
 
-        Debug.Log("[시작] 새로운 영업일이 시작되었습니다.");
+        Debug.Log("[준비] 다음 영업일 데이터 설정 완료 (시간은 아직 정지 상태)");
+    }
+
+    public void StartDayGameplay()
+    {
+        GameClock.Resume(); // 시간 흐르기 시작
+        OrderSpawner.Instance.RestartSpawning(); // 주문 생성 시작
+
+        Debug.Log("[시작] 셔터가 열리고 영업이 시작되었습니다!");
     }
 
     public void EndOfDay()

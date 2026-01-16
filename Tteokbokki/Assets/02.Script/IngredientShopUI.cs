@@ -3,6 +3,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events; // ✨ 이벤트를 위해 추가
 
 public class IngredientShopUI : MonoBehaviour
 {
@@ -15,12 +16,17 @@ public class IngredientShopUI : MonoBehaviour
     public TextMeshProUGUI totalCostText;
     public TextMeshProUGUI warningText;
     public Button orderButton;
+    // ✨ [NEW] 버튼 텍스트를 변경하기 위한 변수 추가
+    public TextMeshProUGUI orderButtonText;
 
     public Button selectAllButton;
     public TextMeshProUGUI selectAllButtonText;
 
     [Header("New Feature")]
-    public Button selectLowStockButton; // "부족한 재료 담기" 버튼 연결
+    public Button selectLowStockButton;
+
+    // ✨ [NEW] 주문(또는 넘어가기) 완료 시 EndOfDayUIHandler에게 알릴 이벤트
+    public UnityEvent OnShopProcessFinished;
 
     private Dictionary<string, IngredientMetaData> selectedItems = new Dictionary<string, IngredientMetaData>();
     private List<ShopItemUI> spawnedItems = new List<ShopItemUI>();
@@ -32,9 +38,11 @@ public class IngredientShopUI : MonoBehaviour
         selectAllButton.onClick.AddListener(OnSelectAllToggle);
         orderButton.onClick.AddListener(OnOrderButtonClicked);
 
-        // 부족한 재료 선택 버튼 이벤트 연결
         if (selectLowStockButton != null)
             selectLowStockButton.onClick.AddListener(OnSelectLowStockButtonClicked);
+
+        // ✨ 안전장치: Inspector에서 이벤트를 초기화하지 않았을 경우를 대비
+        if (OnShopProcessFinished == null) OnShopProcessFinished = new UnityEvent();
     }
 
     public void OpenShop()
@@ -61,10 +69,8 @@ public class IngredientShopUI : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        // 1. 재고 부족 리스트 갱신 및 가져오기 (매니저 활용)
         IngredientStockManager.Instance.UpdateLowStockList();
         List<string> lowStockList = IngredientStockManager.Instance.GetLowStockIngredients();
-        // 빠른 검색을 위해 HashSet으로 변환 (옵션)
         HashSet<string> lowStockSet = new HashSet<string>(lowStockList);
 
         foreach (var kv in IngredientEconomyDatabase.Data)
@@ -79,11 +85,8 @@ public class IngredientShopUI : MonoBehaviour
             spawnedItems.Add(ui);
 
             bool isOrdered = IngredientStockManager.Instance.HasOrderedToday(data.Name);
-
-            // 2. 현재 재료가 부족한 상태인지 확인
             bool isLowStock = lowStockSet.Contains(data.Name);
 
-            // 3. Setup 호출 시 isLowStock 전달
             ui.Setup(data, isOrdered, isLowStock, (isOn) =>
             {
                 if (isOn)
@@ -103,42 +106,24 @@ public class IngredientShopUI : MonoBehaviour
         }
     }
 
-    // "부족한 재료 담기" 버튼 로직
     public void OnSelectLowStockButtonClicked()
     {
-        // 1. 제어 대상 찾기 (주문 안 했고 & 재고가 부족한 아이템들)
         var targetItems = spawnedItems
             .Where(item => !item.IsOrdered && item.IsLowStock)
             .ToList();
 
-        if (targetItems.Count == 0)
-        {
-            Debug.Log("선택할 부족한 재료가 없습니다.");
-            return;
-        }
+        if (targetItems.Count == 0) return;
 
-        // 2. [판단 로직] 대상들이 "이미 전부 선택된 상태"인가?
-        // All()은 리스트의 모든 요소가 조건을 만족하면 true입니다.
-        // 즉, 하나라도 선택 안 된 게 있으면 false가 됩니다.
         bool areAllSelected = targetItems.All(item => item.selectToggle.isOn);
-
-        // 3. 행동 결정
-        // 이미 다 선택되어 있다면(true) -> 끈다(false)
-        // 하나라도 안 켜져 있다면(false) -> 켠다(true)
         bool newToggleState = !areAllSelected;
 
-        // 4. 적용
         foreach (var item in targetItems)
         {
             item.SetToggle(newToggleState);
         }
-
-        // 로그 및 피드백 (옵션)
-        Debug.Log(newToggleState ? "필요 재료 모두 선택" : "필요 재료 선택 해제");
     }
 
-    // ... (UpdateTotalCostUI, OnOrderButtonClicked, OnSelectAllToggle은 기존과 동일)
-
+    // ✨ [수정] 주문 버튼 상태 및 텍스트 업데이트 로직 변경
     void UpdateTotalCostUI()
     {
         int totalCost = selectedItems.Values.Sum(i => i.OrderCost);
@@ -146,61 +131,75 @@ public class IngredientShopUI : MonoBehaviour
 
         bool canAfford = totalCost <= PlayerWalletManager.Instance.CurrentBalance;
 
-        if (selectedItems.Count > 0 && !canAfford)
-        {
-            warningText.gameObject.SetActive(true);
-            warningText.text = "잔고 부족!";
-            orderButton.interactable = false;
-        }
-        else if (selectedItems.Count == 0)
-        {
-            warningText.gameObject.SetActive(false);
-            orderButton.interactable = false;
-        }
-        else
+        // 1. 선택된 아이템이 없을 때 -> "넘어가기" 상태 (활성화)
+        if (selectedItems.Count == 0)
         {
             warningText.gameObject.SetActive(false);
             orderButton.interactable = true;
+
+            if (orderButtonText != null)
+                orderButtonText.text = "넘어가기";
+        }
+        // 2. 선택된 아이템이 있을 때 -> "주문하기" 상태
+        else
+        {
+            if (orderButtonText != null)
+                orderButtonText.text = "주문하기";
+
+            if (!canAfford)
+            {
+                warningText.gameObject.SetActive(true);
+                warningText.text = "잔고 부족!";
+                orderButton.interactable = false; // 돈 없으면 비활성화
+            }
+            else
+            {
+                warningText.gameObject.SetActive(false);
+                orderButton.interactable = true; // 돈 있으면 활성화
+            }
         }
     }
 
+    // ✨ [수정] 주문 버튼 클릭 로직
     public void OnOrderButtonClicked()
     {
-        if (selectedItems.Count == 0) return;
-
-        foreach (var entry in selectedItems)
+        // 1. 선택된 아이템이 있다면 주문 처리 (없으면 스킵)
+        if (selectedItems.Count > 0)
         {
-            IngredientStockManager.Instance.OrderIngredient(entry.Key);
+            foreach (var entry in selectedItems)
+            {
+                IngredientStockManager.Instance.OrderIngredient(entry.Key);
+            }
+
+            // 주문 처리 후 UI 갱신 (선택 해제 등)
+            PopulateShop();
+            UpdateTotalCostUI();
+        }
+        else
+        {
+            Debug.Log("[상점] 주문 없이 넘어갑니다.");
         }
 
-        // 주문 후 목록 갱신
-        PopulateShop();
-        UpdateTotalCostUI();
+        // 2. 주문을 했든, 그냥 넘어갔든 다음 단계(마감창)로 이동하라고 알림
+        OnShopProcessFinished?.Invoke();
     }
 
     public void OnSelectAllToggle()
     {
-        // 1. 제어 대상 찾기 (주문 안 한 모든 아이템)
         var targetItems = spawnedItems
             .Where(item => !item.IsOrdered)
             .ToList();
 
         if (targetItems.Count == 0) return;
 
-        // 2. [판단 로직] 전부 선택된 상태인가?
         bool areAllSelected = targetItems.All(item => item.selectToggle.isOn);
-
-        // 3. 행동 결정
         bool newToggleState = !areAllSelected;
 
-        // 4. 적용
         foreach (var item in targetItems)
         {
             item.SetToggle(newToggleState);
         }
 
-        // 5. 버튼 텍스트 갱신 (상태에 따라 직관적으로 변경)
-        // 만약 이번에 켰으면(true) 다음엔 '해제'라고 보여주는 게 맞음
         selectAllButtonText.text = newToggleState ? "모두 해제" : "모두 선택";
     }
 
