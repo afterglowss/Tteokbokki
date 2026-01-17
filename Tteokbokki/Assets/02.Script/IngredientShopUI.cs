@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using System.Collections;
 
 public class IngredientShopUI : MonoBehaviour
 {
@@ -65,7 +66,7 @@ public class IngredientShopUI : MonoBehaviour
         UpdateTotalCostUI();
         UpdateButtonOutlines();
 
-        ResetScrollPosition();
+        StartCoroutine(ResetScrollCoroutine());
     }
 
     public void CloseShop()
@@ -154,16 +155,19 @@ public class IngredientShopUI : MonoBehaviour
 
         // 초기 버튼 상태 갱신
         UpdateButtonOutlines();
-        ResetScrollPosition();
+        StartCoroutine(ResetScrollCoroutine());
     }
 
     // ✨ 스크롤 초기화 헬퍼 함수
-    private void ResetScrollPosition()
+    private IEnumerator ResetScrollCoroutine()
     {
+        // 1. 레이아웃이 갱신될 때까지 한 프레임 대기
+        yield return null;
+
+        // 2. 혹시 모르니 강제 업데이트 한 번 더 (선택사항이지만 안전함)
         if (shopScrollRect != null)
         {
-            // Canvas 업데이트가 늦을 수 있어 약간의 강제성 부여가 필요할 때도 있지만,
-            // 보통은 값 설정만으로 충분합니다.
+            Canvas.ForceUpdateCanvases();
             shopScrollRect.verticalNormalizedPosition = 1f;
         }
     }

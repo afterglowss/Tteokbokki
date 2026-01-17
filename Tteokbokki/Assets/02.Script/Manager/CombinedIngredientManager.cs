@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -63,13 +64,11 @@ public class CombinedIngredientManager : MonoBehaviour
         if (recipeScrollView != null)
         {
             recipeScrollView.SetActive(true);
-            // ✨ [NEW] 켜질 때 스크롤 맨 위로
-            if (recipeScrollRect != null)
-            {
-                recipeScrollRect.verticalNormalizedPosition = 1f;
-            }
+
+            // ✨ 코루틴 시작
+            StartCoroutine(ResetScrollCoroutine());
         }
-       
+
         string result = $"주문번호 {receipt.OrderID}의 메뉴별 재료 목록\n\n";
 
         foreach (var order in receipt.GetOrders())
@@ -81,6 +80,17 @@ public class CombinedIngredientManager : MonoBehaviour
         }
 
         combinedIngredientsText.text = result;
+    }
+
+    private IEnumerator ResetScrollCoroutine()
+    {
+        yield return null; // 한 프레임 대기
+
+        if (recipeScrollRect != null)
+        {
+            Canvas.ForceUpdateCanvases();
+            recipeScrollRect.verticalNormalizedPosition = 1f;
+        }
     }
     public void ClearIngredientsText()
     {

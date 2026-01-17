@@ -3,6 +3,7 @@ using TMPro;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerWokManager : MonoBehaviour
 {
@@ -54,10 +55,7 @@ public class PlayerWokManager : MonoBehaviour
                 if (!statusScrollView.activeSelf)
                 {
                     statusScrollView.SetActive(true);
-                    if (statusScrollRect != null)
-                    {
-                        statusScrollRect.verticalNormalizedPosition = 1f;
-                    }
+                    StartCoroutine(ResetScrollCoroutine());
                 }
                 // 이미 켜져있는 상태에서 텍스트만 바뀌는 거라면 스크롤 유지 (유저가 내리고 있었을 수도 있음)
             }
@@ -78,6 +76,17 @@ public class PlayerWokManager : MonoBehaviour
             result += $"{item.Key} x{item.Value}\n";
         }
         playerIngredientsText.text = result;
+    }
+
+    private IEnumerator ResetScrollCoroutine()
+    {
+        yield return null; // 한 프레임 대기
+
+        if (statusScrollRect != null)
+        {
+            Canvas.ForceUpdateCanvases();
+            statusScrollRect.verticalNormalizedPosition = 1f;
+        }
     }
 
     public void ClearUI()

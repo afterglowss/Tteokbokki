@@ -1,6 +1,6 @@
 ﻿using DG.Tweening; // DOTween 필수
 using System.Collections;
-using System.Collections.Generic; // List 사용
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,19 +8,19 @@ using UnityEngine.UI;
 public class EndOfDayUIHandler : MonoBehaviour
 {
     [Header("Black Curtain")]
-    [SerializeField] private Image blackCurtainImage; // 뒤쪽 배경을 가려줄 반투명 이미지
+    [SerializeField] private Image blackCurtainImage;
     [SerializeField] private float fadeDuration = 0.5f;
-    [Range(0f, 1f)][SerializeField] private float curtainMaxAlpha = 0.7f; // 커튼의 최대 불투명도
+    [Range(0f, 1f)][SerializeField] private float curtainMaxAlpha = 0.7f;
 
     [Header("Shutter Animation")]
-    [SerializeField] private RectTransform shutterRect; // 셔터 이미지 (반드시 Anchor가 화면 꽉 차게 설정)
-    [SerializeField] private float shutterMoveDuration = 0.6f; // 셔터 이동 시간
-    [SerializeField] private float shutterStayDelay = 0.5f;    // 셔터가 내려와서 머무는 시간
-    private float screenHeight; // 화면 높이 계산용
+    [SerializeField] private RectTransform shutterRect;
+    [SerializeField] private float shutterMoveDuration = 0.6f;
+    [SerializeField] private float shutterStayDelay = 0.5f;
+    private float screenHeight;
 
     [Header("Animation References")]
-    [SerializeField] private RectTransform mainWindowRect; // 창 전체의 RectTransform (배경 포함)
-    [SerializeField] private Image[] macDecorationButtons; // 빨, 노, 초 장식 이미지들 (없으면 비워도 됨)
+    [SerializeField] private RectTransform mainWindowRect;
+    [SerializeField] private Image[] macDecorationButtons;
     [SerializeField] private float windowPopDuration = 0.5f;
 
     [Header("Panels (순서대로 진행)")]
@@ -38,11 +38,10 @@ public class EndOfDayUIHandler : MonoBehaviour
     [SerializeField] private Button buttonPayTaxAndNext;
     [SerializeField] private TextMeshProUGUI textPayButton;
 
-    // ... (Step 2, 3 변수들은 기존 유지) ...
     [Header("Step 2: 상점 UI")]
     [SerializeField] private TextMeshProUGUI lowStockTextUI;
     [SerializeField] private TextMeshProUGUI textLowStockCost;
-    [SerializeField] private Button buttonOrderAndNext;
+    [SerializeField] private Button buttonOrderAndNext; // (외부 버튼용)
 
     [Header("Step 3: 마감 체크 UI")]
     [SerializeField] private Toggle checkReciptToggle;
@@ -58,34 +57,40 @@ public class EndOfDayUIHandler : MonoBehaviour
     private bool isTaxPaid = false;
     private bool isUpdating = false;
 
+    // ✨ 현재 활성화된 패널 추적용
+    private GameObject currentActivePanel;
+
     private void Awake()
     {
         if (blackCurtainImage != null) blackCurtainImage.gameObject.SetActive(false);
         if (shutterRect != null) shutterRect.gameObject.SetActive(false);
+
+        // ✨ 페이드 효과를 위해 CanvasGroup이 없다면 미리 추가해둠
+        SetupCanvasGroup(panelSettlement);
+        SetupCanvasGroup(panelShop);
+        SetupCanvasGroup(panelClosing);
     }
 
-    // ... Start 함수 기존 유지 ...
+    private void SetupCanvasGroup(GameObject panel)
+    {
+        if (panel != null && panel.GetComponent<CanvasGroup>() == null)
+        {
+            panel.AddComponent<CanvasGroup>();
+        }
+    }
+
     private void Start()
     {
         Canvas canvas = GetComponentInParent<Canvas>();
-        if (canvas != null)
-        {
-            screenHeight = canvas.GetComponent<RectTransform>().rect.height;
-        }
-        else
-        {
-            screenHeight = 1920f; // 기본값 (FHD 기준)
-        }
-        buttonPayTaxAndNext.onClick.AddListener(OnPayTaxAndNextClicked);
-        //buttonOrderAndNext.onClick.AddListener(OnOrderAndNextClicked);
+        if (canvas != null) screenHeight = canvas.GetComponent<RectTransform>().rect.height;
+        else screenHeight = 1920f;
 
-        // ✨ [수정] 상점 UI의 내부 버튼 이벤트에 "다음 단계로 이동" 기능을 연결
+        buttonPayTaxAndNext.onClick.AddListener(OnPayTaxAndNextClicked);
+
         if (IngredientShop != null)
         {
-            // 상점에서 "주문하기" 또는 "넘어가기"를 누르면 OnOrderAndNextClicked가 실행됨
             IngredientShop.OnShopProcessFinished.AddListener(OnOrderAndNextClicked);
         }
-        // 혹시 모르니 기존 외부 버튼도 유지
         if (buttonOrderAndNext != null)
         {
             buttonOrderAndNext.onClick.AddListener(OnOrderAndNextClicked);
@@ -97,64 +102,66 @@ public class EndOfDayUIHandler : MonoBehaviour
         checkReciptToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
         checkTaxToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
         checkIngredientToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
-        
     }
 
     private void OnEnable()
     {
-        // 1. 데이터 초기화 (텍스트는 비워두거나 0으로 시작)
         InitializeSettlementData(animate: true);
 
-        // ✨ [NEW] 2. 배경 커튼 Fade In (창 팝업 전에 먼저 어두워짐)
         if (blackCurtainImage != null)
         {
-            // 1. 오브젝트를 먼저 켭니다 (Raycast를 막기 위해)
             blackCurtainImage.gameObject.SetActive(true);
-            Debug.Log("검은 천막 활성화");
-
-            // 2. 투명하게 초기화 (알파 0)
             Color c = blackCurtainImage.color;
             blackCurtainImage.color = new Color(c.r, c.g, c.b, 0f);
-
-            // 3. 부드럽게 어두워짐
             blackCurtainImage.DOFade(curtainMaxAlpha, fadeDuration).SetEase(Ease.OutQuad);
         }
 
-        // 3. 창 팝업 연출 시작 (약간의 딜레이를 주면 더 자연스러울 수 있음)
         DOVirtual.DelayedCall(0.1f, PlayWindowOpenAnimation);
 
-        GoToStep(1);
+        // 첫 시작은 애니메이션 없이 바로 1단계 배치
+        currentActivePanel = panelSettlement;
+
+        panelSettlement.SetActive(true);
+        ResetPanelTransform(panelSettlement); // 위치 초기화
+
+        panelShop.SetActive(false);
+        panelClosing.SetActive(false);
     }
 
-    // ✨ [NEW] 창 열리는 연출
+    // ✨ 패널 위치/투명도 초기화 함수
+    // ✨ [수정] 패널 초기화 (Y축 위치는 유지하고, X축만 0으로 정렬)
+    private void ResetPanelTransform(GameObject panel)
+    {
+        if (panel == null) return;
+
+        RectTransform rt = panel.GetComponent<RectTransform>();
+        if (rt != null)
+        {
+            // Vector3.zero 대신, 현재 Y값은 유지하고 X만 0으로 맞춤
+            rt.anchoredPosition = new Vector2(0f, rt.anchoredPosition.y);
+        }
+        else
+        {
+            // RectTransform이 없는 경우에만 기존 방식 사용
+            panel.transform.localPosition = Vector3.zero;
+        }
+
+        var cg = panel.GetComponent<CanvasGroup>();
+        if (cg != null) cg.alpha = 1f;
+    }
+
     private void PlayWindowOpenAnimation()
     {
-        // 초기화: 창은 작게, 장식 버튼은 안 보이게
-        if (mainWindowRect != null)
-        {
-            mainWindowRect.localScale = Vector3.zero;
-        }
+        if (mainWindowRect != null) mainWindowRect.localScale = Vector3.zero;
+        foreach (var btn in macDecorationButtons) if (btn != null) btn.transform.localScale = Vector3.zero;
 
-        foreach (var btn in macDecorationButtons)
-        {
-            if (btn != null) btn.transform.localScale = Vector3.zero;
-        }
-
-        // Sequence로 연출 묶기
         Sequence seq = DOTween.Sequence();
+        if (mainWindowRect != null) seq.Append(mainWindowRect.DOScale(1f, windowPopDuration).SetEase(Ease.OutBack));
 
-        // 1. 창이 뿅! 하고 커짐 (Back 이징으로 쫀득하게)
-        if (mainWindowRect != null)
-        {
-            seq.Append(mainWindowRect.DOScale(1f, windowPopDuration).SetEase(Ease.OutBack));
-        }
-
-        // 2. 빨/노/초 버튼이 따-다-닥 하고 나타남
         for (int i = 0; i < macDecorationButtons.Length; i++)
         {
             if (macDecorationButtons[i] != null)
             {
-                // 약간의 시차를 두고 튀어나옴
                 seq.Insert(windowPopDuration * 0.7f + (i * 0.1f),
                     macDecorationButtons[i].transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
             }
@@ -163,8 +170,8 @@ public class EndOfDayUIHandler : MonoBehaviour
 
     private void InitializeSettlementData(bool animate = false)
     {
+        // ... (기존 로직 동일) ...
         isTaxPaid = false;
-
         int successTotal = 0;
         int missedTotal = 0;
 
@@ -172,18 +179,14 @@ public class EndOfDayUIHandler : MonoBehaviour
         {
             textSuccess.text = ReceiptLineManager.Instance.GetTodaySuccessfulReceiptsText();
             textMissed.text = ReceiptLineManager.Instance.GetTodayMissedReceiptsText();
-
             successTotal = ReceiptLineManager.Instance.GetTotalSuccessfulAmount();
             missedTotal = ReceiptLineManager.Instance.GetTotalMissedAmount();
 
-            // ✨ 숫자 카운팅 연출 (성공 금액)
             if (textSuccessAmount != null)
             {
                 if (animate) AnimateMoneyText(textSuccessAmount, 0, successTotal, "총 성공 금액", "#008000", "+");
                 else textSuccessAmount.text = $"총 성공 금액: <color=#008000>+{successTotal:N0}원</color>";
             }
-
-            // ✨ 숫자 카운팅 연출 (실패 금액)
             if (textMissedAmount != null)
             {
                 if (animate) AnimateMoneyText(textMissedAmount, 0, missedTotal, "총 손실 금액", "red", "-");
@@ -196,52 +199,103 @@ public class EndOfDayUIHandler : MonoBehaviour
         currentTaxAmount = Mathf.RoundToInt(grossIncome * taxRate);
         int netIncome = grossIncome - currentTaxAmount;
 
-        // ✨ 하단 텍스트는 애니메이션 없이 표시하거나, 원한다면 여기도 카운팅 적용 가능
         textTotalAndTax.text = $"총 매출: {grossIncome:N0}원\n세금: <color=red>-{currentTaxAmount:N0}원</color>";
 
-        // 순수익도 카운팅하면 멋짐!
         if (animate && textNetIncome != null)
         {
-            // 순수익 카운팅 (0 -> netIncome)
             DOVirtual.Float(0, netIncome, 1.5f, (value) =>
             {
                 textNetIncome.text = $"순수익: <color=#008000>+{(int)value:N0}원</color>";
-            }).SetEase(Ease.OutCubic).SetDelay(0.5f); // 창 뜨고 0.5초 뒤 시작
+            }).SetEase(Ease.OutCubic).SetDelay(0.5f);
         }
         else
         {
             textNetIncome.text = $"순수익: <color=#008000>+{netIncome:N0}원</color>";
         }
 
-
         buttonPayTaxAndNext.interactable = true;
         if (textPayButton != null) textPayButton.text = "세금 납부 및 다음 단계";
     }
 
-    // ✨ 숫자 카운팅 헬퍼 함수
     private void AnimateMoneyText(TextMeshProUGUI textUI, int start, int end, string prefix, string color, string sign)
     {
-        // 0.5초 딜레이 후 1초 동안 카운팅
         DOVirtual.Float(start, end, 1f, (value) =>
         {
             textUI.text = $"{prefix}: <color={color}>{sign}{(int)value:N0}원</color>";
         }).SetEase(Ease.OutQuart).SetDelay(0.3f);
     }
 
-    // ... (나머지 GoToStep, 버튼 클릭 이벤트 등 기존 함수 그대로 유지) ...
-    private void GoToStep(int step)
+    // ✨ [핵심] 패널 전환 애니메이션 (슬라이드 & 페이드)
+    // ✨ [수정] 패널 전환 (기존 Y좌표 유지하도록 변경)
+    // ✨ [확인] 지난번 수정했던 SwitchPanel (혹시 모르니 다시 확인)
+    private void SwitchPanel(GameObject nextPanel, int stepForInit = -1)
     {
-        panelSettlement.SetActive(step == 1);
-        panelShop.SetActive(step == 2);
-        panelClosing.SetActive(step == 3);
+        if (currentActivePanel == nextPanel) return;
 
-        if (step == 3)
+        float moveDistance = 500f;
+        float duration = 0.4f;
+
+        // 1. 현재 패널 퇴장
+        if (currentActivePanel != null)
         {
-            PrepareClosingChecklist();
-            UpdateCloseButtonState();
+            GameObject oldPanel = currentActivePanel;
+            RectTransform oldRect = oldPanel.GetComponent<RectTransform>();
+            CanvasGroup oldCg = oldPanel.GetComponent<CanvasGroup>();
+
+            // 현재 Y위치 기억
+            float originalY = oldRect.anchoredPosition.y;
+
+            oldRect.DOAnchorPosX(-moveDistance, duration).SetEase(Ease.InQuad);
+            if (oldCg != null) oldCg.DOFade(0f, duration);
+
+            DOVirtual.DelayedCall(duration, () =>
+            {
+                oldPanel.SetActive(false);
+                // 복구할 때도 Y위치는 원래대로 유지
+                oldRect.anchoredPosition = new Vector2(0, originalY);
+            });
+        }
+
+        // 2. 다음 패널 입장
+        if (nextPanel != null)
+        {
+            nextPanel.SetActive(true);
+
+            if (stepForInit == 3)
+            {
+                PrepareClosingChecklist();
+                UpdateCloseButtonState();
+            }
+
+            RectTransform newRect = nextPanel.GetComponent<RectTransform>();
+            CanvasGroup newCg = nextPanel.GetComponent<CanvasGroup>();
+
+            // 시작 위치: X는 오른쪽(moveDistance), Y는 기존 설정 유지
+            newRect.anchoredPosition = new Vector2(moveDistance, newRect.anchoredPosition.y);
+
+            if (newCg != null) newCg.alpha = 0f;
+
+            // X축만 0으로 이동 (Y축은 건드리지 않음)
+            newRect.DOAnchorPosX(0, duration).SetEase(Ease.OutQuad);
+            if (newCg != null) newCg.DOFade(1f, duration);
+
+            currentActivePanel = nextPanel;
         }
     }
 
+    // ✨ 버튼 타격감 연출 (Punch)
+    private void PunchButton(Button btn)
+    {
+        if (btn != null)
+        {
+            // 크기가 살짝(0.1 정도) 줄어들었다가 띠용 하고 복구됨
+            btn.transform.DOKill();
+            btn.transform.localScale = Vector3.one;
+            btn.transform.DOPunchScale(new Vector3(-0.1f, -0.1f, 0), 0.2f, 10, 1);
+        }
+    }
+
+    // ... (PrepareClosingChecklist, UpdateCloseButtonState, Toggle 관련 함수들 동일) ...
     private void PrepareClosingChecklist()
     {
         checkTaxToggle.isOn = isTaxPaid;
@@ -249,10 +303,7 @@ public class EndOfDayUIHandler : MonoBehaviour
         checkIngredientToggle.isOn = false;
         checkAllToggle.isOn = false;
     }
-    private void UpdateCloseButtonState()
-    {
-        buttonFinalClose.interactable = checkAllToggle.isOn;
-    }
+    private void UpdateCloseButtonState() => buttonFinalClose.interactable = checkAllToggle.isOn;
     private void OnToggleAllChanged(bool isOn)
     {
         if (isUpdating) return;
@@ -272,21 +323,24 @@ public class EndOfDayUIHandler : MonoBehaviour
         isUpdating = false;
         UpdateCloseButtonState();
     }
+
+    // ✨ [수정] 최종 마감 버튼
     private void OnFinalCloseClicked()
     {
         if (!checkAllToggle.isOn)
         {
+            PunchButton(buttonFinalClose); // 안 눌릴 때도 흔들어주기
             TooltipManager.ShowFollowMouse(TooltipType.UI, "모든 마감 항목을 확인해주세요!", 1f);
             return;
         }
 
+        PunchButton(buttonFinalClose); // 눌림 효과
+
         Debug.Log("[마감] 영업 종료. 셔터 연출 시작");
         buttonFinalClose.interactable = false;
 
-        // ✨ [중요] 게임 시간이 멈춰있을 수 있으므로 시퀀스도 Unscaled Time을 쓰도록 설정
         Sequence closeSeq = DOTween.Sequence().SetUpdate(true);
 
-        // --- 1. 셔터 내리기 준비 ---
         if (shutterRect != null)
         {
             shutterRect.DOKill();
@@ -300,70 +354,52 @@ public class EndOfDayUIHandler : MonoBehaviour
                 shutterImg.color = new Color(c.r, c.g, c.b, 1f);
             }
 
-            // 높이 재계산 (화면 크기가 바뀔 수 있으므로 여기서 계산 추천)
             float height = shutterRect.rect.height;
-            if (height == 0) height = 1920f; // 안전장치
+            if (height == 0) height = 1920f;
 
-            // 시작 위치: 화면 위쪽 (화면 높이만큼 위로)
             shutterRect.anchoredPosition = new Vector2(0, height);
-
-            // 셔터 내려오기 (0,0 으로)
-            // ✨ .SetUpdate(true)는 위에서 Sequence에 걸었으므로 자식 트윈에도 적용됨
             closeSeq.Append(shutterRect.DOAnchorPos(Vector2.zero, shutterMoveDuration).SetEase(Ease.OutBounce));
         }
 
-        // --- 2. 셔터 내려오는 동안 뒤쪽 정리 ---
-        if (mainWindowRect != null)
-        {
-            closeSeq.Join(mainWindowRect.DOScale(0f, 0.3f));
-        }
-        if (blackCurtainImage != null)
-        {
-            closeSeq.Join(blackCurtainImage.DOFade(0f, 0.3f));
-        }
+        if (mainWindowRect != null) closeSeq.Join(mainWindowRect.DOScale(0f, 0.3f));
+        if (blackCurtainImage != null) closeSeq.Join(blackCurtainImage.DOFade(0f, 0.3f));
 
-        // --- 3. 다음 날 로직 실행 ---
-        closeSeq.AppendCallback(() =>
-        {
-            GameManager.Instance.StartOfDay();
-        });
-
-        // --- 4. 대기 후 셔터 올리기 ---
+        closeSeq.AppendCallback(() => { GameManager.Instance.StartOfDay(); });
         closeSeq.AppendInterval(shutterStayDelay);
 
         if (shutterRect != null)
         {
-            // 다시 화면 위로 (height 만큼)
-            // 안전하게 다시 계산하거나 저장된 height 사용
             float height = shutterRect.rect.height;
             closeSeq.Append(shutterRect.DOAnchorPos(new Vector2(0, height), shutterMoveDuration).SetEase(Ease.InQuad));
         }
 
-        // --- 5. 종료 및 비활성화 ---
         closeSeq.OnComplete(() =>
         {
             if (blackCurtainImage != null) blackCurtainImage.gameObject.SetActive(false);
             if (shutterRect != null) shutterRect.gameObject.SetActive(false);
-
             gameObject.SetActive(false);
-
             GameManager.Instance.StartDayGameplay();
         });
     }
+
+    // ✨ [수정] 세금 납부 및 다음 단계
     private void OnPayTaxAndNextClicked()
     {
+        PunchButton(buttonPayTaxAndNext); // 버튼 효과
+
         if (isTaxPaid)
         {
             IngredientShop.OpenShop();
-            GoToStep(2);
+            SwitchPanel(panelShop); // ✨ 슬라이드 전환
             return;
         }
+
         if (PlayerWalletManager.Instance.Spend(currentTaxAmount))
         {
             Debug.Log($"[세금 납부] {currentTaxAmount:N0}원 납부 완료");
             isTaxPaid = true;
             IngredientShop.OpenShop();
-            GoToStep(2);
+            SwitchPanel(panelShop); // ✨ 슬라이드 전환
         }
         else
         {
@@ -371,12 +407,20 @@ public class EndOfDayUIHandler : MonoBehaviour
             TooltipManager.ShowFollowMouse(TooltipType.UI, "잔액이 부족하여 세금을 낼 수 없습니다!", 2f);
         }
     }
+
+    // ✨ [수정] 상점 완료 및 다음 단계
     private void OnOrderAndNextClicked()
     {
+        // 외부 버튼일 경우 Punch 효과, 내부 이벤트 호출일 경우 null 체크
+        if (buttonOrderAndNext != null && buttonOrderAndNext.gameObject.activeSelf)
+            PunchButton(buttonOrderAndNext);
+        else if (IngredientShop != null && IngredientShop.orderButton != null)
+            PunchButton(IngredientShop.orderButton);
+
         Debug.Log("[상점] 주문 단계 완료");
-        PrepareClosingChecklist();
-        GoToStep(3);
+        SwitchPanel(panelClosing, stepForInit: 3); // ✨ 슬라이드 전환 (마감 체크 초기화 포함)
     }
+
     public void FillIngredientData()
     {
         IngredientStockManager.Instance.UpdateLowStockList();
