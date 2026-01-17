@@ -1,10 +1,22 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CombinedIngredientManager : MonoBehaviour
 {
     public TextMeshProUGUI combinedIngredientsText;  // UI 연결 (Inspector에서 할당)
+
+    // ✨ [NEW] 텍스트가 포함된 ScrollView 오브젝트 (Inspector 연결)
+    public GameObject recipeScrollView;
+
+    public ScrollRect recipeScrollRect;
+
+    private void Start()
+    {
+        // 시작할 때 안 보이게 숨김
+        ClearIngredientsText();
+    }
 
     // 메뉴 기본재료 + 추가재료 합산하는 함수
     public static Dictionary<string, int> GetCombinedIngredients(MenuItem menu, Dictionary<string, int> extras)
@@ -48,6 +60,16 @@ public class CombinedIngredientManager : MonoBehaviour
     // 하나의 영수증에 있는 **모든 메뉴**의 재료 합산 결과를 출력하는 함수
     public void DisplayAllCombinedIngredients(Receipt receipt)
     {
+        if (recipeScrollView != null)
+        {
+            recipeScrollView.SetActive(true);
+            // ✨ [NEW] 켜질 때 스크롤 맨 위로
+            if (recipeScrollRect != null)
+            {
+                recipeScrollRect.verticalNormalizedPosition = 1f;
+            }
+        }
+       
         string result = $"주문번호 {receipt.OrderID}의 메뉴별 재료 목록\n\n";
 
         foreach (var order in receipt.GetOrders())
@@ -62,6 +84,10 @@ public class CombinedIngredientManager : MonoBehaviour
     }
     public void ClearIngredientsText()
     {
-        combinedIngredientsText.text = "활성화된 영수증이 없습니다.";
+        // 1. 텍스트 비우기 (안전장치)
+        if (combinedIngredientsText != null) combinedIngredientsText.text = "";
+
+        // 2. 스크롤뷰 전체 비활성화
+        if (recipeScrollView != null) recipeScrollView.SetActive(false);
     }
 }

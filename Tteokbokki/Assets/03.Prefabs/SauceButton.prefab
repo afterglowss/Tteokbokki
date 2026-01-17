@@ -514,6 +514,7 @@ MonoBehaviour:
   ingredientName: "\uAD70\uC790 \uC18C\uC2A4"
   nameText: {fileID: 2920209288557665077}
   stockText: {fileID: 968269269256099562}
+  iconImage: {fileID: 5948253400364013245}
 --- !u!1 &6537639879265154417
 GameObject:
   m_ObjectHideFlags: 0

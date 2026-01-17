@@ -54,6 +54,18 @@ public class ReceiptLineManager : MonoBehaviour
         receiptSlots.Clear();
         pendingReceipts.Clear();
         UpdatePendingCountUI();  // 대기중 표시 초기화
+
+        // ✨ [추가] 모든 영수증을 지울 때(다음 날 넘어갈 때), 보여주던 레시피 텍스트도 비웁니다.
+        if (combinedIngredientManager != null)
+        {
+            combinedIngredientManager.ClearIngredientsText();
+        }
+
+        // ✨ [추가] 혹시 영수증 팝업이 켜져있다면 닫아줍니다.
+        if (receiptPopup != null)
+        {
+            receiptPopup.Close();
+        }
     }
     private Queue<Receipt> pendingReceipts = new();
     public float slotSpacing = 160f;  // 슬롯 간 거리
@@ -108,6 +120,12 @@ public class ReceiptLineManager : MonoBehaviour
         {
             ReceiptStateManager.Instance.ClearActiveReceipt();
             receiptPopup.Close(); // 팝업 닫기
+
+            // ✨ [추가] 보고 있던 영수증이 삭제되면 텍스트도 지움
+            if (combinedIngredientManager != null)
+            {
+                combinedIngredientManager.ClearIngredientsText();
+            }
         }
 
         receiptSlots.Remove(item);

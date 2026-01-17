@@ -15,7 +15,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
     // ✨ Image 컴포넌트 제어 (Sprite 교체용)
     public Image wokImage;
-    public GameObject selectedHighlight;
+    public Image wokOverlayImage;  // ✨ [NEW] 위에 겹쳐질 이미지 (완성될 상태, 서서히 나타남)
     public Button cookButton;
 
     [Header("Wok Sprites")]
@@ -92,7 +92,6 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
     public void SetSelected(bool selected)
     {
-        if (selectedHighlight != null) selectedHighlight.SetActive(selected);
 
         if (selected)
         {
@@ -184,38 +183,63 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     // --- 3. 조리 시작 ---
     public void TryStartCooking()
     {
-        if (pendingIngredients.Count == 0)
+        if (pendingIngredients.Count == 0) return;
+
+        // ✨ [핵심] 기존 CheckRecipe 대신 IdentifyMenu를 호출해야 로그가 뜹니다!
+        string menuResult = PlayerWokManager.Instance.IdentifyMenu(pendingIngredients);
+
+        // 결과에 따라 처리
+        if (menuResult == "Invalid")
         {
-            Debug.LogWarning("재료가 없습니다.");
+            Debug.LogWarning("필수 재료 부족 또는 소스 없음");
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "기본 재료가 부족하거나 소스가 없습니다!", 1f);
             return;
         }
 
-        if (PlayerWokManager.Instance.CheckRecipe(pendingIngredients))
-        {
-            StartCooking(pendingIngredients, 5 * 60f, null);
-            pendingIngredients.Clear();
-            if (cookButton != null) cookButton.gameObject.SetActive(false);
-        }
-        else
-        {
-            Debug.LogWarning("기본 재료가 부족합니다!");
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "기본 재료가 부족합니다!", 1f);
-        }
+        // 조리 시작 (메뉴 이름을 넘겨줌)
+        StartCooking(pendingIngredients, 5 * 60f, menuResult);
+
+        pendingIngredients.Clear();
+        if (cookButton != null) cookButton.gameObject.SetActive(false);
     }
 
-    private void StartCooking(Dictionary<string, int> ingredients, float cookTime, Action<Dictionary<string, int>> onComplete)
+    private void StartCooking(Dictionary<string, int> ingredients, float cookTime, string menuName)
     {
         currentIngredients = new Dictionary<string, int>(ingredients);
         cookTimeSeconds = cookTime;
         cookTimeRemaining = cookTime;
-        this.onCookComplete = onComplete;
 
         isCooking = true;
         isCooked = false;
 
-        // 조리 시작 -> '뚜껑 덮인 웍' 이미지로 변경
-        SetWokState(wokLidSprite);
-        if (cookButton != null) cookButton.gameObject.SetActive(false);
+        // --- 이미지 세팅 ---
+        // 1. 아래쪽 이미지: 공통된 '희멀건한' 시작 이미지
+        wokImage.sprite = StoveManager.Instance.commonRawSprite;
+        wokImage.gameObject.SetActive(true);
+
+        // 2. 위쪽 오버레이 이미지: 목표 이미지 결정
+        Sprite targetSprite;
+        if (string.IsNullOrEmpty(menuName) || menuName == "Ruined")
+        {
+            targetSprite = StoveManager.Instance.ruinedSprite;
+        }
+        else
+        {
+            // 매니저에게 메뉴 이름으로 이미지 달라고 요청
+            targetSprite = StoveManager.Instance.GetCookingSprite(menuName);
+        }
+
+        // 3. 오버레이 초기화 (투명도 0)
+        if (wokOverlayImage != null)
+        {
+            wokOverlayImage.sprite = targetSprite;
+            wokOverlayImage.gameObject.SetActive(true);
+
+            // 투명하게 시작
+            Color c = wokOverlayImage.color;
+            c.a = 0f;
+            wokOverlayImage.color = c;
+        }
 
         UpdateInfoUI();
         UpdateTimerDisplay();
@@ -316,6 +340,20 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         if (!isCooking) return;
 
         cookTimeRemaining -= Time.deltaTime * (60f / 3f);
+
+        // ✨ [NEW] 투명도 조절 (크로스페이드 연출)
+        if (wokOverlayImage != null && cookTimeSeconds > 0)
+        {
+            // 진행률 (0 ~ 1)
+            float progress = 1f - (cookTimeRemaining / cookTimeSeconds);
+            progress = Mathf.Clamp01(progress);
+
+            // 알파값 적용
+            Color c = wokOverlayImage.color;
+            c.a = progress;
+            wokOverlayImage.color = c;
+        }
+
         if (cookTimeRemaining <= 0)
         {
             FinishCooking();
@@ -333,7 +371,9 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         timerText.text = "완료!";
 
         // 조리 완료 -> 웍 이미지 사라짐
-        wokImage.gameObject.SetActive(false);
+        // ✨ [수정] 조리 완료 시 아래 깔린 이미지와 오버레이 모두 끄기
+        if (wokImage != null) wokImage.gameObject.SetActive(false);
+        if (wokOverlayImage != null) wokOverlayImage.gameObject.SetActive(false); // 이거 추가!
 
         if (spawnedFood != null) Destroy(spawnedFood);
 
@@ -373,7 +413,8 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         pendingIngredients.Clear();
         onCookComplete = null;
 
-        wokImage.gameObject.SetActive(false);
+        if (wokImage != null) wokImage.gameObject.SetActive(false);
+        if (wokOverlayImage != null) wokOverlayImage.gameObject.SetActive(false); // 이거 추가!
         timerText.text = "대기중";
 
         SetSelected(false);

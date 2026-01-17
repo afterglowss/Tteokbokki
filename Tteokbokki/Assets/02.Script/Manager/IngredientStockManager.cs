@@ -171,6 +171,7 @@ public class IngredientStockManager : MonoBehaviour
             return false;
         }
 
+        /*
         // 유통기한이 가장 짧은 항목부터 사용
         var entryList = stock[ingredientName]
             .OrderBy(e => e.dayRemaining)
@@ -191,8 +192,22 @@ public class IngredientStockManager : MonoBehaviour
                 return true;
             }
         }
+        */
 
-        Debug.LogWarning($"'{ingredientName}' 재고는 있으나 모두 폐기 상태입니다.");
+        // ✨ [NEW] 단순 재고 관리 로직
+        // 리스트의 첫 번째 뭉치에서 그냥 뺍니다.
+        var entry = stock[ingredientName][0];
+        if (entry.count > 0)
+        {
+            entry.count--;
+            // 0개가 되어도 항목 자체를 지우진 않습니다 (단일 슬롯 유지)
+            // 필요하다면 0일 때 Remove 해도 되지만, 
+            // 단일 관리 체제에서는 entry를 남겨두고 count만 0으로 두는 게 관리하기 편합니다.
+
+            UpdateStockText(ingredientName);
+            return true;
+        }
+
         return false;
     }
 
@@ -212,8 +227,19 @@ public class IngredientStockManager : MonoBehaviour
         if (!paid) return;
 
         if (!stock.ContainsKey(ingredientName)) stock[ingredientName] = new List<StockEntry>();
+        /*
         stock[ingredientName].Add(new StockEntry { count = servings, dayRemaining = ShelfLifeDays });
+        */
 
+        // ✨ [NEW] 단일 재고 합산 로직
+        // 리스트가 비어있으면 하나 만듭니다.
+        if (stock[ingredientName].Count == 0)
+        {
+            stock[ingredientName].Add(new StockEntry { count = 0, dayRemaining = 999 }); // 999는 의미 없는 더미 값
+        }
+
+        // 첫 번째 항목에 수량을 더합니다.
+        stock[ingredientName][0].count += servings;
         TotalSpent += cost;
         orderedToday.Add(ingredientName);
 
@@ -280,11 +306,17 @@ public class IngredientStockManager : MonoBehaviour
             // displayText = totalCount.ToString();
 
             // 기존처럼 상세 표시를 원한다면:
+            /*
             var grouped = stock[ingredientName]
                .GroupBy(e => e.dayRemaining)
                .OrderBy(g => g.Key)
                .Select(g => $"{g.Sum(e => e.count)}({g.Key}일)");
             displayText = string.Join("\n", grouped); // 줄바꿈으로 구분
+            */
+
+            // ✨ [NEW] 단순 총합 표시
+            int totalCount = stock[ingredientName].Sum(e => e.count);
+            displayText = totalCount.ToString();
         }
 
         // 3. 버튼에게 전달
@@ -375,6 +407,7 @@ public class IngredientStockManager : MonoBehaviour
 
     public void AdvanceDayAndDecay()
     {
+        /*
         foreach (var pair in stock)
         {
             string ingredientName = pair.Key;
@@ -391,6 +424,8 @@ public class IngredientStockManager : MonoBehaviour
                 }
             }
         }
+        */
+        Debug.Log("[시스템] 재료 유통기한 시스템이 비활성화되어 재고가 유지됩니다.");
 
         UpdateAllStockTexts(); // UI 갱신
     }
@@ -416,17 +451,25 @@ public class IngredientStockManager : MonoBehaviour
         stock.Clear();
         foreach (var pair in savedStock)
         {
-            stock[pair.Key] = pair.Value.Select(e => new StockEntry { count = e.count, dayRemaining = e.dayRemaining }).ToList();
+            // 일단 로드
+            var loadedList = pair.Value.Select(e => new StockEntry { count = e.count, dayRemaining = e.dayRemaining }).ToList();
+
+            // ✨ [NEW] 유통기한 기능이 꺼져있으므로, 로드한 데이터를 하나로 합칩니다.
+            if (loadedList.Count > 1)
+            {
+                int totalCount = loadedList.Sum(e => e.count);
+                loadedList.Clear();
+                loadedList.Add(new StockEntry { count = totalCount, dayRemaining = 999 });
+            }
+
+            stock[pair.Key] = loadedList;
         }
 
-        // 안전장치: 혹시 해금 목록 저장이 누락되었더라도, 현재 재고가 있다면 해금 처리
         foreach (var key in stock.Keys)
         {
             if (stock[key].Count > 0) purchasedAtLeastOnce.Add(key);
         }
 
-        // ✨ [중요] 로드 후에는 해금 목록(`purchasedAtLeastOnce`)이 갱신되었으므로
-        // 주방의 버튼들도 다시 생성해서 보여줘야 함 (재고 0개인 해금 재료 포함)
         if (autoGenerateButtons)
         {
             GenerateIngredientButtons();
@@ -460,11 +503,17 @@ public class IngredientStockManager : MonoBehaviour
             if (!IngredientEconomyDatabase.Data.TryGetValue(ingredientName, out var meta)) continue;
             if (!stock.ContainsKey(ingredientName)) stock[ingredientName] = new List<StockEntry>();
 
+            /*
             stock[ingredientName].Add(new StockEntry { count = meta.ServingsPerOrder, dayRemaining = 5 });
+            */
+            // ✨ [NEW] 단일 재고 합산
+            if (stock[ingredientName].Count == 0)
+            {
+                stock[ingredientName].Add(new StockEntry { count = 0, dayRemaining = 999 });
+            }
+            stock[ingredientName][0].count += meta.ServingsPerOrder;
 
-            // ✨ 기본 재료도 해금 처리를 해놔야 버튼이 생성됨
             purchasedAtLeastOnce.Add(ingredientName);
-
             UpdateStockText(ingredientName);
         }
     }

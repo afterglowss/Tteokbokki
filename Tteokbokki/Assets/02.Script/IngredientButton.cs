@@ -23,18 +23,37 @@ public class IngredientButton : MonoBehaviour
         if (stockText != null) stockText.text = text;
     }
 
+    // ✨ [핵심 수정] 버튼 클릭 로직 변경
     public void OnButtonClick()
     {
         if (string.IsNullOrEmpty(ingredientName)) return;
 
+        // 1. 화구 선택 여부 확인
+        if (!StoveManager.Instance.HasSelectedSlot())
+        {
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "화구를 먼저 선택해주세요!", 1f);
+            return; // ❌ 화구가 없으면 재고 차감하지 않고 종료
+        }
+
+        // 2. 선택된 화구의 상태 확인 (조리 중이거나, 음식이 완료되어 올려진 상태인지)
+        StoveSlot selectedSlot = StoveManager.Instance.GetSelectedSlot();
+        if (selectedSlot.IsCooking || selectedSlot.IsCooked)
+        {
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "조리 중이거나 음식이 있는 화구입니다!", 1f);
+            return; // ❌ 이미 사용 중인 화구면 재고 차감하지 않고 종료
+        }
+
+        // 3. 위 조건을 모두 통과했을 때만 재고 차감 시도
         bool success = IngredientStockManager.Instance.UseIngredient(ingredientName);
 
         if (success)
         {
+            // 4. 재고 차감 성공 시 화구에 투입
             StoveManager.Instance.AddIngredientToSelectedSlot(ingredientName);
         }
         else
         {
+            // 재고 부족
             TooltipManager.ShowFollowMouse(TooltipType.UI, $"{ingredientName} 재고가 부족합니다!", 1f);
         }
     }
