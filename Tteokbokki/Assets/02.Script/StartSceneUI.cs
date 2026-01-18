@@ -30,13 +30,6 @@ public class StartSceneUI : MonoBehaviour
 
     void Start()
     {
-        // ��ư Ŭ�� �̺�Ʈ ���
-        startButton.onClick.AddListener(OnStartButtonClicked);
-        if (true) 
-        { 
-            // (���߿�) ���۹�ư ������ üũ�Ǹ� Ȱ��ȭ
-            continueButton.onClick.AddListener(OnContinueButtonClicked);
-        }
         settingButton.onClick.AddListener(OnSettingButtonClicked);
         exitButton.onClick.AddListener(OnExitButtonClicked);
         UpdateContinueDateLabel();
@@ -51,22 +44,32 @@ public class StartSceneUI : MonoBehaviour
             GameSaveData data = LoadSaveMetaOnly();
             if (DateTime.TryParse(data.gameTime, out DateTime gameTime))
             {
-                continueDateText.text = $"{gameTime.Month}�� {gameTime.Day}�� �̾��ϱ�";
+                continueDateText.text = $"{gameTime.Month}월 {gameTime.Day}일부터";
             }
             continueButton.interactable = true;
         }
         else if (lastDate.HasValue)
         {
             // SaveData.json�� ���� ��¥ ��ϸ� ���� ���
-            continueDateText.text = $"{lastDate.Value.Month}�� {lastDate.Value.Day}�� �̾��ϱ�";
+            continueDateText.text = $"{lastDate.Value.Month}월 {lastDate.Value.Day}일 이어하기";
             continueButton.interactable = true;
         }
         else
         {
             // �̾��ϱ� �Ұ���
-            continueDateText.text = "�̾��ϱ� (����)";
+            continueDateText.text = "기록이 없습니다.";
             continueButton.interactable = false;
         }
+    }
+
+    public void MoveScene(string scene)
+    {
+        SceneManager.LoadScene(scene);
+    }
+    public void MoveScene(string scene, bool save)
+    {
+        GameLoadFlags.shouldLoadFromSave = true;
+        SceneManager.LoadScene(scene);
     }
 
     private GameSaveData LoadSaveMetaOnly()
@@ -77,9 +80,7 @@ public class StartSceneUI : MonoBehaviour
 
     private void OnStartButtonClicked()
     {
-        // ���� ������ �̵�
         SceneManager.LoadScene("SampleScene");
-        //SceneManager.LoadScene("SampleScene 1");
     }
 
     private void OnContinueButtonClicked()
@@ -96,7 +97,7 @@ public class StartSceneUI : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("PauseMenuUI�� �Ҵ���� �ʾҽ��ϴ�.");
+            Debug.LogWarning("PauseMenuUI가 없습니다.");
         }
     }
 

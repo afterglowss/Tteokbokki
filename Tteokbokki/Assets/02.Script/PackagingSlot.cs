@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class PackagingSlot : MonoBehaviour, IDropHandler
 {
@@ -12,6 +13,11 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
     private PackagingAreaManager packagingArea;
 
     public int maxStackSize = 4;
+
+    private void Start()
+    {
+        GetComponent<Image>().alphaHitTestMinimumThreshold = 0.1f;
+    }
 
     public void Initialize(PackagingAreaManager area)
     {
@@ -31,7 +37,8 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         // 2. 화구 상태 초기화
         if (foodUI.originStoveSlot != null)
         {
-            foodUI.originStoveSlot.ResetSlot();
+            //foodUI.originStoveSlot.ResetSlot();
+            foodUI.originStoveSlot.NotifyFoodPickedUp();
         }
     }
 

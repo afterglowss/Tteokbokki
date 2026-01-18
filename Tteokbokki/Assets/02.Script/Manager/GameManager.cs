@@ -34,12 +34,14 @@ public class GameManager : MonoBehaviour
         IngredientStockManager.Instance.ResetDailyOrderFlags();
         IngredientStockManager.Instance.AdvanceDayAndDecay();
 
-        // 조리 상태 초기화 (각 화구의 ResetSlot()이 호출되며 담겨있던 재료들도 함께 초기화됩니다)
+        // ✨ [NEW] 어제 구매 내역을 반영하여 주방 버튼(재료통) 새로고침!
+        // (일반 재료와 소스도 이때 분리되어 생성됨)
+        IngredientStockManager.Instance.GenerateIngredientButtons();
+
+        // 조리 상태 초기화
         StoveManager.Instance.ClearAllStoves();
 
         PackagingAreaManager.Instance.ClearAllFoods(); // 포장대 초기화
-
-        // ✨ [수정] PlayerWokManager.Instance.ClearWok(); -> 삭제됨 (더 이상 전역 Wok을 쓰지 않음)
 
         ReceiptLineManager.Instance.ClearAllReceipts(); // 영수증 리스트 초기화
         ReceiptLineManager.Instance.ClearMissedReceipts(); // 실패 영수증 리스트 초기화
@@ -50,16 +52,23 @@ public class GameManager : MonoBehaviour
 
         DailyBonusManager.Instance.ApplyNewDayBonus();
 
-        GameClock.Resume();
+        //GameClock.Resume();
 
-        OrderSpawner.Instance.RestartSpawning();
+        //OrderSpawner.Instance.RestartSpawning();
 
         PlayerWalletManager.Instance.ResetTodayEarnings();  // 하루 수익 초기화
 
-        HideEndOfDayPanel();
+        //HideEndOfDayPanel();
 
-        // 로그 출력
-        Debug.Log("[시작] 새로운 영업일이 시작되었습니다.");
+        Debug.Log("[준비] 다음 영업일 데이터 설정 완료 (시간은 아직 정지 상태)");
+    }
+
+    public void StartDayGameplay()
+    {
+        GameClock.Resume(); // 시간 흐르기 시작
+        OrderSpawner.Instance.RestartSpawning(); // 주문 생성 시작
+
+        Debug.Log("[시작] 셔터가 열리고 영업이 시작되었습니다!");
     }
 
     public void EndOfDay()
@@ -80,8 +89,10 @@ public class GameManager : MonoBehaviour
 
         // 판매 총액 계산
         int successTotal = successful.Sum(r => r.GetTotalPrice());
-        // 세금 차감
-        PlayerWalletManager.Instance.DeductDailyTaxes(successTotal);
+
+        // ❌ [삭제됨] 자동 세금 차감 로직 제거 (이제 UI에서 버튼 눌러서 납부함)
+        // PlayerWalletManager.Instance.DeductDailyTaxes(successTotal); 
+
         // 손실 총액 계산
         int missedTotal = missed.Sum(r => r.GetOrders().Sum(o => o.TotalPrice));
         // 성공률 계산
@@ -91,7 +102,8 @@ public class GameManager : MonoBehaviour
         // 로그 출력
         Debug.Log($"[마감] 성공 주문 {successful.Count}건 / 총 판매금액: {successTotal:N0}원");
         Debug.Log($"[마감] 미완료 주문 {missed.Count}건 / 손실 금액: {missedTotal:N0}원");
-        Debug.Log($"[마감] 세금 {Mathf.RoundToInt(successTotal * PlayerWalletManager.Instance.taxRate):N0}원 납부");
+        // 세금 로그도 여기서 띄우기 애매하므로 제거하거나 예상액으로 변경
+        // Debug.Log($"[마감] 세금 {Mathf.RoundToInt(successTotal * PlayerWalletManager.Instance.taxRate):N0}원 납부");
 
         // 마감 UI 출력
         ShowEndOfDayPanel();
@@ -132,15 +144,9 @@ public class GameManager : MonoBehaviour
 
     private void ShowEndOfDayPanel()
     {
-        //Panel_EndOfDay 활성화
+        // Panel_EndOfDay 활성화
+        // ✨ [수정] 핸들러가 OnEnable에서 스스로 초기화하므로, 여기서는 켜기만 하면 됩니다.
         endOfDayPanel.SetActive(true);
-
-        // 텍스트 채우기
-        endOfDayUIHandler.FillReceiptTexts();
-        endOfDayUIHandler.FillIngredientTexts();
-        endOfDayUIHandler.FillIngredientCostText();
-        endOfDayUIHandler.FillTaxText();
-        endOfDayUIHandler.FillTodayEarningsText();
     }
 
     private void HideEndOfDayPanel()

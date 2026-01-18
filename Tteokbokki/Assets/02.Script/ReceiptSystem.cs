@@ -25,27 +25,6 @@ public class Ingredient
 // 🟢 [2] 재료 데이터베이스 (고정된 재료 목록)
 public static class IngredientDatabase
 {
-    //public static readonly Dictionary<string, Ingredient> Ingredients = new Dictionary<string, Ingredient>
-    //{
-    //    { "떡", new Ingredient("떡", 1000) },
-    //    { "오뎅", new Ingredient("오뎅", 1000) },
-    //    { "파", new Ingredient("파", 0) },
-    //    { "양배추", new Ingredient("양배추", 0) },
-    //    { "군자 소스", new Ingredient("군자 소스", 500) },
-    //    { "체다치즈", new Ingredient("체다치즈", 1500) },
-    //    { "모짜렐라", new Ingredient("모짜렐라", 1500) },
-    //    { "중국당면", new Ingredient("중국당면", 2000) },
-    //    { "일반당면", new Ingredient("일반당면", 1000) },
-    //    { "라면사리", new Ingredient("라면사리", 1000) },
-    //    { "우삼겹", new Ingredient("우삼겹", 2500) },
-    //    { "계란", new Ingredient("계란", 1500) },
-    //    { "메추리알", new Ingredient("메추리알", 1500) },
-    //    { "분모자", new Ingredient("분모자", 3000) },
-    //    { "유부", new Ingredient("유부", 1500) },
-    //    { "곱창", new Ingredient("곱창", 4000) },
-    //    { "마라 소스", new Ingredient("마라 소스", 0) },
-    //    { "로제 소스", new Ingredient("로제 소스", 0) }
-    //};
     public static readonly Dictionary<string, Ingredient> Ingredients = CreateLegacyIngredientDict();
 
     private static Dictionary<string, Ingredient> CreateLegacyIngredientDict()

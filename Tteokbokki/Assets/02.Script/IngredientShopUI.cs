@@ -3,38 +3,60 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
+using System.Collections;
 
 public class IngredientShopUI : MonoBehaviour
 {
     [Header("UI References")]
     public GameObject shopPanel;
     public GameObject shopItemPrefab;
-    public Transform ingredientListParent;
+
+    public ScrollRect shopScrollRect;
+
+    // ✨ 기존 ingredientListParent는 더 이상 직접 쓰지 않고, 전체 구조의 부모 역할만 합니다.
+    public Transform contentRoot;
+
+    [Header("Categorized Grids & Titles")]
+    public GameObject reorderTitleObject; // "재주문" 제목 오브젝트
+    public Transform unlockedGridParent;  // "재주문" 그리드
+
+    public GameObject newArrivalTitleObject; // "신규 입고" 제목 오브젝트
+    public Transform lockedGridParent;       // "신규 입고" 그리드
 
     [Header("Bottom UI")]
     public TextMeshProUGUI totalCostText;
     public TextMeshProUGUI warningText;
     public Button orderButton;
+    public TextMeshProUGUI orderButtonText;
 
+    [Header("Select Buttons")]
     public Button selectAllButton;
     public TextMeshProUGUI selectAllButtonText;
+    public Outline selectAllButtonOutline;
 
     [Header("New Feature")]
-    public Button selectLowStockButton; // "부족한 재료 담기" 버튼 연결
+    public Button selectLowStockButton;
+    public Outline selectLowStockButtonOutline;
+
+    [Header("Outline Colors")]
+    public Color defaultButtonOutlineColor = Color.white;
+    public Color activeButtonOutlineColor = Color.red;
+
+    public UnityEvent OnShopProcessFinished;
 
     private Dictionary<string, IngredientMetaData> selectedItems = new Dictionary<string, IngredientMetaData>();
     private List<ShopItemUI> spawnedItems = new List<ShopItemUI>();
-
-    private bool isAllSelected = false;
 
     void Start()
     {
         selectAllButton.onClick.AddListener(OnSelectAllToggle);
         orderButton.onClick.AddListener(OnOrderButtonClicked);
 
-        // 부족한 재료 선택 버튼 이벤트 연결
         if (selectLowStockButton != null)
             selectLowStockButton.onClick.AddListener(OnSelectLowStockButtonClicked);
+
+        if (OnShopProcessFinished == null) OnShopProcessFinished = new UnityEvent();
     }
 
     public void OpenShop()
@@ -42,6 +64,9 @@ public class IngredientShopUI : MonoBehaviour
         shopPanel.SetActive(true);
         PopulateShop();
         UpdateTotalCostUI();
+        UpdateButtonOutlines();
+
+        StartCoroutine(ResetScrollCoroutine());
     }
 
     public void CloseShop()
@@ -51,93 +76,166 @@ public class IngredientShopUI : MonoBehaviour
 
     void PopulateShop()
     {
-        isAllSelected = false;
         selectAllButtonText.text = "모두 선택";
         selectedItems.Clear();
         spawnedItems.Clear();
 
-        foreach (Transform child in ingredientListParent)
-        {
-            Destroy(child.gameObject);
-        }
+        // 1. 그리드 청소
+        ClearGrid(unlockedGridParent);
+        ClearGrid(lockedGridParent);
 
-        // 1. 재고 부족 리스트 갱신 및 가져오기 (매니저 활용)
         IngredientStockManager.Instance.UpdateLowStockList();
         List<string> lowStockList = IngredientStockManager.Instance.GetLowStockIngredients();
-        // 빠른 검색을 위해 HashSet으로 변환 (옵션)
         HashSet<string> lowStockSet = new HashSet<string>(lowStockList);
+
+        // 카테고리별 아이템 개수 카운트 (UI 끄기/켜기용)
+        int unlockedCount = 0;
+        int lockedCount = 0;
 
         foreach (var kv in IngredientEconomyDatabase.Data)
         {
             var data = kv.Value;
+            string name = data.Name;
 
-            GameObject obj = Instantiate(shopItemPrefab, ingredientListParent);
+            // ✨ [구역 분리 로직]
+            bool hasPurchased = IngredientStockManager.Instance.HasPurchasedBefore(name);
+            Transform targetParent;
+
+            if (hasPurchased)
+            {
+                targetParent = unlockedGridParent;
+                unlockedCount++;
+            }
+            else
+            {
+                targetParent = lockedGridParent;
+                lockedCount++;
+            }
+
+            // 부모가 연결 안 되어있으면 예외처리
+            if (targetParent == null) continue;
+
+            // ✨ [버그 수정] 부모를 targetParent로 지정해야 분류가 됩니다!
+            GameObject obj = Instantiate(shopItemPrefab, targetParent);
             ShopItemUI ui = obj.GetComponent<ShopItemUI>();
 
             if (ui == null) continue;
 
             spawnedItems.Add(ui);
 
-            bool isOrdered = IngredientStockManager.Instance.HasOrderedToday(data.Name);
+            bool isOrdered = IngredientStockManager.Instance.HasOrderedToday(name);
+            bool isLowStock = lowStockSet.Contains(name);
 
-            // 2. 현재 재료가 부족한 상태인지 확인
-            bool isLowStock = lowStockSet.Contains(data.Name);
-
-            // 3. Setup 호출 시 isLowStock 전달
             ui.Setup(data, isOrdered, isLowStock, (isOn) =>
             {
                 if (isOn)
                 {
-                    if (!selectedItems.ContainsKey(data.Name))
-                        selectedItems.Add(data.Name, data);
+                    if (!selectedItems.ContainsKey(name))
+                        selectedItems.Add(name, data);
                 }
                 else
                 {
-                    if (selectedItems.ContainsKey(data.Name))
-                        selectedItems.Remove(data.Name);
+                    if (selectedItems.ContainsKey(name))
+                        selectedItems.Remove(name);
                 }
-                CheckSelectAllButtonState();
 
+                // 버튼 상태 갱신은 토글이 바뀔 때마다 즉시 반영
+                CheckSelectAllButtonState();
                 UpdateTotalCostUI();
+                UpdateButtonOutlines();
             });
+        }
+
+        // ✨ [UI 정리] 아이템이 없는 카테고리는 제목과 그리드를 숨겨서 깔끔하게 만듦
+        if (reorderTitleObject != null) reorderTitleObject.SetActive(unlockedCount > 0);
+        if (unlockedGridParent != null) unlockedGridParent.gameObject.SetActive(unlockedCount > 0);
+
+        if (newArrivalTitleObject != null) newArrivalTitleObject.SetActive(lockedCount > 0);
+        if (lockedGridParent != null) lockedGridParent.gameObject.SetActive(lockedCount > 0);
+
+        // 초기 버튼 상태 갱신
+        UpdateButtonOutlines();
+        StartCoroutine(ResetScrollCoroutine());
+    }
+
+    // ✨ 스크롤 초기화 헬퍼 함수
+    private IEnumerator ResetScrollCoroutine()
+    {
+        // 1. 레이아웃이 갱신될 때까지 한 프레임 대기
+        yield return null;
+
+        // 2. 혹시 모르니 강제 업데이트 한 번 더 (선택사항이지만 안전함)
+        if (shopScrollRect != null)
+        {
+            Canvas.ForceUpdateCanvases();
+            shopScrollRect.verticalNormalizedPosition = 1f;
         }
     }
 
-    // "부족한 재료 담기" 버튼 로직
+    private void UpdateButtonOutlines()
+    {
+        // 1. "모두 선택" 버튼
+        var allActiveItems = spawnedItems.Where(item => !item.IsOrdered).ToList();
+        if (allActiveItems.Count > 0 && selectAllButtonOutline != null)
+        {
+            bool allOn = allActiveItems.All(item => item.selectToggle.isOn);
+            selectAllButtonOutline.effectColor = allOn ? activeButtonOutlineColor : defaultButtonOutlineColor;
+            selectAllButtonText.text = allOn ? "모두 해제" : "모두 선택";
+        }
+
+        // 2. "부족한 재료" 버튼
+        var lowStockItems = spawnedItems.Where(item => !item.IsOrdered && item.IsLowStock).ToList();
+        if (lowStockItems.Count > 0 && selectLowStockButtonOutline != null)
+        {
+            bool allLowStockOn = lowStockItems.All(item => item.selectToggle.isOn);
+            selectLowStockButtonOutline.effectColor = allLowStockOn ? activeButtonOutlineColor : defaultButtonOutlineColor;
+        }
+        else if (selectLowStockButtonOutline != null)
+        {
+            // 부족한 재료가 아예 없으면 기본 색상
+            selectLowStockButtonOutline.effectColor = defaultButtonOutlineColor;
+        }
+    }
+
     public void OnSelectLowStockButtonClicked()
     {
-        // 1. 제어 대상 찾기 (주문 안 했고 & 재고가 부족한 아이템들)
         var targetItems = spawnedItems
             .Where(item => !item.IsOrdered && item.IsLowStock)
             .ToList();
 
-        if (targetItems.Count == 0)
-        {
-            Debug.Log("선택할 부족한 재료가 없습니다.");
-            return;
-        }
+        if (targetItems.Count == 0) return;
 
-        // 2. [판단 로직] 대상들이 "이미 전부 선택된 상태"인가?
-        // All()은 리스트의 모든 요소가 조건을 만족하면 true입니다.
-        // 즉, 하나라도 선택 안 된 게 있으면 false가 됩니다.
         bool areAllSelected = targetItems.All(item => item.selectToggle.isOn);
-
-        // 3. 행동 결정
-        // 이미 다 선택되어 있다면(true) -> 끈다(false)
-        // 하나라도 안 켜져 있다면(false) -> 켠다(true)
         bool newToggleState = !areAllSelected;
 
-        // 4. 적용
-        foreach (var item in targetItems)
-        {
-            item.SetToggle(newToggleState);
-        }
+        foreach (var item in targetItems) item.SetToggle(newToggleState);
 
-        // 로그 및 피드백 (옵션)
-        Debug.Log(newToggleState ? "필요 재료 모두 선택" : "필요 재료 선택 해제");
+        UpdateButtonOutlines();
+        UpdateTotalCostUI(); // 금액 갱신 추가
     }
 
-    // ... (UpdateTotalCostUI, OnOrderButtonClicked, OnSelectAllToggle은 기존과 동일)
+    public void OnSelectAllToggle()
+    {
+        var targetItems = spawnedItems.Where(item => !item.IsOrdered).ToList();
+
+        if (targetItems.Count == 0) return;
+
+        bool areAllSelected = targetItems.All(item => item.selectToggle.isOn);
+        bool newToggleState = !areAllSelected;
+
+        foreach (var item in targetItems) item.SetToggle(newToggleState);
+
+        UpdateButtonOutlines();
+        UpdateTotalCostUI(); // 금액 갱신 추가
+    }
+
+    private void CheckSelectAllButtonState()
+    {
+        var activeItems = spawnedItems.Where(i => !i.IsOrdered).ToList();
+        if (activeItems.Count == 0) return;
+        bool allOn = activeItems.All(i => i.selectToggle.isOn);
+        selectAllButtonText.text = allOn ? "모두 해제" : "모두 선택";
+    }
 
     void UpdateTotalCostUI()
     {
@@ -146,70 +244,51 @@ public class IngredientShopUI : MonoBehaviour
 
         bool canAfford = totalCost <= PlayerWalletManager.Instance.CurrentBalance;
 
-        if (selectedItems.Count > 0 && !canAfford)
-        {
-            warningText.gameObject.SetActive(true);
-            warningText.text = "잔고 부족!";
-            orderButton.interactable = false;
-        }
-        else if (selectedItems.Count == 0)
-        {
-            warningText.gameObject.SetActive(false);
-            orderButton.interactable = false;
-        }
-        else
+        if (selectedItems.Count == 0)
         {
             warningText.gameObject.SetActive(false);
             orderButton.interactable = true;
+            if (orderButtonText != null) orderButtonText.text = "넘어가기";
         }
+        else
+        {
+            if (orderButtonText != null) orderButtonText.text = "주문하기";
+
+            if (!canAfford)
+            {
+                warningText.gameObject.SetActive(true);
+                warningText.text = "잔고 부족!";
+                orderButton.interactable = false;
+            }
+            else
+            {
+                warningText.gameObject.SetActive(false);
+                orderButton.interactable = true;
+            }
+        }
+    }
+
+    private void ClearGrid(Transform grid)
+    {
+        if (grid == null) return;
+        foreach (Transform child in grid) Destroy(child.gameObject);
     }
 
     public void OnOrderButtonClicked()
     {
-        if (selectedItems.Count == 0) return;
-
-        foreach (var entry in selectedItems)
+        if (selectedItems.Count > 0)
         {
-            IngredientStockManager.Instance.OrderIngredient(entry.Key);
+            foreach (var entry in selectedItems)
+                IngredientStockManager.Instance.OrderIngredient(entry.Key);
+
+            PopulateShop();
+            UpdateTotalCostUI();
+            UpdateButtonOutlines();
         }
-
-        // 주문 후 목록 갱신
-        PopulateShop();
-        UpdateTotalCostUI();
-    }
-
-    public void OnSelectAllToggle()
-    {
-        // 1. 제어 대상 찾기 (주문 안 한 모든 아이템)
-        var targetItems = spawnedItems
-            .Where(item => !item.IsOrdered)
-            .ToList();
-
-        if (targetItems.Count == 0) return;
-
-        // 2. [판단 로직] 전부 선택된 상태인가?
-        bool areAllSelected = targetItems.All(item => item.selectToggle.isOn);
-
-        // 3. 행동 결정
-        bool newToggleState = !areAllSelected;
-
-        // 4. 적용
-        foreach (var item in targetItems)
+        else
         {
-            item.SetToggle(newToggleState);
+            Debug.Log("[상점] 주문 없이 넘어갑니다.");
         }
-
-        // 5. 버튼 텍스트 갱신 (상태에 따라 직관적으로 변경)
-        // 만약 이번에 켰으면(true) 다음엔 '해제'라고 보여주는 게 맞음
-        selectAllButtonText.text = newToggleState ? "모두 해제" : "모두 선택";
-    }
-
-    private void CheckSelectAllButtonState()
-    {
-        var activeItems = spawnedItems.Where(i => !i.IsOrdered).ToList();
-        if (activeItems.Count == 0) return;
-
-        bool allOn = activeItems.All(i => i.selectToggle.isOn);
-        selectAllButtonText.text = allOn ? "모두 해제" : "모두 선택";
+        OnShopProcessFinished?.Invoke();
     }
 }
