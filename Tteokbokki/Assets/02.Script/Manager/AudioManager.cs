@@ -13,7 +13,10 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private List<SoundData> soundClips;
 
     private Dictionary<int, AudioClip> soundDict = new Dictionary<int, AudioClip>();
-    private float masterVolume = 1f;
+
+    private float masterVol = 1f;
+    private float bgmVol = 0.5f;
+    private float sfxVol = 0.5f;
 
     [System.Serializable]
     public struct SoundData
@@ -37,7 +40,7 @@ public class AudioManager : MonoBehaviour
     private void Start()
     {
         //test
-        PlayBGM(101);
+        PlayBGM(201);
     }
 
     // --- 재생 로직 ---
@@ -61,18 +64,26 @@ public class AudioManager : MonoBehaviour
 
     public void SetMasterVolume(float volume)
     {
-        masterVolume = Mathf.Clamp01(volume);
-        bgmSource.volume = masterVolume;
-        sfxSource.volume = masterVolume;
+        masterVol = Mathf.Clamp01(volume);
+        UpdateAllVolumes(); // 마스터가 바뀌면 전체를 다시 계산
     }
 
     public void SetBGMVolume(float volume)
     {
-        bgmSource.volume = Mathf.Clamp01(volume) * masterVolume;
+        bgmVol = Mathf.Clamp01(volume);
+        bgmSource.volume = bgmVol * masterVol; // BGM 개별값 * 마스터값
     }
 
     public void SetSFXVolume(float volume)
     {
-        sfxSource.volume = Mathf.Clamp01(volume) * masterVolume;
+        sfxVol = Mathf.Clamp01(volume);
+        sfxSource.volume = sfxVol * masterVol; // SFX 개별값 * 마스터값
+    }
+
+    // 마스터 볼륨 변경 시 전체 소스에 일괄 적용하는 함수
+    private void UpdateAllVolumes()
+    {
+        bgmSource.volume = bgmVol * masterVol;
+        sfxSource.volume = sfxVol * masterVol;
     }
 }
