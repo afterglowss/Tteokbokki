@@ -14,12 +14,18 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private Button optionButton;
     [SerializeField] private Button closeButton;
 
-    [Header("오른쪽 패널들")]
-    [SerializeField] private List<GameObject> rightPanels;
     [Header("메뉴 버튼들 (왼쪽)")]
     [SerializeField] private List<Button> menuButtons;
+    // 메뉴 버튼 강조 이미지
+    private List<GameObject> selectionButtons = new List<GameObject>();
 
-    // ✨ 색상 변수 분리 (인스펙터에서 따로 설정하세요!)
+    [Header("탭 제목")]
+    [SerializeField] private TMP_Text textHeader;
+    [SerializeField] private List<string> tabNames = new List<string> { "소리 설정", "화면 설정", "업적" };
+    [Header("오른쪽 패널들")]
+    [SerializeField] private List<GameObject> rightPanels;
+
+    // 색상 변수 분리
     [Header("버튼 내부 색상 (Image Color)")]
     [SerializeField] private Color normalButtonColor = Color.white;       // 평소 버튼 색
     [SerializeField] private Color selectedButtonColor = Color.white;     // 선택/호버 버튼 색
@@ -56,26 +62,38 @@ public class PauseMenuUI : MonoBehaviour
         }
         applyButton.onClick.AddListener(ApplyBtnClick);
 
-        panelPause.anchoredPosition = new Vector2(0, 1530);
 
+        panelPause.anchoredPosition = new Vector2(-2000, 0);
+        selectionButtons.Clear();
         for (int i = 0; i < menuButtons.Count; i++)
         {
+            if (menuButtons[i] == null) continue;
+
+            // 각 버튼의 첫 번째 자식을 강조 이미지로 수집
+            if (menuButtons[i].transform.childCount > 0)
+            {
+                selectionButtons.Add(menuButtons[i].transform.GetChild(0).gameObject);
+            }
+
             int index = i;
             menuButtons[i].onClick.AddListener(() => ShowPanel(index));
             AddHoverEvents(menuButtons[i], index);
         }
 
-        // 기본 선택: 소리 탭 (0번)
+        // 초기 화면 = 소리 탭
         ShowPanel(0);
 
+        // 볼륨 슬라이더 연동
         sliderMaster.onValueChanged.AddListener((value) => { AudioManager.Instance?.SetMasterVolume(value); });
         sliderBGM.onValueChanged.AddListener((value) => { AudioManager.Instance?.SetBGMVolume(value); });
         sliderSFX.onValueChanged.AddListener((value) => { AudioManager.Instance?.SetSFXVolume(value); });
 
+        // 슬라이더 초기값 설정
         sliderMaster.value = 1f;
         sliderBGM.value = 0.5f;
         sliderSFX.value = 0.5f;
 
+        // 디스플레이 설정 초기화
         FilterResolutions();
         SetUpDropdown();
         SetUpToggles();
@@ -113,7 +131,7 @@ public class PauseMenuUI : MonoBehaviour
         SetButtonVisual(index, isHover);
     }
 
-    // ✨ 핵심 수정: 버튼 색과 테두리 색을 각각의 변수에서 가져와 적용
+    // 버튼 색과 테두리 색을 각각의 변수에서 가져와 적용
     private void SetButtonVisual(int index, bool isSelectedOrHover)
     {
         // 1. 테두리(Outline) 색상 설정
@@ -146,30 +164,39 @@ public class PauseMenuUI : MonoBehaviour
 
         if (isPauseOpen)
         {
-            panelPause.DOAnchorPosY(225, 0.4f).SetEase(Ease.OutCubic);
+            panelPause.DOAnchorPosX(0, 0.4f).SetEase(Ease.OutCubic);
         }
         else
         {
-            panelPause.DOAnchorPosY(1530, 0.4f).SetEase(Ease.InCubic);
+            panelPause.DOAnchorPosX(-2000, 0.4f).SetEase(Ease.InCubic);
         }
     }
 
     public void ShowPanel(int index)
     {
         if (index < 0 || index >= rightPanels.Count) return;
-
         currentMenuIndex = index;
+
+        // 탭 제목 변경
+        if (textHeader != null && index < tabNames.Count)
+        {
+            textHeader.text = tabNames[index];
+        }
 
         for (int i = 0; i < rightPanels.Count; i++)
         {
             rightPanels[i].SetActive(i == index);
+
+            if (selectionButtons != null && i < selectionButtons.Count)
+            {
+                selectionButtons[i].SetActive(i == index);
+            }
         }
 
         // 버튼 색상 일괄 업데이트
         UpdateAllButtonVisuals(index);
     }
 
-    // ... (이하 코드 동일) ...
     public void MoveStartScene()
     {
         TogglePausePanel();
