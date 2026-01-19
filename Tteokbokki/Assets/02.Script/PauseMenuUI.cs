@@ -9,6 +9,11 @@ using UnityEngine.EventSystems;
 
 public class PauseMenuUI : MonoBehaviour
 {
+    [Header("Black Curtain (배경 어둡게)")]
+    [SerializeField] private Image blackCurtainImage;
+    [SerializeField] private float fadeDuration = 0.4f;
+    [Range(0f, 1f)][SerializeField] private float curtainMaxAlpha = 0.7f;
+
     [Header("설정 패널")]
     [SerializeField] private RectTransform panelPause;
     [SerializeField] private Button optionButton;
@@ -53,6 +58,20 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private Slider sliderBGM;
     [SerializeField] private Slider sliderSFX;
 
+    private void Awake()
+    {
+        // 씬 시작 시 시간이 멈춰있을 수 있으므로 정상화 (안전장치)
+        Time.timeScale = 1f;
+
+        // 시작 시 커튼 비활성화 및 초기화
+        if (blackCurtainImage != null)
+        {
+            blackCurtainImage.gameObject.SetActive(false);
+            Color c = blackCurtainImage.color;
+            blackCurtainImage.color = new Color(c.r, c.g, c.b, 0f);
+        }
+    }
+
     private void Start()
     {
         closeButton.onClick.AddListener(TogglePausePanel);
@@ -89,6 +108,11 @@ public class PauseMenuUI : MonoBehaviour
         sliderSFX.onValueChanged.AddListener((value) => { AudioManager.Instance?.SetSFXVolume(value); });
 
         // 슬라이더 초기값 설정
+        if (AudioManager.Instance != null)
+        {
+            // 오디오 매니저가 있다면 현재 볼륨을 가져와 반영 (없다면 기본값 유지)
+            // 여기서는 구현 편의상 기본값으로 둡니다. 필요시 AudioManager에서 GetVolume 추가 필요
+        }
         sliderMaster.value = 1f;
         sliderBGM.value = 0.5f;
         sliderSFX.value = 0.5f;
@@ -160,15 +184,56 @@ public class PauseMenuUI : MonoBehaviour
 
     public void TogglePausePanel()
     {
+
         isPauseOpen = !isPauseOpen;
 
         if (isPauseOpen)
         {
-            panelPause.DOAnchorPosX(0, 0.4f).SetEase(Ease.OutCubic);
+            // ⏸️ 게임 시간 정지
+            Time.timeScale = 0f;
+
+            // 🟢 패널 열기
+            panelPause.DOKill();
+            panelPause.DOAnchorPosX(0, fadeDuration)
+                .SetEase(Ease.OutCubic)
+                .SetUpdate(true); // ⭐ 중요: 게임 시간이 0이어도 애니메이션은 작동하도록 설정
+
+            // 🟢 배경(Curtain) Fade In
+            if (blackCurtainImage != null)
+            {
+                blackCurtainImage.gameObject.SetActive(true);
+                blackCurtainImage.DOKill(); // 기존 트윈 제거
+
+                // 알파값을 0부터 시작하지 않고 현재 상태에서 자연스럽게 전환되도록 하려면 
+                // Color 초기화를 빼도 되지만, 보통 켜질 땐 0에서 시작하는 것이 깔끔합니다.
+                Color c = blackCurtainImage.color;
+                blackCurtainImage.color = new Color(c.r, c.g, c.b, 0f);
+
+                blackCurtainImage.DOFade(curtainMaxAlpha, fadeDuration).SetEase(Ease.OutQuad).SetUpdate(true);
+            }
         }
         else
         {
-            panelPause.DOAnchorPosX(-2000, 0.4f).SetEase(Ease.InCubic);
+            // ▶️ 게임 시간 재개
+            Time.timeScale = 1f;
+
+            // 🔴 패널 닫기
+            panelPause.DOKill();
+            panelPause.DOAnchorPosX(-2000, fadeDuration)
+                .SetEase(Ease.InCubic)
+                .SetUpdate(true); // 중요
+
+            if (blackCurtainImage != null)
+            {
+                blackCurtainImage.DOKill();
+                blackCurtainImage.DOFade(0f, fadeDuration)
+                    .SetEase(Ease.InQuad)
+                    .SetUpdate(true) // 중요
+                    .OnComplete(() =>
+                    {
+                        blackCurtainImage.gameObject.SetActive(false);
+                    });
+            }
         }
     }
 
@@ -199,6 +264,11 @@ public class PauseMenuUI : MonoBehaviour
 
     public void MoveStartScene()
     {
+        // 씬 이동 전에 반드시 시간을 다시 흐르게 해야 함!
+        Time.timeScale = 1f;
+
+        DOTween.KillAll();
+
         TogglePausePanel();
         SceneManager.LoadScene("StartScene");
     }

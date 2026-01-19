@@ -108,6 +108,9 @@ public class EndOfDayUIHandler : MonoBehaviour
     {
         InitializeSettlementData(animate: true);
 
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(109);
+
         if (blackCurtainImage != null)
         {
             blackCurtainImage.gameObject.SetActive(true);

@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 5464150981388591904}
   - component: {fileID: 4208159944027185633}
   - component: {fileID: 2626042762773456924}
+  - component: {fileID: 504116031549991019}
   m_Layer: 5
   m_Name: IngredientImage
   m_TagString: Untagged
@@ -241,6 +242,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &504116031549991019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844150156760853793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
 --- !u!1 &3638236042622121195
 GameObject:
   m_ObjectHideFlags: 0

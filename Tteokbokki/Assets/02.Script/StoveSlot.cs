@@ -34,6 +34,8 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     private bool isCooking = false;
     private bool isCooked = false;
 
+    private AudioSource boilingSoundSource;
+
     private bool isDraggingWok = false;
 
     private GameObject spawnedFood;
@@ -147,6 +149,9 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         if (!pendingIngredients.ContainsKey(name))
             pendingIngredients[name] = 0;
 
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(102);
+
         pendingIngredients[name]++;
 
         // 재료가 들어갔으므로 '재료 담긴 웍' 이미지로 변경
@@ -221,7 +226,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         Sprite targetSprite;
         if (string.IsNullOrEmpty(menuName) || menuName == "Ruined")
         {
-            targetSprite = StoveManager.Instance.ruinedSprite;
+            targetSprite = StoveManager.Instance.ruinedCookingSprite;
         }
         else
         {
@@ -240,6 +245,13 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             c.a = 0f;
             wokOverlayImage.color = c;
         }
+
+        // 🔥 [사운드] 1. 조리 시작 '치이익' 소리는 화구별로 나도 됨 (ID 105)
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(105);
+
+        // 🔥 [사운드] 2. 끓는 소리는 매니저에게 요청
+        StoveManager.Instance.NotifyCookingStarted();
 
         UpdateInfoUI();
         UpdateTimerDisplay();
@@ -366,29 +378,49 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
     private void FinishCooking()
     {
+        if (isCooking) StoveManager.Instance.NotifyCookingEnded();
+
         isCooking = false;
         isCooked = true;
         timerText.text = "완료!";
 
-        // 조리 완료 -> 웍 이미지 사라짐
-        // ✨ [수정] 조리 완료 시 아래 깔린 이미지와 오버레이 모두 끄기
+        // 화구 이미지는 숨김 (CookedFoodUI가 대신 보여줌)
         if (wokImage != null) wokImage.gameObject.SetActive(false);
-        if (wokOverlayImage != null) wokOverlayImage.gameObject.SetActive(false); // 이거 추가!
+        if (wokOverlayImage != null) wokOverlayImage.gameObject.SetActive(false);
 
         if (spawnedFood != null) Destroy(spawnedFood);
 
         spawnedFood = Instantiate(cookedFoodPrefab, cookedFoodSpawnPoint);
         spawnedFood.transform.localPosition = Vector3.zero;
 
+        // ✨ [핵심 수정] 메뉴 이름을 식별하여 매니저에게 '완성된 이미지'를 요청
+        string menuName = PlayerWokManager.Instance.IdentifyMenu(currentIngredients);
+        Sprite finishedSprite;
+
+        if (menuName == "Invalid" || menuName == "Ruined")
+        {
+            // 재료가 이상하거나 망했으면 '망한 완성 이미지' 사용
+            finishedSprite = StoveManager.Instance.ruinedFinishedSprite;
+        }
+        else
+        {
+            // 정상 메뉴라면 해당 메뉴의 '완성 이미지' 요청
+            finishedSprite = StoveManager.Instance.GetFinishedSprite(menuName);
+        }
+
+        // CookedFoodUI 초기화 및 이미지 전달
         var foodUI = spawnedFood.GetComponent<CookedFoodUI>();
         if (foodUI != null)
         {
-            foodUI.Initialize(currentIngredients);
+            // 여기서 finishedSprite가 CookedFoodUI의 WokImage로 들어감
+            foodUI.Initialize(currentIngredients, finishedSprite);
             foodUI.originStoveSlot = this;
         }
 
-        onCookComplete?.Invoke(currentIngredients);
+        // 사운드 재생
+        if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(106);
 
+        onCookComplete?.Invoke(currentIngredients);
         UpdateInfoUI();
     }
 
@@ -407,6 +439,11 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
     public void ResetSlot()
     {
+        // 🔥 [사운드] 요리 도중에 리셋(초기화)되는 경우에도 소리 카운트를 줄여야 함
+        if (isCooking)
+        {
+            StoveManager.Instance.NotifyCookingEnded();
+        }
         isCooked = false;
         isCooking = false;
         currentIngredients = null;
@@ -480,6 +517,11 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             // 조리 중 이미지 복원
             SetWokState(wokLidSprite);
             UpdateTimerDisplay();
+
+            // 🔥 [사운드] 로드 시 '조리 중'이었다면 끓는 소리 다시 켜주기 (선택 사항)
+            // 만약 로드했을 때 조용하길 원하면 이 부분은 빼셔도 됩니다.
+            if (AudioManager.Instance != null)
+                boilingSoundSource = AudioManager.Instance.PlayLoopSFX(101);
         }
         else if (data.pendingIngredients != null && data.pendingIngredients.Count > 0)
         {

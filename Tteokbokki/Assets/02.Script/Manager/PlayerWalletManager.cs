@@ -38,6 +38,9 @@ public class PlayerWalletManager : MonoBehaviour
 
         // ✨ 변경 전 금액부터 애니메이션 시작
         UpdateUI(true, prevBalance);
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(111);
     }
 
     public void ResetTodayEarnings()
