@@ -42,7 +42,7 @@ public class AudioManager : MonoBehaviour
     private void Start()
     {
         UpdateAllVolumes();
-        PlayBGM(201);
+        PlayBGM(201, 0.5f);
     }
 
     // --- 1. 단발성 효과음 (SFX) ---

@@ -29,6 +29,8 @@ public class StoveManager : MonoBehaviour
     private AudioSource globalBoilingSource;
     private int activeCookingCount = 0; // 현재 요리 중인 화구 개수
 
+    private int currentSelectedStoveIndex = -1; // ✨ 현재 선택된 인덱스 추적용
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -41,6 +43,26 @@ public class StoveManager : MonoBehaviour
         {
             slot.Initialize(this);
         }
+    }
+
+    public void OnStoveClicked(int index) // 기존 함수 (UI 버튼 등에서 호출한다고 가정)
+    {
+        if (index < 0 || index >= stoves.Length) return;
+
+        // 같은 거 누르면 해제
+        if (currentSelectedStoveIndex == index)
+        {
+            DeselectCurrentSlot();
+            return;
+        }
+
+        // 기존 해제
+        if (selectedSlot != null) selectedSlot.SetSelected(false);
+
+        // 신규 선택
+        currentSelectedStoveIndex = index;
+        selectedSlot = stoves[index];
+        selectedSlot.SetSelected(true);
     }
 
     public void SelectSlot(StoveSlot slot)
@@ -66,6 +88,27 @@ public class StoveManager : MonoBehaviour
             selectedSlot.SetSelected(false);
             PlayerWokManager.Instance.ClearUI();
             selectedSlot = null;
+            currentSelectedStoveIndex = -1; // 인덱스 초기화
+        }
+    }
+
+    // ✨ [NEW] 키보드 입력용: 화구 직접 선택 (토글 아님, 무조건 선택)
+    public void SelectStoveByIndex(int index)
+    {
+        // 0~4 범위 체크
+        if (index >= 0 && index < stoves.Length)
+        {
+            // 이미 선택된 거라면 무시하거나 재선택 (여기선 재선택 효과)
+            if (currentSelectedStoveIndex != index)
+            {
+                // 기존 해제
+                if (selectedSlot != null) selectedSlot.SetSelected(false);
+
+                // 선택
+                currentSelectedStoveIndex = index;
+                selectedSlot = stoves[index];
+                selectedSlot.SetSelected(true);
+            }
         }
     }
 

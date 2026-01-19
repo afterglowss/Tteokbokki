@@ -353,5 +353,24 @@ public class ReceiptLineManager : MonoBehaviour
 
         UpdatePendingCountUI(); // 대기 중 숫자 UI 업데이트
     }
+    // ✨ [NEW] 마감 시 남아있는 모든 영수증을 실패 처리하는 함수
+    public void FailAllActiveReceipts()
+    {
+        // 1. 화면에 매달려 있는 영수증들 실패 처리
+        foreach (var item in receiptSlots)
+        {
+            if (item != null)
+            {
+                RecordFailedReceipt(item.GetReceipt());
+            }
+        }
 
+        // 2. 대기열(아직 화면에 안 나온)에 있는 영수증들 실패 처리
+        foreach (var receipt in pendingReceipts)
+        {
+            RecordFailedReceipt(receipt);
+        }
+
+        Debug.Log("[마감] 남아있던 모든 영수증을 실패 처리했습니다.");
+    }
 }

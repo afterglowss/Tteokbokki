@@ -12,6 +12,8 @@ public class IngredientButton : MonoBehaviour
     public TextMeshProUGUI stockText;
     public Image iconImage; // ✨ [NEW] 재료 이미지를 표시할 Image 컴포넌트
 
+    public TextMeshProUGUI hotkeyText;
+
     private void Start()
     {
         IngredientStockManager.Instance.RegisterIngredientButton(this);
@@ -80,5 +82,15 @@ public class IngredientButton : MonoBehaviour
         }
 
         gameObject.name = $"{name}_Button";
+    }
+
+    // ✨ [NEW] 단축키 표시 함수
+    public void SetHotkeyDisplay(string key)
+    {
+        if (hotkeyText != null)
+        {
+            hotkeyText.text = key;
+            hotkeyText.gameObject.SetActive(!string.IsNullOrEmpty(key));
+        }
     }
 }

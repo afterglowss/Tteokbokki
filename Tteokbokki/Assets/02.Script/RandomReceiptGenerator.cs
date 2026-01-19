@@ -64,7 +64,6 @@ public class RandomReceiptGenerator : MonoBehaviour
     public CombinedIngredientManager combinedIngredientManager;  // RandomReceiptGenerator에 Inspector에서 연결
     public ReceiptUIManager receiptUIManager;
     public ReceiptLineManager receiptLineManager;
-    public float autoOrderIntervalMinutes = 3f;  // 게임시간 3분마다 자동주문
 
     private ReceiptManager receiptManager;
 
@@ -89,19 +88,7 @@ public class RandomReceiptGenerator : MonoBehaviour
 
     void Update()
     {
-        //CheckAutoOrder();
-    }
-
-    private void CheckAutoOrder()
-    {
-        DateTime currentGameTime = gameClock.GetCurrentGameTime();
-        TimeSpan elapsed = currentGameTime - lastOrderTime;
-
-        if (elapsed.TotalMinutes >= 3)
-        {
-            GenerateAndDisplayReceipt();
-            lastOrderTime = currentGameTime;  // 다음 주문 시간 갱신
-        }
+        
     }
 
     public void ShowReceiptIngredients(int orderID)     //특정 주문 번호의 영수증의 재료 합산 출력
@@ -148,7 +135,7 @@ public class RandomReceiptGenerator : MonoBehaviour
         }
 
 
-        int menuCount = GetRandomWeightedValue(new int[] { 70, 20, 5, 5 }) + 1;
+        int menuCount = GetRandomWeightedValue(new int[] { 84, 15, 1}) + 1;
 
         for (int i = 0; i < menuCount; i++)
         {

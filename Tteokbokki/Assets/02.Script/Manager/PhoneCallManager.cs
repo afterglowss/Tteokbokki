@@ -218,4 +218,30 @@ public class PhoneCallManager : MonoBehaviour
         isInCall = false;
         SetIdleVisual();
     }
+
+    // ✨ [NEW] 마감 시 모든 전화 상황 강제 종료
+    public void ForceStopAllCalls()
+    {
+        // 1. 대기열 비우기
+        callQueue.Clear();
+
+        // 2. 울리는 중이라면 즉시 중단 (소리 끄기 포함)
+        if (isRinging)
+        {
+            StopRinging();
+        }
+
+        // 3. 통화 중이라면 강제 종료 (Yarn 대화 중단)
+        if (isInCall)
+        {
+            if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
+            {
+                dialogueRunner.Stop(); // 대화창 끄기
+            }
+            isInCall = false;
+            SetIdleVisual();
+        }
+
+        Debug.Log("[PhoneCall] 마감으로 인해 모든 전화가 강제 종료되었습니다.");
+    }
 }

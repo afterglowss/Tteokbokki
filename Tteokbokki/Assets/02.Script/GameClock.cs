@@ -3,6 +3,7 @@ using UnityEngine;
 using TMPro;
 using System.Data;
 using System.IO;
+using System.Globalization;
 
 [Serializable]
 public class DateWrapper
@@ -127,8 +128,9 @@ public class GameClock : MonoBehaviour
     {
         if (dateTimeText != null)
         {
-            // "2025 - 08 - 25 12:00" 형식으로 포맷팅
-            dateTimeText.text = gameTime.ToString("yyyy - MM - dd HH:mm");
+            // "yyyy - MM - dd dddd HH:mm" 형식을 사용합니다.
+            // new CultureInfo("ko-KR")를 넣으면 컴퓨터 언어 설정과 상관없이 무조건 한국어로 나옵니다.
+            dateTimeText.text = gameTime.ToString("yyyy - MM - dd dddd HH:mm", new CultureInfo("ko-KR"));
         }
     }
 

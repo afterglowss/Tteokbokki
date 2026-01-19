@@ -2,6 +2,7 @@
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 // ✨ [NEW] 주방용 버튼 이미지를 Inspector에서 연결하기 위한 데이터 구조
 [System.Serializable]
@@ -49,6 +50,17 @@ public class IngredientStockManager : MonoBehaviour
     private const int ShelfLifeDays = 5;
     private HashSet<string> purchasedAtLeastOnce = new();
     private List<string> lowStockIngredients = new();
+
+
+    // ✨ [변경] KeyCode 대신 InputSystem의 'Key' 사용
+    private readonly Key[] row1Keys = { Key.Q, Key.W, Key.E, Key.R, Key.T, Key.Y, Key.U };
+    private readonly Key[] row2Keys = { Key.A, Key.S, Key.D, Key.F, Key.G, Key.H, Key.J };
+    private readonly Key[] row3Keys = { Key.Z, Key.X, Key.C, Key.V, Key.B, Key.N, Key.M };
+
+    // ✨ 매핑 딕셔너리 타입 변경 (Key -> string)
+    private Dictionary<Key, string> keyToIngredientMap = new Dictionary<Key, string>();
+
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -72,12 +84,28 @@ public class IngredientStockManager : MonoBehaviour
             GenerateIngredientButtons();
         }
     }
+    // ✨ [변경] 반환 타입 KeyCode -> Key
+    public List<Key> GetAllRegisteredKeys()
+    {
+        return keyToIngredientMap.Keys.ToList();
+    }
+
+    // ✨ [변경] 매개변수 타입 KeyCode -> Key
+    public string GetIngredientByKey(Key key)
+    {
+        if (keyToIngredientMap.TryGetValue(key, out string name))
+        {
+            return name;
+        }
+        return null;
+    }
 
     public void GenerateIngredientButtons()
     {
         ClearGrid(ingredientGridParent);
         ClearGrid(sauceGridParent);
         registeredButtons.Clear();
+        keyToIngredientMap.Clear();
 
         Dictionary<string, Sprite> spriteMap = new Dictionary<string, Sprite>();
         foreach (var data in kitchenSprites)
@@ -86,33 +114,64 @@ public class IngredientStockManager : MonoBehaviour
                 spriteMap.Add(data.ingredientName, data.kitchenButtonSprite);
         }
 
+        List<string> sauceList = new List<string>();
+        List<string> normalList = new List<string>();
+
         foreach (var ingredientName in IngredientEconomyDatabase.Data.Keys)
         {
-            // 해금 안 됐으면 패스
             if (!purchasedAtLeastOnce.Contains(ingredientName)) continue;
+            if (ingredientName.Contains("소스")) sauceList.Add(ingredientName);
+            else normalList.Add(ingredientName);
+        }
 
-            // 소스 여부 판별
-            bool isSauce = ingredientName.Contains("소스");
+        CreateButtons(normalList, ingredientGridParent, ingredientButtonPrefab, spriteMap, false);
+        CreateButtons(sauceList, sauceGridParent, sauceButtonPrefab, spriteMap, true);
 
-            // ✨ [핵심 수정] 소스 여부에 따라 부모와 프리팹을 다르게 설정
-            Transform targetParent = isSauce ? sauceGridParent : ingredientGridParent;
-            GameObject prefabToUse = isSauce ? sauceButtonPrefab : ingredientButtonPrefab;
+        UpdateAllStockTexts();
+    }
 
-            // 안전장치: 소스 프리팹을 연결 안 했다면 그냥 일반 프리팹 사용
-            if (isSauce && prefabToUse == null) prefabToUse = ingredientButtonPrefab;
+    private void CreateButtons(List<string> ingredients, Transform parent, GameObject prefab, Dictionary<string, Sprite> spriteMap, bool isSauceRow)
+    {
+        if (parent == null || prefab == null) return;
 
-            if (targetParent == null || prefabToUse == null) continue;
-
-            // 생성
-            GameObject obj = Instantiate(prefabToUse, targetParent);
+        int index = 0;
+        foreach (var name in ingredients)
+        {
+            GameObject obj = Instantiate(prefab, parent);
             IngredientButton btn = obj.GetComponent<IngredientButton>();
 
             if (btn != null)
             {
                 Sprite icon = null;
-                if (spriteMap.TryGetValue(ingredientName, out Sprite s)) icon = s;
-                btn.Setup(ingredientName, icon);
+                if (spriteMap.TryGetValue(name, out Sprite s)) icon = s;
+                btn.Setup(name, icon);
+
+                // ✨ Key 할당 로직 (타입만 Key로 변경됨)
+                Key assignedKey = Key.None;
+
+                if (isSauceRow)
+                {
+                    if (index < row3Keys.Length) assignedKey = row3Keys[index];
+                }
+                else
+                {
+                    if (index < row1Keys.Length)
+                        assignedKey = row1Keys[index];
+                    else if (index - row1Keys.Length < row2Keys.Length)
+                        assignedKey = row2Keys[index - row1Keys.Length];
+                }
+
+                if (assignedKey != Key.None)
+                {
+                    btn.SetHotkeyDisplay(assignedKey.ToString());
+                    keyToIngredientMap[assignedKey] = name;
+                }
+                else
+                {
+                    btn.SetHotkeyDisplay("");
+                }
             }
+            index++;
         }
     }
 
@@ -205,10 +264,47 @@ public class IngredientStockManager : MonoBehaviour
             // 단일 관리 체제에서는 entry를 남겨두고 count만 0으로 두는 게 관리하기 편합니다.
 
             UpdateStockText(ingredientName);
+
+            CheckGameoverCondition();
             return true;
         }
 
         return false;
+    }
+    // ✨ [NEW] 필수 재료나 소스가 전멸했는지 검사하는 함수
+    private void CheckGameoverCondition()
+    {
+        // 1. 4대 필수 재료 검사 (하나라도 0이면 게임 오버)
+        string[] essentials = { "떡", "오뎅", "파", "양배추" };
+        foreach (var item in essentials)
+        {
+            if (GetStock(item) <= 0)
+            {
+                GameManager.Instance.TriggerEmergencyClose($"필수 재료 '{item}' 소진!");
+                return;
+            }
+        }
+
+        // 2. 소스 전멸 검사 (모든 소스 합계가 0이면 게임 오버)
+        string[] sauces = {
+            "군자 소스", "마라 소스", "로제 소스", "크림 소스",
+            "간장 소스", "카레 소스", "짜장 소스"
+        };
+
+        bool hasAnySauce = false;
+        foreach (var sauce in sauces)
+        {
+            if (GetStock(sauce) > 0)
+            {
+                hasAnySauce = true;
+                break; // 소스가 하나라도 있으면 생존
+            }
+        }
+
+        if (!hasAnySauce)
+        {
+            GameManager.Instance.TriggerEmergencyClose("모든 소스 소진!");
+        }
     }
 
 
