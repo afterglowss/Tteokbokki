@@ -361,6 +361,10 @@ public class EndOfDayUIHandler : MonoBehaviour
             if (height == 0) height = 1920f;
 
             shutterRect.anchoredPosition = new Vector2(0, height);
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFX(116);
+
             closeSeq.Append(shutterRect.DOAnchorPos(Vector2.zero, shutterMoveDuration).SetEase(Ease.OutBounce));
         }
 

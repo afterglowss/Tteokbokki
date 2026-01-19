@@ -101,7 +101,13 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         bool success = MatchAllMenusInReceipt(receipt, cookedIngredients);
 
         if (!success)
+        {
+            // 🔥 [전화] 잘못된 배달 실패 전화 걸기
+            if (PhoneCallManager.Instance != null)
+                PhoneCallManager.Instance.TriggerCall(FailReason.WrongDelivery);
+
             ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
+        }
         else
         {
             ReceiptLineManager.Instance.RecordSuccessfulReceipt(receipt);

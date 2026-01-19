@@ -85,6 +85,10 @@ public class ReceiptLineManager : MonoBehaviour
 
     public void AddNewReceipt(Receipt receipt)
     {
+        if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(113);
+
+        if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(117);
+
         if (receiptSlots.Count >= maxSlots)
         {
             pendingReceipts.Enqueue(receipt);  // 대기열에 보관

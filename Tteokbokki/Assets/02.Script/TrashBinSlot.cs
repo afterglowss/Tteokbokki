@@ -9,6 +9,8 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
         var food = eventData.pointerDrag?.GetComponent<CookedFoodUI>();
         if (food != null)
         {
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114);
+
             // ... (기존 음식 버리기 코드 유지) ...
             if (food.originStoveSlot != null) food.originStoveSlot.ResetSlot();
             if (food.currentSlot != null) food.currentSlot.RemoveFood(food);
@@ -20,6 +22,8 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
         var receiptItem = eventData.pointerDrag?.GetComponent<ReceiptLineItem>();
         if (receiptItem != null)
         {
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114);
+
             // ... (기존 영수증 버리기 코드 유지) ...
             ReceiptLineManager.Instance.RecordFailedReceipt(receiptItem.GetReceipt());
             ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
@@ -33,6 +37,8 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
 
         if (stoveSlot != null)
         {
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114);
+
             Debug.Log($"[휴지통] {stoveSlot.name}의 재료를 비웁니다.");
             stoveSlot.ClearPending(); // 재료 비우기
             return;

@@ -66,11 +66,18 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     // ✨ 포장 완료 상태로 전환하는 함수
     public void SwitchToPackedState()
     {
+        // 1. 현재 웍(냄비) 상태인지 먼저 확인합니다.
+        // (wokStateObject가 켜져 있다는 건 아직 포장되지 않았다는 뜻)
+        bool isTransforming = wokStateObject != null && wokStateObject.activeSelf;
+
         if (wokStateObject != null) wokStateObject.SetActive(false);
         if (packageStateObject != null) packageStateObject.SetActive(true);
 
-        // 포장 사운드 (선택사항)
-        if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(112);
+        // 2. 웍 상태에서 -> 포장 상태로 '변신하는 순간'에만 소리 재생
+        if (isTransforming)
+        {
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(112);
+        }
     }
 
     // ... (이하 UpdateText, Tooltip, Drag 관련 함수들은 기존과 동일하므로 유지) ...
@@ -129,7 +136,7 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             {
                 if (slot.foodStackParent.childCount >= slot.maxStackSize)
                 {
-                    TooltipManager.ShowFollowMouse(TooltipType.UI, "포장 슬롯은 가득 찼습니다!");
+                    //TooltipManager.ShowFollowMouse(TooltipType.UI, "포장 슬롯은 가득 찼습니다!");
                     ReturnToOriginal(); // 실패 시 복귀
                     return;
                 }

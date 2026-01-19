@@ -150,7 +150,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             pendingIngredients[name] = 0;
 
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlaySFX(102);
+            AudioManager.Instance.PlaySFX(102, 0.2f);
 
         pendingIngredients[name]++;
 

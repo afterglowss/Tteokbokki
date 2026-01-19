@@ -2324,7 +2324,7 @@ MonoBehaviour:
   fadeDuration: 0.5
   curtainMaxAlpha: 0.7
   shutterRect: {fileID: 0}
-  shutterMoveDuration: 0.6
+  shutterMoveDuration: 1.3
   shutterStayDelay: 1
   mainWindowRect: {fileID: 1028477172703266006}
   macDecorationButtons:
