@@ -10,6 +10,8 @@ public class SuccessBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler,
 
         if (receiptItem != null)
         {
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114);
+
             Receipt receipt = receiptItem.GetReceipt();
 
             Debug.Log($"[Debug] 영수증 {receipt.OrderID} 강제 성공 처리 (Success Bin)");

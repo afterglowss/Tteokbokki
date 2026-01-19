@@ -88,7 +88,10 @@ public class ReceiptLineItem : MonoBehaviour
 
         if (elapsed.TotalMinutes >= cookTimeSeconds / 60f)
         {
-            //Debug.LogWarning($"[영수증 {receipt.OrderID}] 시간이 초과되어 삭제됩니다.");
+            // 🔥 [전화] 시간 초과 실패 전화 걸기
+            if (PhoneCallManager.Instance != null)
+                PhoneCallManager.Instance.TriggerCall(FailReason.Timeout);
+
             ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
             manager.RemoveReceipt(this);
             return;

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class PackagingSlot : MonoBehaviour, IDropHandler
 {
-    public Transform foodStackParent; // À½½ÄÀÌ ½×ÀÏ À§Ä¡ (ÀÚ½ÅÀÌ°Å³ª ÀÚ½Ä)
+    public Transform foodStackParent; // ìŒì‹ì´ ìŒ“ì¼ ìœ„ì¹˜ (ìì‹ ì´ê±°ë‚˜ ìì‹)
     public float stackYOffset = 30f;
 
     private List<CookedFoodUI> stackedFoods = new();
@@ -31,10 +31,10 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
 
         if (stackedFoods.Count >= maxStackSize) return;
 
-        // 1. ½½·Ô¿¡ ½×±â
+        // 1. ìŠ¬ë¡¯ì— ìŒ“ê¸°
         AddFood(foodUI);
 
-        // 2. È­±¸ »óÅÂ ÃÊ±âÈ­
+        // 2. í™”êµ¬ ìƒíƒœ ì´ˆê¸°í™”
         if (foodUI.originStoveSlot != null)
         {
             //foodUI.originStoveSlot.ResetSlot();
@@ -47,13 +47,17 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         if (stackedFoods.Contains(food))
             return;
 
-        packagingArea.RemoveFoodFromAllSlots(food);  // ±âÁ¸ ½½·Ô¿¡¼­ Á¦°Å (Áßº¹ ¹æÁö)
+        packagingArea.RemoveFoodFromAllSlots(food);  // ê¸°ì¡´ ìŠ¬ë¡¯ì—ì„œ ì œê±° (ì¤‘ë³µ ë°©ì§€)
 
         food.transform.SetParent(foodStackParent);
         food.transform.localPosition = new Vector3(0, stackedFoods.Count * stackYOffset, 0);
         stackedFoods.Add(food);
 
-        food.currentSlot = this;  // ÇöÀç ½½·Ô µî·Ï
+        food.currentSlot = this;  // í˜„ì¬ ìŠ¬ë¡¯ ë“±ë¡
+
+        // âœ¨ [í•µì‹¬ ì¶”ê°€] í¬ì¥ëŒ€ì— ë“¤ì–´ì™”ìœ¼ë‹ˆ "í¬ì¥ëœ ëª¨ìŠµ"ìœ¼ë¡œ ë³€ì‹ !
+        food.SwitchToPackedState();
+
     }
 
     public void RemoveFood(CookedFoodUI food)
@@ -78,15 +82,15 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
 
         if (stackedFoods.Count == 0)
         {
-            // À½½ÄÀÌ ÇÏ³ªµµ ¾ø´Â ½½·Ô ¡æ ½ÇÆĞ ¾Æ´Ô, µå·Ó ¹«È¿
-            Debug.Log("À½½ÄÀÌ ¾ø´Â ½½·ÔÀÔ´Ï´Ù. ¿µ¼öÁõ µå·Ó ¹«½Ã + º¹±Í");
+            // ìŒì‹ì´ í•˜ë‚˜ë„ ì—†ëŠ” ìŠ¬ë¡¯ â†’ ì‹¤íŒ¨ ì•„ë‹˜, ë“œë¡­ ë¬´íš¨
+            Debug.Log("ìŒì‹ì´ ì—†ëŠ” ìŠ¬ë¡¯ì…ë‹ˆë‹¤. ì˜ìˆ˜ì¦ ë“œë¡­ ë¬´ì‹œ + ë³µê·€");
 
-            // º¹±Í¸¦ À§ÇØ ¿ø·¡ À§Ä¡·Î µ¹·Á³õ±â
+            // ë³µê·€ë¥¼ ìœ„í•´ ì›ë˜ ìœ„ì¹˜ë¡œ ëŒë ¤ë†“ê¸°
             receiptItem.ReturnToOriginalPosition();
             return;
         }
 
-        // ³»ºÎ À½½Ä Àç·á ¸ñ·Ï ÃßÃâ
+        // ë‚´ë¶€ ìŒì‹ ì¬ë£Œ ëª©ë¡ ì¶”ì¶œ
         List<Dictionary<string, int>> cookedIngredients = new();
         foreach (var food in stackedFoods.ToList())
         {
@@ -97,7 +101,13 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         bool success = MatchAllMenusInReceipt(receipt, cookedIngredients);
 
         if (!success)
+        {
+            // ğŸ”¥ [ì „í™”] ì˜ëª»ëœ ë°°ë‹¬ ì‹¤íŒ¨ ì „í™” ê±¸ê¸°
+            if (PhoneCallManager.Instance != null)
+                PhoneCallManager.Instance.TriggerCall(FailReason.WrongDelivery);
+
             ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
+        }
         else
         {
             ReceiptLineManager.Instance.RecordSuccessfulReceipt(receipt);
@@ -114,23 +124,23 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
 
             PlayerWalletManager.Instance.AddIncome(totalIncome);
             if (bonus > 0)
-                Debug.Log($"[º¸³Ê½º] {bonus:N0}¿ø º¸³Ê½º Áö±Ş (º¸³Ê½º Àç·á Æ÷ÇÔ)");
+                Debug.Log($"[ë³´ë„ˆìŠ¤] {bonus:N0}ì› ë³´ë„ˆìŠ¤ ì§€ê¸‰ (ë³´ë„ˆìŠ¤ ì¬ë£Œ í¬í•¨)");
         }
 
-        TooltipManager.Hide(TooltipType.Info); // ÅøÆÁ ¼û±â±â
+        TooltipManager.Hide(TooltipType.Info); // íˆ´íŒ ìˆ¨ê¸°ê¸°
         foreach (var food in stackedFoods)
             Destroy(food.gameObject);
 
         stackedFoods.Clear();
 
-        // ¿µ¼öÁõ UI Á¦°Å
+        // ì˜ìˆ˜ì¦ UI ì œê±°
         Destroy(receiptItem.gameObject);
 
         receiptItem.OnEndDrag();
         ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
 
-        // (¼±ÅÃ»çÇ×: ¼º°ø/½ÇÆĞ ÇÇµå¹é)
-        Debug.Log(success ? $"¿µ¼öÁõ {receipt.OrderID} Ã³¸® ¼º°ø!" : $"¿µ¼öÁõ {receipt.OrderID} Ã³¸® ½ÇÆĞ - ±â·ÏµÊ");
+        // (ì„ íƒì‚¬í•­: ì„±ê³µ/ì‹¤íŒ¨ í”¼ë“œë°±)
+        Debug.Log(success ? $"ì˜ìˆ˜ì¦ {receipt.OrderID} ì²˜ë¦¬ ì„±ê³µ!" : $"ì˜ìˆ˜ì¦ {receipt.OrderID} ì²˜ë¦¬ ì‹¤íŒ¨ - ê¸°ë¡ë¨");
     }
 
     private bool MatchAllMenusInReceipt(Receipt receipt, List<Dictionary<string, int>> cookedFoods)

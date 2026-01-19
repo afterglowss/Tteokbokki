@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,37 +13,39 @@ public class PhoneCallManager : MonoBehaviour
     [Header("UI & Audio")]
     [SerializeField] private Button phoneButton;
     [SerializeField] private Image phoneIcon;
+    [SerializeField] private RectTransform phoneIconRt;
+
+    [Header("Visual Settings")]
     [SerializeField] private Color idleColor = Color.white;
     [SerializeField] private Color ringingColor = Color.red;
-    [SerializeField] private RectTransform phoneIconRt;
-    [SerializeField] private AudioSource ringAudio;     // loop on
-    [SerializeField] private AudioClip ringClip;
+
+    [Header("Sound Settings")]
+    public int ringSoundID = 115; // ğŸ”¥ ë²¨ì†Œë¦¬ (Loop) ID ì„¤ì • í•„ìš”
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
-    [Tooltip("¿¹: phone/timeout_1, phone/timeout_2 ...")]
     [SerializeField] private List<string> timeoutNodes = new();
-    [Tooltip("¿¹: phone/wrong_1, phone/wrong_2 ...")]
     [SerializeField] private List<string> wrongNodes = new();
 
     [Header("Behavior")]
-    [SerializeField, Range(0f, 1f)] private float probTimeout = 0.30f;
-    [SerializeField, Range(0f, 1f)] private float probWrong = 0.45f;
-    [SerializeField] private float ringDuration = 8f;        // ¾È ¹ŞÀ¸¸é ÀÚµ¿ Á¾·á
-    [SerializeField] private float minDelay = 1.0f;          // ½ÇÆĞ ÈÄ ÀüÈ­ ½Ãµµ±îÁö µô·¹ÀÌ ¹üÀ§
-    [SerializeField] private float maxDelay = 3.0f;
-    [SerializeField] private float cooldownSeconds = 30f;    // ÅëÈ­/º§ ÀÌÈÄ Àç½Ãµµ Äğ´Ù¿î
-    [SerializeField] private int dailyMaxCalls = 3;          // ÇÏ·ç ÃÖ´ë ÅëÈ­(º§ ¼º°ø ¼ö½Å ±âÁØ)
+    [SerializeField] private float ringDuration = 8f;        // ì´ ì‹œê°„ ë™ì•ˆ ì•ˆ ë°›ìœ¼ë©´ ê°•ì œ ì—°ê²°
 
+    // ìƒíƒœ ë³€ìˆ˜
     private bool isRinging;
     private bool isInCall;
-    private float lastBusyTime;
-    private int todayCalls; // ÇÊ¿äÇÑ °æ¿ì GameClockÀÇ ³¯Â¥ ·Ñ¿À¹ö ¶§ 0À¸·Î ÃÊ±âÈ­
+
+    // ğŸ”¥ ì „í™” ëŒ€ê¸°ì—´ (ì¤‘ì²© í•´ê²°ìš©)
+    private Queue<FailReason> callQueue = new Queue<FailReason>();
+    private FailReason currentReason;
 
     private Coroutine ringRoutineCo;
-    private Vector2 shakeOffset; // °£´ÜÇÑ Èçµé¸²
-
     private Vector2 originalAnchoredPos;
+
+    // ğŸ”¥ í˜„ì¬ ì¬ìƒ ì¤‘ì¸ ë²¨ì†Œë¦¬ ì˜¤ë””ì˜¤ ì†ŒìŠ¤
+    private AudioSource currentRingSource;
+
+    // IsBusy: ìš¸ë¦¬ëŠ” ì¤‘ì´ê±°ë‚˜ í†µí™” ì¤‘ì´ë©´ ë°”ìœ ìƒíƒœ
+    public bool IsBusy => isRinging || isInCall;
 
     void Awake()
     {
@@ -53,71 +55,77 @@ public class PhoneCallManager : MonoBehaviour
 
     void Start()
     {
-        originalAnchoredPos = phoneIconRt.anchoredPosition; // ¿ø·¡ À§Ä¡ ÀúÀå
+        if (phoneIconRt != null) originalAnchoredPos = phoneIconRt.anchoredPosition;
+
         SetIdleVisual();
         phoneButton.onClick.AddListener(OnPhoneClicked);
 
-        // Yarn ¿Ï·á ÀÌº¥Æ®¿¡ ±¸µ¶ (Yarn Spinner 2.x)
-        dialogueRunner.onDialogueComplete.AddListener(OnDialogueComplete);
-        Debug.Log("Call Start!");
-        StartRinging(FailReason.Timeout);
+        // ëŒ€í™”ê°€ ëë‚˜ë©´ ë‹¤ìŒ ë¡œì§ ì²˜ë¦¬ë¥¼ ìœ„í•´ ì´ë²¤íŠ¸ ì—°ê²°
+        if (dialogueRunner != null)
+            dialogueRunner.onDialogueComplete.AddListener(OnDialogueComplete);
     }
 
-    public bool IsBusy = false/*=> isRinging || isInCall || (Time.time - lastBusyTime) < cooldownSeconds*/;
-
-    /// ½ÇÆĞ ÁöÁ¡¿¡¼­ È£Ãâ: ÀÏÁ¤ ½Ã°£ µÚ È®·ü Ã¼Å© ¡æ ¿ï¸®±â
-    public void TryScheduleCall(FailReason reason)
+    // ğŸ”” ì™¸ë¶€ì—ì„œ í˜¸ì¶œ: ì‹¤íŒ¨ ë°œìƒ ì‹œ ì¦‰ì‹œ ì „í™” ìš”ì²­
+    public void TriggerCall(FailReason reason)
     {
-        if (IsBusy || todayCalls >= dailyMaxCalls) return;
-        float delay = Random.Range(minDelay, maxDelay);
-        StartCoroutine(ScheduleCallCo(reason, delay));
-    }
+        Debug.Log($"[PhoneCall] ì „í™” ìš”ì²­ ë“¤ì–´ì˜´: {reason}");
 
-    private IEnumerator ScheduleCallCo(FailReason reason, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        if (IsBusy || todayCalls >= dailyMaxCalls) yield break;
-
-        float p = ComputeProbability(reason);
-        if (Random.value <= p)
+        // ì´ë¯¸ í†µí™” ì¤‘ì´ê±°ë‚˜ ìš¸ë¦¬ëŠ” ì¤‘ì´ë¼ë©´ ëŒ€ê¸°ì—´ì— ì¶”ê°€ (ì¤‘ì²© í•´ê²°)
+        if (IsBusy)
+        {
+            Debug.Log("[PhoneCall] ë¼ì¸ì´ ë°”ì¨. ëŒ€ê¸°ì—´ì— ì¶”ê°€.");
+            callQueue.Enqueue(reason);
+        }
+        else
+        {
+            // ë°”ë¡œ ìš¸ë¦¬ê¸°
             StartRinging(reason);
-    }
-
-    private float ComputeProbability(FailReason reason)
-    {
-        return reason == FailReason.Timeout ? probTimeout : probWrong;
+        }
     }
 
     private void StartRinging(FailReason reason)
     {
-        lastReason = reason;
-        if (IsBusy) return;
-        Debug.Log("hey");
         isRinging = true;
-        lastBusyTime = Time.time;
+        currentReason = reason;
 
         SetRingingVisual(true);
-        ringRoutineCo = StartCoroutine(RingRoutine(reason));
+
+        // ğŸ”¥ [ì‚¬ìš´ë“œ] ë²¨ì†Œë¦¬ Loop ì¬ìƒ (AudioManager ì‚¬ìš©)
+        if (AudioManager.Instance != null)
+        {
+            currentRingSource = AudioManager.Instance.PlayLoopSFX(ringSoundID, 0.2f);
+        }
+
+        // í”ë“¤ë¦¼ ì—°ì¶œ ë° íƒ€ì´ë¨¸ ì‹œì‘
+        if (ringRoutineCo != null) StopCoroutine(ringRoutineCo);
+        ringRoutineCo = StartCoroutine(RingRoutine());
     }
 
-    private IEnumerator RingRoutine(FailReason reason)
+    private IEnumerator RingRoutine()
     {
-        // ¼Ò¸® on
-        if (ringClip != null) { ringAudio.clip = ringClip; ringAudio.loop = true; ringAudio.Play(); }
-
         float t = 0f;
-        float amp = 8f, speed = 12f; // Èçµé¸² °­µµ/¼Óµµ
+        float amp = 8f, speed = 12f; // í”ë“¤ë¦¼ ê°•ë„
+
         while (t < ringDuration && isRinging)
         {
             t += Time.deltaTime;
-            // ÁÂ¿ì Èçµé¸²
-            float dx = Mathf.Sin(Time.time * speed) * amp;
-            phoneIconRt.anchoredPosition = originalAnchoredPos + new Vector2(dx, 0f);
+
+            // ì•„ì´ì½˜ í”ë“¤ê¸°
+            if (phoneIconRt != null)
+            {
+                float dx = Mathf.Sin(Time.time * speed) * amp;
+                phoneIconRt.anchoredPosition = originalAnchoredPos + new Vector2(dx, 0f);
+            }
             yield return null;
         }
 
-        if (isRinging) // ½Ã°£ ¸¸·á·Î ÀÚµ¿ Á¾·á
-            StopRinging();
+        // ì‹œê°„ì´ ë‹¤ ë¨ -> ğŸ”¥ ëŠì–´ì§€ëŠ” ê²Œ ì•„ë‹ˆë¼ 'ìë™ ì—°ê²°'
+        if (isRinging)
+        {
+            Debug.Log("[PhoneCall] ë°›ì§€ ì•Šì•„ ê°•ì œ ì—°ê²°");
+            StopRinging(); // ì†Œë¦¬ì™€ ì—°ì¶œ ë„ê³ 
+            StartCall();   // í†µí™” ì‹œì‘
+        }
     }
 
     private void StopRinging()
@@ -126,44 +134,61 @@ public class PhoneCallManager : MonoBehaviour
         if (ringRoutineCo != null) StopCoroutine(ringRoutineCo);
         ringRoutineCo = null;
 
-        if (ringAudio.isPlaying) ringAudio.Stop();
-        phoneIconRt.anchoredPosition = originalAnchoredPos;
-        SetIdleVisual();
+        // ğŸ”¥ [ì‚¬ìš´ë“œ] ë²¨ì†Œë¦¬ ë„ê¸°
+        if (currentRingSource != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopLoopSFX(currentRingSource);
+            currentRingSource = null;
+        }
+
+        // ìœ„ì¹˜ ë³µêµ¬
+        if (phoneIconRt != null) phoneIconRt.anchoredPosition = originalAnchoredPos;
+        // ì‹œê°ì  ìƒíƒœëŠ” StartCallì´ë‚˜ Idleë¡œ ë„˜ì–´ê°€ë©´ì„œ ë³€ê²½ë¨
     }
 
     private void OnPhoneClicked()
     {
+        // ìš¸ë¦¬ê³  ìˆì„ ë•Œë§Œ í´ë¦­ ê°€ëŠ¥
         if (!isRinging || isInCall) return;
-        // º§ ¸ØÃß°í ÅëÈ­ ½ÃÀÛ
-        StopRinging();
-        StartCall(); // Yarn ½ÃÀÛÀº StartCall ³»ºÎ¿¡¼­ ¸¶Áö¸· ½ÇÆĞ »çÀ¯ ±â¾ïºĞ±â ÇÊ¿ä
-    }
 
-    // ÃÖ±Ù ½ÇÆĞ »çÀ¯¸¦ ÀúÀåÇØ¼­ ÇØ´ç Ä«Å×°í¸®¿¡¼­ ·£´ı ³ëµå ¼±ÅÃ
-    private FailReason lastReason;
-    //private void StartRinging(FailReason reason, bool force = false)
-    //{
-    //    // ¿À¹ö·Îµå¸¦ À§ÇÑ ³»ºÎ ÇïÆÛ ¹æÁö¿ë ÀÌ¸§ Ãæµ¹ ÇÇÇÏ·Á°í ¸Ş¼­µå¸í ºĞ¸®
-    //    // À§ StartRinging(FailReason)¿¡¼­¸¸ È£Ãâ
-    //}
-    // À§ ÀÌ¸§ Ãæµ¹ ¹æÁö: lastReason ¼¼ÆÃÀ» StartRinging¿¡¼­ ÇØÁÖÀÚ.
-    
+        Debug.Log("[PhoneCall] í”Œë ˆì´ì–´ê°€ ì „í™”ë¥¼ ë°›ìŒ");
+        StopRinging();
+        StartCall();
+    }
 
     private void StartCall()
     {
-        isInCall = true;
+        AudioManager.Instance.PlaySFX(104);
 
-        string node = PickNode(lastReason);
+        isInCall = true;
+        // í†µí™” ì¤‘ ë¹„ì£¼ì–¼ (í•„ìš” ì‹œ ringingColor ìœ ì§€í•˜ê±°ë‚˜ ë³€ê²½)
+        SetRingingVisual(true); // í†µí™” ì¤‘ì„ì„ í‘œì‹œ (ë¹¨ê°„ìƒ‰ ìœ ì§€ ë“±)
+
+        string node = PickNode(currentReason);
         if (string.IsNullOrEmpty(node))
         {
-            // ¾ÈÀüÀåÄ¡: ³ëµå°¡ ¾øÀ¸¸é Áï½Ã Á¾·á
-            isInCall = false;
+            Debug.LogWarning("ì—°ê²°í•  ëŒ€í™” ë…¸ë“œê°€ ì—†ìŠµë‹ˆë‹¤.");
+            OnDialogueComplete(); // ì¦‰ì‹œ ì¢…ë£Œ ì²˜ë¦¬
             return;
         }
 
-        dialogueRunner.StartDialogue(node);
-        // ÅëÈ­¸¦ ¹ŞÀº °ÍÀ¸·Î °£ÁÖ ¡æ ÀÏÀÏ Ä«¿îÆ® Áõ°¡
-        todayCalls++;
+        if (dialogueRunner != null)
+            dialogueRunner.StartDialogue(node);
+    }
+
+    private void OnDialogueComplete()
+    {
+        // ëŒ€í™” ì¢…ë£Œ
+        isInCall = false;
+        SetIdleVisual();
+
+        // ğŸ”¥ ëŒ€ê¸°ì—´ í™•ì¸: ë°€ë¦° ì „í™”ê°€ ìˆë‹¤ë©´ ì¦‰ì‹œ ë‹¤ìŒ ì „í™” ì‹œì‘
+        if (callQueue.Count > 0)
+        {
+            FailReason nextReason = callQueue.Dequeue();
+            Debug.Log($"[PhoneCall] ëŒ€ê¸° ì¤‘ì´ë˜ ë‹¤ìŒ ì „í™” ì—°ê²°: {nextReason}");
+            StartRinging(nextReason);
+        }
     }
 
     private string PickNode(FailReason reason)
@@ -174,30 +199,49 @@ public class PhoneCallManager : MonoBehaviour
         return list[idx];
     }
 
-    private void OnDialogueComplete()
-    {
-        // ´ëÈ­ Á¾·á ¡æ ÅëÈ­ Á¾·á ¡æ ¾ÆÀÌÄÜ ÀáÀá
-        isInCall = false;
-        lastBusyTime = Time.time; // Äğ´Ù¿î ½ÃÀÛ
-        SetIdleVisual();
-    }
-
     private void SetIdleVisual()
     {
-        phoneIcon.color = idleColor;
-        // Èçµé¸² ÇØÁ¦
+        if (phoneIcon != null) phoneIcon.color = idleColor;
         if (phoneIconRt != null) phoneIconRt.localRotation = Quaternion.identity;
     }
 
     private void SetRingingVisual(bool on)
     {
-        phoneIcon.color = on ? ringingColor : idleColor;
-        // ÇÊ¿ä ½Ã ¾Ö´Ï¸ŞÀÌ¼Ç Æ®¸®°Å³ª DOTweenÀ¸·Îµµ ´ëÃ¼ °¡´É
+        if (phoneIcon != null) phoneIcon.color = on ? ringingColor : idleColor;
     }
 
-    // °ÔÀÓ ³¯Â¥°¡ ¹Ù²ğ ¶§ È£Ãâ (GameClock¿¡¼­ ÀÌº¥Æ® ¹Ş¾Æ ÃÊ±âÈ­)
-    public void ResetDailyCount()
+    // ë‚ ì§œ ë³€ê²½ ì‹œ ëŒ€ê¸°ì—´ ì´ˆê¸°í™”ê°€ í•„ìš”í•˜ë‹¤ë©´ ì‚¬ìš©
+    public void ResetDailyState()
     {
-        todayCalls = 0;
+        callQueue.Clear();
+        StopRinging();
+        isInCall = false;
+        SetIdleVisual();
+    }
+
+    // âœ¨ [NEW] ë§ˆê° ì‹œ ëª¨ë“  ì „í™” ìƒí™© ê°•ì œ ì¢…ë£Œ
+    public void ForceStopAllCalls()
+    {
+        // 1. ëŒ€ê¸°ì—´ ë¹„ìš°ê¸°
+        callQueue.Clear();
+
+        // 2. ìš¸ë¦¬ëŠ” ì¤‘ì´ë¼ë©´ ì¦‰ì‹œ ì¤‘ë‹¨ (ì†Œë¦¬ ë„ê¸° í¬í•¨)
+        if (isRinging)
+        {
+            StopRinging();
+        }
+
+        // 3. í†µí™” ì¤‘ì´ë¼ë©´ ê°•ì œ ì¢…ë£Œ (Yarn ëŒ€í™” ì¤‘ë‹¨)
+        if (isInCall)
+        {
+            if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
+            {
+                dialogueRunner.Stop(); // ëŒ€í™”ì°½ ë„ê¸°
+            }
+            isInCall = false;
+            SetIdleVisual();
+        }
+
+        Debug.Log("[PhoneCall] ë§ˆê°ìœ¼ë¡œ ì¸í•´ ëª¨ë“  ì „í™”ê°€ ê°•ì œ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.");
     }
 }

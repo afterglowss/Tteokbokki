@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5391483c6dadc124fb88e227ff4291db
+guid: d65598d8d0e157b4ea15598a3a3bd32b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5414849391045992365
-    second: "\uB9D0\uD48D\uC120_0"
+      213: 421459417652990388
+    second: "\uC6CD_\uC870\uB9AC\uC911_\uCE74\uB808_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uB9D0\uD48D\uC120_0"
+      name: "\uC6CD_\uC870\uB9AC\uC911_\uCE74\uB808_0"
       rect:
         serializedVersion: 2
-        x: 8
-        y: 0
-        width: 546
-        height: 245
+        x: 188
+        y: 145
+        width: 1165
+        height: 795
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 90, y: 38, z: 90, w: 31}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 350a67efa279ad4b0800000000000000
-      internalID: -5414849391045992365
+      spriteID: 4b1137c7b1359d500800000000000000
+      internalID: 421459417652990388
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 30ac573611fc83747944011a6513ad5e
+    spriteID: 5cf7bf5d801e6af468fce7d93d306a09
     internalID: 0
     vertices: []
     indices: 
@@ -146,11 +146,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":5.0,"y":3.0},"gridSpriteSize":{"x":112.0,"y":83.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      "\uB9D0\uD48D\uC120_0": -5414849391045992365
+      "\uC6CD_\uC870\uB9AC\uC911_\uCE74\uB808_0": 421459417652990388
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

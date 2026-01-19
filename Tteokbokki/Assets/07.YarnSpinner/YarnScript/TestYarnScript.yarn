@@ -30,9 +30,4 @@ title: TomorrowBonusLine
 <<declare $bonus2 = "" >>
 <<waitInput>>
 뱁새: 내일의 보너스 재료는 {$bonus1}, {$bonus2} 입니다!
-뱁새: 골라봐
-    -> 1
-        오늘은 좋은날
-    -> 2
-        오늘은 나쁜날
 ===

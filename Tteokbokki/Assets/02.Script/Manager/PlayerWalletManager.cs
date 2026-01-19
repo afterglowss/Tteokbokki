@@ -13,7 +13,7 @@ public class PlayerWalletManager : MonoBehaviour
     public int LastPaidTaxAmount { get; private set; } = 0; //EndOfDayUIHandler <- 세금 기록용 프로퍼티
 
     public TextMeshProUGUI balanceText;
-    public TextMeshProUGUI endOfDayBalanceText;
+    public TextMeshProUGUI [] endOfDayBalanceText;
 
     // ✨ 애니메이션 중복 실행 방지용 트윈 변수
     private Tween balanceTween;
@@ -38,6 +38,9 @@ public class PlayerWalletManager : MonoBehaviour
 
         // ✨ 변경 전 금액부터 애니메이션 시작
         UpdateUI(true, prevBalance);
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(111);
     }
 
     public void ResetTodayEarnings()
@@ -94,7 +97,12 @@ public class PlayerWalletManager : MonoBehaviour
                     balanceText.text = $"잔고: {(int)value:N0}원";
 
                 if (endOfDayBalanceText != null)
-                    endOfDayBalanceText.text = $"현재 자산: {(int)value:N0}원";
+                {
+                    for(int i = 0; i<endOfDayBalanceText.Length; i++)
+                    {
+                        endOfDayBalanceText[i].text = $"현재 자산: {(int)value:N0}원";
+                    }
+                }
             }).SetEase(Ease.OutExpo); // OutExpo: 빠르다가 끝에 부드럽게 멈춤 (돈 계산 느낌에 좋음)
         }
         else
@@ -104,7 +112,12 @@ public class PlayerWalletManager : MonoBehaviour
                 balanceText.text = $"잔고: {CurrentBalance:N0}원";
 
             if (endOfDayBalanceText != null)
-                endOfDayBalanceText.text = $"현재 자산: {CurrentBalance:N0}원";
+            {
+                for (int i = 0; i < endOfDayBalanceText.Length; i++)
+                {
+                    endOfDayBalanceText[i].text = $"현재 자산: {CurrentBalance:N0}원";
+                }
+            }
         }
     }
 

@@ -104,7 +104,7 @@ public static class MenuDatabase
                 { "군자 소스", 1 }
             })
         },
-        { "성인 군자 떡볶이", new MenuItem("성인 군자 떡볶이", 8500, new Dictionary<string, int>
+        { "성인군자 떡볶이", new MenuItem("성인군자 떡볶이", 8500, new Dictionary<string, int>
             {
                 { "떡", 2 },
                 { "오뎅", 2 },

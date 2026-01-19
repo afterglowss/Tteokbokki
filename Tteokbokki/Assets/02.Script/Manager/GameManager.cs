@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour
 
     public DialogueRunner dialogueRunner;
 
+    private bool isEmergencyClosing = false;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -27,6 +29,8 @@ public class GameManager : MonoBehaviour
 
     public void StartOfDay()
     {
+        isEmergencyClosing = false; // ✨ 플래그 초기화
+
         GameClock.gameTime = GameClock.gameTime.AddDays(1);
         GameClock.Instance.SetToStartOfDay();
         GameClock.Instance.UpdateTimeAndDateDisplay();
@@ -76,6 +80,18 @@ public class GameManager : MonoBehaviour
         GameClock.Pause();
         OrderSpawner.Instance.StopSpawning();
 
+        // ✨ [NEW] 전화기 코드 뽑기 (전화 강제 종료)
+        if (PhoneCallManager.Instance != null)
+        {
+            PhoneCallManager.Instance.ForceStopAllCalls();
+        }
+
+        // ✨ [핵심 추가] 정산 계산하기 전에, 현재 남아있는 영수증들을 전부 '실패'로 확정 짓습니다.
+        if (ReceiptLineManager.Instance != null)
+        {
+            ReceiptLineManager.Instance.FailAllActiveReceipts();
+        }
+
         GameSaveManager.Instance.SaveGame();
 
         PackagingAreaManager.Instance.ClearAllFoods();
@@ -104,6 +120,19 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[마감] 미완료 주문 {missed.Count}건 / 손실 금액: {missedTotal:N0}원");
         // 세금 로그도 여기서 띄우기 애매하므로 제거하거나 예상액으로 변경
         // Debug.Log($"[마감] 세금 {Mathf.RoundToInt(successTotal * PlayerWalletManager.Instance.taxRate):N0}원 납부");
+
+        // ✨ [UI 정리] 마감 창이 뜨기 전에 화구 정보와 영수증 정보창을 강제로 끕니다.
+        // 1. 화구 정보창 끄기 & 화구 선택 해제 (PlayerWokManager 스크롤뷰 꺼짐)
+        if (StoveManager.Instance != null)
+        {
+            StoveManager.Instance.DeselectCurrentSlot();
+        }
+
+        // 2. 영수증 재료 정보창 끄기 (CombinedIngredientManager 스크롤뷰 꺼짐)
+        if (ReceiptLineManager.Instance != null && ReceiptLineManager.Instance.combinedIngredientManager != null)
+        {
+            ReceiptLineManager.Instance.combinedIngredientManager.ClearIngredientsText();
+        }
 
         // 마감 UI 출력
         ShowEndOfDayPanel();
@@ -167,5 +196,30 @@ public class GameManager : MonoBehaviour
         Debug.Log("[마감] 모든 영수증 처리 완료. EndOfDay 호출!");
 
         EndOfDay();
+    }
+
+    // ✨ [NEW] 재료 소진 시 강제 조기 마감
+    public void TriggerEmergencyClose(string reason)
+    {
+        // 1. 이미 마감 절차가 진행 중이라면 무시
+        if (isEmergencyClosing || GameClock.isPaused || endOfDayPanel.activeSelf) return;
+
+        isEmergencyClosing = true; // ✨ 지금부터 마감 절차 시작함을 표시
+
+        Debug.Log($"[긴급 마감] {reason} - 더 이상 조리가 불가능하여 영업을 종료합니다.");
+
+        // 2. 플레이어에게 이유를 알려줌 (툴팁 등)
+        TooltipManager.ShowFollowMouse(TooltipType.UI, $"{reason}\n잠시 후 영업을 조기 종료합니다...", 5f);
+
+        // 3. 주문 생성 즉시 중단
+        OrderSpawner.Instance.StopSpawning();
+
+        StartCoroutine(DelayedEmergencyCloseRoutine());
+    }
+    private IEnumerator DelayedEmergencyCloseRoutine()
+    {
+        yield return new WaitForSeconds(5.0f); // 5초 대기 (플레이어가 툴팁 읽을 시간)
+
+        EndOfDay(); // 마감 정산 시작
     }
 }

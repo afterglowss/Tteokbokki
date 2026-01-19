@@ -1028,6 +1028,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4116972739701109009}
   - component: {fileID: 9103296631322173422}
+  - component: {fileID: 7516038330959311104}
   m_Layer: 5
   m_Name: Toggle_CheckReceipt
   m_TagString: Untagged
@@ -1104,6 +1105,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &7516038330959311104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 662755308071837396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
 --- !u!1 &808753706901019881
 GameObject:
   m_ObjectHideFlags: 0
@@ -2309,7 +2324,7 @@ MonoBehaviour:
   fadeDuration: 0.5
   curtainMaxAlpha: 0.7
   shutterRect: {fileID: 0}
-  shutterMoveDuration: 0.6
+  shutterMoveDuration: 1.3
   shutterStayDelay: 1
   mainWindowRect: {fileID: 1028477172703266006}
   macDecorationButtons:
@@ -7424,6 +7439,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3157775473668431158}
   - component: {fileID: 9003913880241921465}
+  - component: {fileID: 1513592556413479800}
   m_Layer: 5
   m_Name: Toggle_CheckIngredient
   m_TagString: Untagged
@@ -7500,6 +7516,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1513592556413479800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4321610632651346661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
 --- !u!1 &4350033515126705320
 GameObject:
   m_ObjectHideFlags: 0
@@ -8362,6 +8392,7 @@ GameObject:
   - component: {fileID: 3325589340641115874}
   - component: {fileID: 2860070671533110727}
   - component: {fileID: 4715122366998971950}
+  - component: {fileID: 603556960107319701}
   m_Layer: 5
   m_Name: Button_NextDay
   m_TagString: Untagged
@@ -8483,6 +8514,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &603556960107319701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4899521063051191986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
 --- !u!1 &4916945871080161676
 GameObject:
   m_ObjectHideFlags: 0
@@ -11642,6 +11687,7 @@ GameObject:
   - component: {fileID: 1289047786209017663}
   - component: {fileID: 4966916012878290141}
   - component: {fileID: 5607210730051361521}
+  - component: {fileID: 1832466769286982019}
   m_Layer: 5
   m_Name: Button_Order
   m_TagString: Untagged
@@ -11763,6 +11809,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1832466769286982019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7074112275735660301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 111
+  playOnlyIfInteractable: 1
 --- !u!1 &7192643475029345747
 GameObject:
   m_ObjectHideFlags: 0
@@ -11773,6 +11833,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4703357935001271625}
   - component: {fileID: 4558611421183161225}
+  - component: {fileID: 1486183227990060681}
   m_Layer: 5
   m_Name: Toggle_CheckTax
   m_TagString: Untagged
@@ -11849,6 +11910,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1486183227990060681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7192643475029345747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
 --- !u!1 &7220320248135967076
 GameObject:
   m_ObjectHideFlags: 0
@@ -13931,6 +14006,7 @@ GameObject:
   - component: {fileID: 9056201098481185266}
   - component: {fileID: 4404443210023597514}
   - component: {fileID: 811275462338440327}
+  - component: {fileID: 282573578417236329}
   m_Layer: 5
   m_Name: Button_Payment
   m_TagString: Untagged
@@ -14040,6 +14116,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &282573578417236329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8568135670866948974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 111
+  playOnlyIfInteractable: 1
 --- !u!1 &8573679792022932649
 GameObject:
   m_ObjectHideFlags: 0
@@ -14840,6 +14930,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1001492325324290294}
   - component: {fileID: 4004969406459389458}
+  - component: {fileID: 5195461927529220980}
   m_Layer: 5
   m_Name: Toggle_CheckAll
   m_TagString: Untagged
@@ -14916,6 +15007,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &5195461927529220980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9173284647454214396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
 --- !u!1 &9174545707844249859
 GameObject:
   m_ObjectHideFlags: 0

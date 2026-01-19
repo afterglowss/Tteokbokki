@@ -105,6 +105,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -112,13 +125,13 @@ TextureImporter:
       name: "\uBC84\uD2BCUI_0"
       rect:
         serializedVersion: 2
-        x: 368
-        y: 393
-        width: 801
-        height: 248
+        x: 379
+        y: 403
+        width: 778
+        height: 207
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 72, y: 76, z: 77, w: 83}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 70, y: 75, z: 70, w: 65}
       customData: 
       outline: []
       physicsShape: []

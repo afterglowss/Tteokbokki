@@ -1,15 +1,15 @@
 fileFormatVersion: 2
-guid: 5391483c6dadc124fb88e227ff4291db
+guid: 87e4d6652d793e647af1dbf9e594a4dd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5414849391045992365
-    second: "\uB9D0\uD48D\uC120_0"
+      213: -2007144069329020224
+    second: "\uC81C\uBAA9UI_\uC218\uC815_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uB9D0\uD48D\uC120_0"
+      name: "\uC81C\uBAA9UI_\uC218\uC815_0"
       rect:
         serializedVersion: 2
-        x: 8
+        x: 0
         y: 0
-        width: 546
-        height: 245
+        width: 2078
+        height: 180
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 90, y: 38, z: 90, w: 31}
+      border: {x: 47, y: 52, z: 47, w: 52}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 350a67efa279ad4b0800000000000000
-      internalID: -5414849391045992365
+      spriteID: 0ca9c9e6a113524e0800000000000000
+      internalID: -2007144069329020224
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 30ac573611fc83747944011a6513ad5e
+    spriteID: 09c54930df296c246a737f3ad252a01b
     internalID: 0
     vertices: []
     indices: 
@@ -146,11 +146,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":5.0,"y":3.0},"gridSpriteSize":{"x":112.0,"y":83.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      "\uB9D0\uD48D\uC120_0": -5414849391045992365
+      "\uC81C\uBAA9UI_\uC218\uC815_0": -2007144069329020224
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

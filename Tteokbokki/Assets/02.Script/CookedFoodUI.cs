@@ -2,12 +2,17 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
+using UnityEngine.UI; // Image 제어를 위해 추가
 using DG.Tweening;
 
 public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    [Header("Visual States")]
+    public GameObject wokStateObject;     // 1. 웍 상태 오브젝트 (냄비 모양)
+    public Image wokContentImage;         // 1-1. 웍 내부 음식 이미지 (스프라이트 교체용)
+    public GameObject packageStateObject; // 2. 포장 상태 오브젝트 (용기 모양)
+
     [Header("재료 텍스트")]
     public TextMeshProUGUI ingredientsText;
 
@@ -15,7 +20,6 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
-    private Vector2 originalPosition;
 
     private Canvas canvas;
     public PackagingSlot currentSlot { get; set; }
@@ -34,85 +38,84 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         canvasGroup = GetComponent<CanvasGroup>();
         canvas = GetComponentInParent<Canvas>();
     }
-    private void Update()
-    {
 
-    }
-
-    public void Initialize(Dictionary<string, int> ingredients)
+    // ✨ 초기화 함수 수정: 완성된 요리 이미지(Sprite)를 받음
+    public void Initialize(Dictionary<string, int> ingredients, Sprite cookedSprite = null)
     {
         Ingredients = new Dictionary<string, int>(ingredients);
         UpdateText();
 
         originalLocalPosition = transform.localPosition;
         originalParent = transform.parent;
+
+        // --- 시각 상태 초기화: 처음엔 웍 모양으로 시작 ---
+        if (wokStateObject != null) wokStateObject.SetActive(true);
+        if (packageStateObject != null) packageStateObject.SetActive(false);
+
+        // 화구에서 넘겨준 완성된 음식 이미지를 웍 내부에 적용
+        if (wokContentImage != null && cookedSprite != null)
+        {
+            wokContentImage.sprite = cookedSprite;
+            // 혹시 투명도가 0이라면 보이게 설정
+            Color c = wokContentImage.color;
+            c.a = 1f;
+            wokContentImage.color = c;
+        }
     }
 
+    // ✨ 포장 완료 상태로 전환하는 함수
+    public void SwitchToPackedState()
+    {
+        // 1. 현재 웍(냄비) 상태인지 먼저 확인합니다.
+        // (wokStateObject가 켜져 있다는 건 아직 포장되지 않았다는 뜻)
+        bool isTransforming = wokStateObject != null && wokStateObject.activeSelf;
+
+        if (wokStateObject != null) wokStateObject.SetActive(false);
+        if (packageStateObject != null) packageStateObject.SetActive(true);
+
+        // 2. 웍 상태에서 -> 포장 상태로 '변신하는 순간'에만 소리 재생
+        if (isTransforming)
+        {
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(112);
+        }
+    }
+
+    // ... (이하 UpdateText, Tooltip, Drag 관련 함수들은 기존과 동일하므로 유지) ...
     private void UpdateText()
     {
         string result = "";
-        foreach (var kv in Ingredients)
-        {
-            result += $"{kv.Key} x{kv.Value}\n";
-        }
-
-        if (ingredientsText != null)
-            ingredientsText.text = result;
+        foreach (var kv in Ingredients) result += $"{kv.Key} x{kv.Value}\n";
+        if (ingredientsText != null) ingredientsText.text = result;
     }
 
     private void ShowTooltip()
     {
         string tooltip = "재료:\n";
-        foreach (var kv in Ingredients)
-        {
-            tooltip += $"{kv.Key} x{kv.Value}\n";
-        }
+        foreach (var kv in Ingredients) tooltip += $"{kv.Key} x{kv.Value}\n";
         TooltipManager.ShowFollowMouse(TooltipType.Info, tooltip);
     }
+    private void HideTooltip() => TooltipManager.Hide(TooltipType.Info);
 
-    private void HideTooltip()
-    {
-        TooltipManager.Hide(TooltipType.Info);
-    }
-
-    // 마우스 올라갔을 때
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        ShowTooltip();
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        HideTooltip();
-    }
+    public void OnPointerEnter(PointerEventData eventData) => ShowTooltip();
+    public void OnPointerExit(PointerEventData eventData) => HideTooltip();
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (isTweening)
-        {
-            eventData.pointerDrag = null;  // 드래그 자체를 무효화
-            return;
-        }
-
-        if (currentSlot != null && !currentSlot.IsTopOfStack(this))
-        {
-            eventData.pointerDrag = null;
-            return;
-        }
+        if (isTweening) { eventData.pointerDrag = null; return; }
+        if (currentSlot != null && !currentSlot.IsTopOfStack(this)) { eventData.pointerDrag = null; return; }
 
         originalLocalPosition = transform.localPosition;
         originalParent = transform.parent;
 
         canvasGroup.blocksRaycasts = false;
-        canvasGroup.alpha = 0.7f;
-        transform.SetParent(canvas.transform); // 자유롭게 이동
+        canvasGroup.alpha = 0.8f; // 드래그 중 살짝 투명하게
+        transform.SetParent(canvas.transform); // 최상위 이동
 
         isPlacedInSlot = false;
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        //UpdateTooltipPosition();
         rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
     }
 
@@ -133,33 +136,12 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             {
                 if (slot.foodStackParent.childCount >= slot.maxStackSize)
                 {
-                    TooltipManager.ShowFollowMouse(TooltipType.UI, "포장 슬롯은 최대 4개까지 가능합니다!");
-
-                    // 복귀 처리
-                    if (currentSlot != null)
-                    {
-                        // 이전 슬롯으로 되돌림
-                        transform.SetParent(currentSlot.foodStackParent);
-                        int index = currentSlot.GetStackIndex(this);
-                        if (index < 0) index = currentSlot.foodStackParent.childCount;
-                        Vector2 target = new Vector2(0, index * currentSlot.stackYOffset);
-                        isTweening = true;
-                        rectTransform.DOAnchorPos(target, 0.25f).SetEase(Ease.OutCubic)
-                            .OnComplete(() => isTweening = false);
-                    }
-                    else if (originStoveSlot != null)
-                    {
-                        // 처음 화구로 복귀
-                        transform.SetParent(originalParent);
-                        isTweening = true;
-                        rectTransform.DOAnchorPos(originalLocalPosition, 0.25f).SetEase(Ease.OutCubic)
-                            .OnComplete(() => isTweening = false);
-                    }
-
+                    //TooltipManager.ShowFollowMouse(TooltipType.UI, "포장 슬롯은 가득 찼습니다!");
+                    ReturnToOriginal(); // 실패 시 복귀
                     return;
                 }
 
-                slot.OnDrop(eventData);
+                slot.OnDrop(eventData); // 성공! -> PackagingSlot에서 SwitchToPackedState 호출함
                 isPlacedInSlot = true;
                 break;
             }
@@ -167,23 +149,42 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
         if (!isPlacedInSlot)
         {
-            // 복귀 처리 (슬롯 외 클릭 시)
-            transform.SetParent(originalParent);
-            isTweening = true;
-            rectTransform.DOAnchorPos(originalLocalPosition, 0.25f).SetEase(Ease.OutCubic)
-                .OnComplete(() => isTweening = false);
+            ReturnToOriginal(); // 허공에 놓으면 복귀
         }
         else
         {
-            // 정상 드롭 시 정렬
+            // 성공적으로 슬롯에 들어감 (정렬 애니메이션)
             transform.SetParent(currentSlot.foodStackParent);
             Vector2 target = new Vector2(0, currentSlot.GetStackIndex(this) * currentSlot.stackYOffset);
-            isTweening = true;
-            rectTransform.DOAnchorPos(target, 0.25f).SetEase(Ease.OutCubic)
-                .OnComplete(() => isTweening = false);
+            DoTweenMove(target);
         }
     }
 
+    private void ReturnToOriginal()
+    {
+        if (currentSlot != null) // 이미 포장된 상태였다면
+        {
+            transform.SetParent(currentSlot.foodStackParent);
+            int index = currentSlot.GetStackIndex(this);
+            Vector2 target = new Vector2(0, index * currentSlot.stackYOffset);
+            DoTweenMove(target);
+        }
+        else if (originStoveSlot != null) // 화구에서 막 꺼낸 상태였다면
+        {
+            transform.SetParent(originalParent);
+            DoTweenMove(originalLocalPosition);
+        }
+        else // 안전장치
+        {
+            transform.SetParent(originalParent);
+            DoTweenMove(originalLocalPosition);
+        }
+    }
 
-
+    private void DoTweenMove(Vector2 targetPos)
+    {
+        isTweening = true;
+        rectTransform.DOAnchorPos(targetPos, 0.25f).SetEase(Ease.OutCubic)
+            .OnComplete(() => isTweening = false);
+    }
 }

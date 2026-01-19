@@ -5,42 +5,65 @@ using UnityEngine;
 public class OrderSpawner : MonoBehaviour
 {
     public static OrderSpawner Instance { get; private set; }
-    [Header("기본 설정")]
-    [Tooltip("주문 생성 시도 주기 (초)")]
-    public float attemptInterval = 0.5f;
 
-    [Tooltip("기본 생성 확률 (0.0 ~ 1.0)")]
-    [Range(0f, 1f)]
-    public float baseOrderProbability = 0.1f;
-
-    [Tooltip("전날 성공률 (GameManager에서 설정)")]
-    [Range(0f, 1f)]
-    public float previousDaySuccessRate = 0.5f;
-    public void SetPreviousDaySuccessRate(float successRate) => previousDaySuccessRate = successRate;
-
-    [Tooltip("영수증 생성기 연결")]
+    [Header("연결 정보")]
     public RandomReceiptGenerator generator;
+    public ReceiptLineManager lineManager; // ✨ [NEW] 영수증 개수 확인용
+
+    [Header("랜덤 생성 설정")]
+    [Tooltip("주문 생성 시도 주기 (초) - 값을 늘려서 천천히 시도하게 하세요")]
+    public float attemptInterval = 2.0f; // 0.5f -> 2.0f 추천
+
+    [Tooltip("기본 생성 확률 (0.0 ~ 1.0) - 값을 낮춰서 자연 생성 빈도를 줄이세요")]
+    [Range(0f, 1f)]
+    public float baseOrderProbability = 0.15f;
+
+    [Header("심심함 방지 (Failsafe)")]
+    [Tooltip("영수증이 0개일 때, 몇 초 뒤에 강제로 주문을 넣을까요?")]
+    public float maxEmptyDuration = 5.0f;
+    private float currentEmptyTimer = 0f;
+
+    [Header("전날 성과 (GameManager)")]
+    [Range(0f, 1f)] public float previousDaySuccessRate = 0.5f;
+    public void SetPreviousDaySuccessRate(float successRate) => previousDaySuccessRate = successRate;
 
     [Tooltip("생성 시 딜레이 범위 (초)")]
     public Vector2 delayRangeSeconds = new Vector2(0.5f, 2.0f);
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
     }
 
     private void Start()
     {
-        InvokeRepeating(nameof(TryOrder), 0f, attemptInterval);
+        // 랜덤 생성 시도 루틴 시작
+        StartCoroutine(RandomSpawnRoutine());
     }
 
-    private void TryOrder()
+    private void Update()
     {
+        // ✨ [NEW] 영수증이 하나도 없는지 감시하는 로직
+        CheckEmptyLineStatus();
+    }
+
+    // InvokeRepeating 대신 코루틴 사용 (제어가 더 쉬움)
+    private IEnumerator RandomSpawnRoutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(attemptInterval);
+            TryRandomOrder();
+        }
+    }
+
+    // 1. 일반적인 랜덤 주문 시도
+    private void TryRandomOrder()
+    {
+        // 만약 대기열이 꽉 찼다면 생성 시도조차 하지 않음 (선택 사항)
+        // if (lineManager.GetReceiptSlots().Count >= lineManager.maxSlots) return;
+
         float probability = CalculateCurrentOrderProbability();
         float roll = UnityEngine.Random.value;
 
@@ -51,29 +74,60 @@ public class OrderSpawner : MonoBehaviour
         }
     }
 
+    // 2. 영수증 0개 감시 로직
+    private void CheckEmptyLineStatus()
+    {
+        if (lineManager == null) return;
+
+        // 현재 활성화된(슬롯에 있는) 영수증 개수 확인
+        // (대기열 pendingReceipts까지 포함할지는 기획에 따라 결정. 보통 화면에 없으면 심심하므로 슬롯 기준)
+        int activeCount = lineManager.GetReceiptSlots().Count;
+
+        if (activeCount == 0)
+        {
+            currentEmptyTimer += Time.deltaTime;
+
+            if (currentEmptyTimer >= maxEmptyDuration)
+            {
+                Debug.Log($"[OrderSpawner] 너무 조용해서 강제 주문 생성! ({maxEmptyDuration}초 경과)");
+                // 즉시 생성 (딜레이 없이 바로 꽂아주는 게 지루함 해소에 좋음)
+                generator.GenerateAndDisplayReceipt();
+
+                // 타이머 초기화
+                currentEmptyTimer = 0f;
+            }
+        }
+        else
+        {
+            // 영수증이 하나라도 있으면 타이머 리셋
+            currentEmptyTimer = 0f;
+        }
+    }
+
     private IEnumerator DelayedOrderSpawn(float delay)
     {
         yield return new WaitForSeconds(delay);
         generator.GenerateAndDisplayReceipt();
-        Debug.Log($"[OrderSpawner] 랜덤 딜레이 주문 생성됨 ({GameClock.gameTime:HH:mm})");
+        Debug.Log($"[OrderSpawner] 랜덤 주문 생성됨");
     }
 
+    // ... (확률 계산 로직들은 기존 유지) ...
     private float CalculateCurrentOrderProbability()
     {
         float performanceFactor = Mathf.Clamp(previousDaySuccessRate * 1.2f, 0.3f, 0.8f);
         float timeFactor = GetTimeBuzzFactor(GameClock.gameTime.Hour);
         float dayFactor = GetWeekdayBuzzFactor(GameClock.gameTime.DayOfWeek);
-
         float diversityFactor = GetIngredientDiversityFactor();
 
         return baseOrderProbability * performanceFactor * timeFactor * dayFactor * diversityFactor;
     }
 
+    // ... (GetTimeBuzzFactor, GetWeekdayBuzzFactor, GetIngredientDiversityFactor 등 기존 코드 유지) ...
     private float GetTimeBuzzFactor(int hour)
     {
-        if (hour >= 12 && hour < 14) return 1.5f; // 점심
-        if (hour >= 17 && hour < 20) return 1.8f; // 저녁
-        return 0.8f; // 일반 시간
+        if (hour >= 12 && hour < 14) return 1.5f;
+        if (hour >= 17 && hour < 20) return 1.8f;
+        return 0.8f;
     }
 
     private float GetWeekdayBuzzFactor(DayOfWeek day)
@@ -88,27 +142,21 @@ public class OrderSpawner : MonoBehaviour
     private float GetIngredientDiversityFactor()
     {
         int count = IngredientStockManager.Instance.GetPurchasedIngredientCount();
-
-        if (count >= 20)
-            return 1.0f;  // 영향 없음
-        if (count >= 17)
-            return 0.95f;
-        if (count >= 14)
-            return 0.9f;
-        if (count >= 11)
-            return 0.85f;
-        if (count >= 8)
-            return 0.8f;
-        return 0.75f;  // 8개 미만은 가장 큰 패널티
+        if (count >= 20) return 1.0f;
+        if (count >= 17) return 0.95f;
+        if (count >= 14) return 0.9f;
+        if (count >= 11) return 0.85f;
+        if (count >= 8) return 0.8f;
+        return 0.75f;
     }
 
     public void StopSpawning()
     {
-        CancelInvoke(nameof(TryOrder));
+        StopAllCoroutines();
     }
     public void RestartSpawning()
     {
-        CancelInvoke(nameof(TryOrder));  // 혹시 몰라 먼저 취소
-        InvokeRepeating(nameof(TryOrder), 0f, attemptInterval);
+        StopAllCoroutines();
+        StartCoroutine(RandomSpawnRoutine());
     }
 }
