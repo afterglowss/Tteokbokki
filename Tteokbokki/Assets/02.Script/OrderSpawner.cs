@@ -153,9 +153,11 @@ public class OrderSpawner : MonoBehaviour
     public void StopSpawning()
     {
         StopAllCoroutines();
+        this.enabled = false; // ✨ [핵심] Update 루프까지 통째로 비활성화
     }
     public void RestartSpawning()
     {
+        this.enabled = true; // 스크립트 다시 켜기
         StopAllCoroutines();
         StartCoroutine(RandomSpawnRoutine());
     }

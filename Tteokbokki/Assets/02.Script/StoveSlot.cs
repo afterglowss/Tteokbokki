@@ -542,4 +542,33 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             wokImage.gameObject.SetActive(false);
         }
     }
+
+    //튜토리얼용
+    public void StartTutorialCook()
+    {
+        currentIngredients = new Dictionary<string, int>(pendingIngredients);
+        pendingIngredients.Clear();
+
+        // --- 수정된 부분 ---
+        float speedMultiplier = (60f / 3f); // 현재 웍의 배속 (20)
+        float targetRealTime = 5f;         // 현실 시간 (10초 아님 -5초)
+
+        // 인게임 타이머 기준으로는 200초를 넣어줘야 현실에서 10초 동안 흐릅니다.
+        cookTimeSeconds = targetRealTime * speedMultiplier;
+        cookTimeRemaining = cookTimeSeconds;
+        // ------------------
+
+        isCooking = true;
+        isCooked = false;
+
+        if (wokImage != null)
+        {
+            wokImage.sprite = wokLidSprite;
+            wokImage.gameObject.SetActive(true);
+        }
+
+        if (cookButton != null) cookButton.gameObject.SetActive(false);
+        UpdateInfoUI();
+    }
+
 }

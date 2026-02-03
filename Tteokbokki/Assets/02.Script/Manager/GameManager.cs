@@ -150,8 +150,9 @@ public class GameManager : MonoBehaviour
         dialogueRunner.VariableStorage.SetValue("$bonus2", bonusList.Count > 1 ? bonusList[1] : "");
 
         // Yarn 대화 시작
-        dialogueRunner.StartDialogue("TomorrowBonusLine");
-
+        if(TutorialManager.Instance ==  null) {
+            dialogueRunner.StartDialogue("TomorrowBonusLine");
+        };
         GameClock.SaveLastPlayedDate(today);
     }
 
