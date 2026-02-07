@@ -20,19 +20,18 @@ title: TutorialSkip
 title: Tutorial
 ---
 <<setIsTutorial true>>
-<<set_bg "Desktop">>
+<<set_bg "Start">>
 암담한 취업난 시대에 좋은 알바를 발견했다. 
 집도 가깝고 무엇보다 다른 알바보다 돈을 더 많이 주는 데다 한 달 동안 잘 하면 정직원이 된다니!
 반드시 합격해야 한다.
 
-<<playSFX 403>>
-
-<<playSFX 402>>
-<<set_bg "Main">>
+<<playSFX 401>> //문 여는 소리
+<<playSFX 403>> //걷는 소리
+<<set_bg "">>
 안녕하세요. 저 알바 면접 보러 왔는데요.
 
 ??: 아, 어서 오세요!
-<<playSFX 402>>
+<<playSFX 402>> //우당탕탕 소리
 뱁새: 반가워요!
 
 어...?
@@ -70,56 +69,45 @@ title: Tutorial
 뱁새: 한 번 만들어 볼까요?
 뱁새: 영수증을 누르면 어떤 재료를 넣어야 하는지 알 수 있어요.
 <<highlight TutorialReceipt>>
-===
+<<waitForReceiptClick>>
 
-title: AddIngredientStep
----
-<<unhighlight>>
+//튜토리얼 영수증 선택 완료
 <<spawnWok>>
 뱁새: 앞에 있는 웍에 재료를 담고 끓이면 돼요. 간단하죠?
 <<highlight GridLayerGroup_IngredientButton>>
 뱁새: 우선 <b>떡과 오뎅</b>은 두 번, <b>파, 양배추</b>는 한 번씩 담아보실래요?
 <<waitIngredients>>
-===
 
-title: AddSauceStep
----
-<<unhighlight>>
+//떡볶이 재료 선택 완료
 뱁새: 그리고 <b>군자 소스</b>를 담아주세요. 
 뱁새: 제가 만든 특별한 소스랍니다.
 <<highlight GridLayerGroup_SauceButton>>
 <<waitSauce>>
-===
 
-title: BoilingStep
----
-<<unhighlight>>
+//군자 소스 선택 완료
 <<startBoiling>>
 뱁새: 이렇게 요리를 하시면 돼요.
-<<waitForDone>>
+<<waitForBoiled>>
 
 <<highlight Button_StoveSlot>>
-<<highlight TooltipManager_UI>>
+//<<highlight TooltipManager_UI>>
 뱁새: 조리가 완료되면 위에 몇 번 조리가 완료되었는지 표시돼요.
 뱁새: 조리가 완료된 음식은 <b>포장대</b> 위에 놓으면 제가 포장할 거예요.
 <<highlight Button_StoveSlot>>
-<<highlight PackagingArea>>
+<<highlight PackagingSlot>>
 <<waitForPacking>>
 
 뱁새: 포장된 음식에는 배달 기사님이 배달할 수 있도록 <b>영수증</b>을 붙여야 해요. 
 뱁새: 붙여볼까요?
 <<highlight TutorialReceipt>>
-<<highlight PackagingArea>>
-<<waitForReceipt>>
-===
+<<highlight PackagingSlot>>
+<<waitForReceiptAttached>>
 
-title: DeliveryStep
----
-<<unhighlight>>
-<<highlight Balance>>
-<<wait 1.0>>
+//영수증 붙임 완료
 <<set $Junk = setFace("smile")>>
 뱁새: 잘하시네요! 
+
+<<highlight Balance>>
 뱁새: 배달이 출발하면 <b>잔고</b>에 바로 수익이 표시돼요.
 
 <<set $Junk = setFace("idle")>>
@@ -133,10 +121,8 @@ title: DeliveryStep
 
 <<highlight Button_EndOfDay>>
 <<waitForEndDay>>
-===
 
-title: ShowEndDayStep
----
+//하루 마치기 버튼 클릭 완료
 <<unhighlight>>
 <<wait 3.0>>
 뱁새: 마감은 컴퓨터로 처리할 거예요!
@@ -154,11 +140,8 @@ title: ShowEndDayStep
 뱁새: 이제 세금을 내고 재료를 사러 가볼까요? '세금 납부' 버튼을 눌러주세요.
 <<highlight Button_Payment>>
 <<waitForPayment>>
-===
 
-title: ShowShopStep
----
-<<unhighlight>>
+//세금 납부 버튼 클릭 완료
 <<wait 1.0>>
 뱁새: 그리고 오늘 번 돈으로 재료를 구매할 수 있어요.
 뱁새: 주문한 재료는 내일 바로 받아볼 수 있답니다.
@@ -170,17 +153,14 @@ title: ShowShopStep
 
 <<highlightSources>>
 <<waitForAnySourceClick>>
-===
 
-title: BuySauceStep
----
-<<unhighlight>>
-뱁새: <b>{$SelectedSource}</b>(을)를 선택하셨군요!
+//소스 선택 완료
+뱁새: <b>{$SelectedSource}</b>를 선택하셨군요!
 
 <<if $SelectedSource == "마라 소스" || $SelectedSource == "로제 소스">>
-    뱁새: {$SelectedSource}(은)는 인기가 많죠! 좋은 선택이에요.
+    뱁새: {$SelectedSource}는 인기가 많죠! 좋은 선택이에요.
 <<else>>
-    뱁새: {$SelectedSource}(은)는 특별하죠! 좋은 선택이에요.
+    뱁새: {$SelectedSource}는 특별하죠! 좋은 선택이에요.
 <<endif>>
 뱁새: 사기 위해 선택한 재료는 빨간색 체크로 표시돼요. 
 
@@ -195,38 +175,26 @@ title: BuySauceStep
 뱁새: 그럼 이제 <b>'주문하기'</b>를 눌러 구매해 보세요.
 <<highlight Button_Order>>
 <<waitForOrderClick>>
-===
 
-title: CheckingStep
----
-<<unhighlight>>
+//소스 주문 완료
 뱁새: 마지막으로 <b>마감</b>을 알려드릴게요!
-<<wait 0.2>>
 뱁새: 영수증 확인, 세금 납부, 재료 확인 및 구매 모두 확인했으니 체크해 주세요.
 <<highlight Toggle_CheckReceipt>>
 <<highlight Toggle_CheckIngredient>>
 <<waitForChecking>>
-===
 
-title: ClosingStep
----
-<<unhighlight>>
+//마감 - 체크 완료
 뱁새: 이제 <b>'마감하기'</b>를 눌러 보세요.
 <<highlight Button_NextDay>>
 <<waitForClosing>>
-<<stop>>
-===
 
-title: ClosedStep
----
-<<unhighlight>>
+//마감 버튼 누르기 완료
 뱁새: 이렇게 마감하는 것까지 알려드렸어요!
 뱁새: 어떤가요? 할 만 하신가요?
     -> 네. 괜찮아요. 
         <<jump TutorialEndOK>>
     -> 아뇨. 너무 힘들어요.
         <<jump TutorialEnd>>
-<<stop>>
 ===
 
 title: TutorialEnd
@@ -245,12 +213,12 @@ title: TutorialBadEnd
 뱁새: 아쉽네요. 그래도 손님으로 오시면 서비스 드릴게요. 
 뱁새: 도와주실 분을 구할 수 있을지는 모르겠지만.... 
 뱁새: 안녕히 가세요...
-<<startScene main>>
+<<loadScene StartScene>>
 ===
 
 title: TutorialEndOK
 ---
 <<set $Junk = setFace("smile")>>
 뱁새: 좋아요! 그러면 장사를 시작해 봐요!
-<<startScene FirstDay>>
+<<loadScene MainScene>>
 ===

@@ -1,28 +1,33 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Yarn.Unity;
-using static UnityEngine.InputManagerEntry;
 
 
 public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance { get; private set; }
-    // ½Ã½ºÅÛ Á¶ÀÛ °¡´É ¿©ºÎ¸¦ °áÁ¤ÇÏ´Â º¯¼öÀÔ´Ï´Ù.
     public static bool IsFreeze { get; private set; } = true;
     public bool IsTutorial { get; private set; } = false;
 
-    [Header("ÇÏÀÌ¶óÀÌÆ® ·¹ÀÌ¾î ¼³Á¤")]
+    [Serializable]
+    public struct TutorialObjectMapping
+    {
+        public string objectID;   // Yarnì—ì„œ ë¶€ë¥¼ ë³„ëª… (ì˜ˆ: "SuccessTitle")
+        public GameObject target; // ì‹¤ì œ ì˜¤ë¸Œì íŠ¸ (êº¼ì ¸ìˆì–´ë„ ë¨)
+    }
+
+
+    [Header("í•˜ì´ë¼ì´íŠ¸ ë ˆì´ì–´ ì„¤ì •")]
     [SerializeField] private RectTransform focusLayer;
     [SerializeField] private GameObject darkOverlay;
-    [SerializeField] private RectTransform yellowOutline;
+    [SerializeField] private GameObject yellowOutlinePrefab;
 
-    [Header("ÀÎ°ÔÀÓ ¸Å´ÏÀú ÂüÁ¶")]
+    [Header("ì¸ê²Œì„ ë§¤ë‹ˆì € ì°¸ì¡°")]
     [SerializeField] private DialogueRunner dialogueRunner;
     [SerializeField] private ReceiptLineManager receiptLineManager;
     [SerializeField] private PackagingAreaManager packagingArea;
@@ -30,17 +35,18 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private Button endDayButton;
     [SerializeField] private Button paymentButton;
 
-    [Header("¸¶°¨ ÆĞ³Î »ó¼¼ ÂüÁ¶")]
+    [Header("ë§ˆê° íŒ¨ë„ ìƒì„¸ ì°¸ì¡°")]
     [SerializeField] private GameObject endOfDayParent;
     [SerializeField] private GameObject shopPanel;
     [SerializeField] private GameObject closingPanel;
 
-    [Header("UI ¹× ¹è°æ Àü¿ë")]
+    [Header("UI ë° ë°°ê²½ ì „ìš©")]
     [SerializeField] private RawImage backgroundDisplay;
     [SerializeField] private Texture2D desktopTexture;
     [SerializeField] private Texture2D mainShopTexture;
+    public CanvasGroup gameplayUI;
 
-    // --- ³»ºÎ µ¥ÀÌÅÍ °ü¸® ---
+    // --- ë‚´ë¶€ ë°ì´í„° ê´€ë¦¬ ---
     private Dictionary<string, int> _tutorialTally = new Dictionary<string, int>();
     private List<HighlightData> _activeHighlights = new List<HighlightData>();
     private GameObject _lastTarget;
@@ -50,6 +56,7 @@ public class TutorialManager : MonoBehaviour
         public GameObject target;
         public Transform originalParent;
         public int originalIndex;
+        public GameObject outlineInstance;
     }
 
     private void Awake()
@@ -61,12 +68,12 @@ public class TutorialManager : MonoBehaviour
     }
     private void InitializeTutorial()
     {
-        // 1. ¾á ÇÔ¼ö µî·Ï (GameSaveManager¿Í ¿¬°á)
+        // 1. ì–€ í•¨ìˆ˜ ë“±ë¡ (GameSaveManagerì™€ ì—°ê²°)
         dialogueRunner?.AddFunction("getSawTutorial", () => GameSaveManager.Instance.IsTutorialCompleted);
 
         OrderSpawner.Instance?.StopSpawning();
         darkOverlay?.SetActive(false);
-        yellowOutline?.gameObject.SetActive(false);
+        SetSystemFreeze(true);
 
         if (dialogueRunner != null && !dialogueRunner.IsDialogueRunning)
         {
@@ -74,8 +81,23 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    public void SetSystemFreeze(bool isFreeze)
+    {
+        // 1. ê¸°ì¡´ ë¡œì§ (ìƒíƒœ ì €ì¥)
+        IsFreeze = isFreeze;
+
+        // 2. ë¬¼ë¦¬ì  í´ë¦­ ì°¨ë‹¨ ì¶”ê°€ (9ë²ˆ ë²„ê·¸ í•´ê²° í•µì‹¬)
+        if (gameplayUI != null)
+        {
+            // í”„ë¦¬ì¦ˆ ìƒíƒœë©´(isFreeze: true) -> í´ë¦­ ì°¨ë‹¨(interactable: false / blocksRaycasts: false)
+            // í”„ë¦¬ì¦ˆ í•´ì œë©´(isFreeze: false) -> í´ë¦­ í—ˆìš©(true)
+            // gameplayUI.interactable = !isFreeze;
+            gameplayUI.blocksRaycasts = !isFreeze;
+        }
+    }
+
     // ==========================================
-    // 5. Æ©Åä¸®¾ó »óÅÂ °ü¸®
+    // 5. íŠœí† ë¦¬ì–¼ ìƒíƒœ ê´€ë¦¬
     // ==========================================
 
     [YarnCommand("setIsTutorial")]
@@ -84,35 +106,102 @@ public class TutorialManager : MonoBehaviour
         if (Instance != null) Instance.IsTutorial = active;
     }
 
-    public void SetSystemFreeze(bool isFreeze) => IsFreeze = isFreeze;
+    [YarnCommand("loadScene")]
+    public static void LoadScene(string sceneName)
+    {
+        Debug.Log($"[íŠœí† ë¦¬ì–¼] {sceneName} ì”¬ìœ¼ë¡œ ì´ë™í•©ë‹ˆë‹¤.");
+
+        // CompleteTutorial
+        if (Instance != null) Instance.IsTutorial = false;
+        GameSaveManager.Instance.SetTutorialComplete();
+
+        // ì…”í„°ê°€ ë‚´ë ¤ê°€ ìˆëŠ” ìƒíƒœì—ì„œ ì”¬ì„ ì „í™˜í•©ë‹ˆë‹¤.
+        // ì”¬ì´ ë°”ë€Œë©´ ìƒˆë¡œìš´ ì”¬ì˜ GameManagerê°€ ì…”í„°ë¥¼ ë‹¤ì‹œ ì˜¬ë¦¬ê²Œ ë©ë‹ˆë‹¤.
+        SceneManager.LoadScene(sceneName);
+    }
 
     // ==========================================
-    // 1. ÇÏÀÌ¶óÀÌÆ® ¹× UI Á¦¾î (IEnumerator)
+    // 1. í•˜ì´ë¼ì´íŠ¸ ë° UI ì œì–´
     // ==========================================
+
     [YarnCommand("highlight")]
-    public static void Highlight(string objName) // static Ãß°¡
+    public static void Highlight(string objName)
     {
         var inst = Instance;
         if (inst == null) return;
 
+        // 1. ì´ë¦„ìœ¼ë¡œ ì˜¤ë¸Œì íŠ¸ ì°¾ê¸°
         GameObject target = GameObject.Find(objName);
+
+        // 2. ì°¾ì•˜ë‹¤ë©´ ì‹¤ì œ í•˜ì´ë¼ì´íŠ¸ ë¡œì§(ApplyHighlight) ì‹¤í–‰
+        if (target != null)
+        {
+            inst.ApplyHighlight(target);
+        }
+        else
+        {
+            Debug.LogWarning($"[íŠœí† ë¦¬ì–¼] {objName}ì„(ë¥¼) ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+        }
+    }
+
+    private void ApplyHighlight(GameObject target)
+    {
         if (target == null) return;
 
-        if (inst._activeHighlights.Exists(h => h.target == target)) return;
+        // ğŸš¨ [ë°©ì–´ë§‰ 1] ìê¸° ìì‹ ì´ ì´ë¯¸ í•˜ì´ë¼ì´íŠ¸ ë¦¬ìŠ¤íŠ¸ì— ìˆëŠ”ì§€ í™•ì¸
+        if (_activeHighlights.Exists(h => h.target == target)) return;
+
+        // ğŸš¨ [ë°©ì–´ë§‰ 2] ë¶€ëª¨ ì¤‘ ëˆ„êµ°ê°€ê°€ ì´ë¯¸ í•˜ì´ë¼ì´íŠ¸ ë˜ì–´ ìˆëŠ”ì§€ í™•ì¸
+        // (ë¶€ëª¨ê°€ ì´ë¯¸ ë¹›ë‚˜ê³  ìˆë‹¤ë©´ ìì‹ì€ ë˜ ë¹›ë‚  í•„ìš”ê°€ ì—†ìŠµë‹ˆë‹¤!)
+        if (_activeHighlights.Exists(h => target.transform.IsChildOf(h.target.transform)))
+        {
+            Debug.Log($"[í•˜ì´ë¼ì´íŠ¸] {target.name}ì˜ ë¶€ëª¨ê°€ ì´ë¯¸ í•˜ì´ë¼ì´íŠ¸ ì¤‘ì´ë¼ ìŠ¤í‚µí•©ë‹ˆë‹¤.");
+            return;
+        }
+
+        Canvas.ForceUpdateCanvases();
+        Vector3 originalWorldPos = target.transform.position;
 
         HighlightData data = new HighlightData
         {
             target = target,
             originalParent = target.transform.parent,
-            originalIndex = target.transform.GetSiblingIndex()
+            originalIndex = target.transform.GetSiblingIndex(),
+            outlineInstance = null
         };
-        inst._activeHighlights.Add(data);
 
-        target.transform.SetParent(inst.focusLayer);
-        inst.yellowOutline.gameObject.SetActive(true);
-        inst.yellowOutline.position = target.transform.position;
-        inst.darkOverlay.SetActive(true);
-        inst.SetSystemFreeze(false);
+        target.transform.SetParent(focusLayer, true);
+        target.transform.position = originalWorldPos;
+
+        // ë¸”ë™ ì»¤íŠ¼ í™œì„±í™” ë° ìˆœì„œ ì •ë¦¬
+        if (darkOverlay != null)
+        {
+            darkOverlay.SetActive(true);
+            darkOverlay.transform.SetAsFirstSibling();
+        }
+
+        if (yellowOutlinePrefab != null)
+        {
+            GameObject outline = Instantiate(yellowOutlinePrefab, focusLayer);
+            outline.transform.SetSiblingIndex(1);
+            data.outlineInstance = outline;
+
+            RectTransform targetRT = target.GetComponent<RectTransform>();
+            RectTransform outlineRT = outline.GetComponent<RectTransform>();
+
+            if (targetRT != null && outlineRT != null)
+            {
+                outlineRT.anchorMin = targetRT.anchorMin;
+                outlineRT.anchorMax = targetRT.anchorMax;
+                outlineRT.pivot = targetRT.pivot;
+                outlineRT.sizeDelta = targetRT.sizeDelta + new Vector2(15, 15);
+                outlineRT.position = targetRT.position;
+                outlineRT.localScale = Vector3.one;
+            }
+        }
+
+        _activeHighlights.Add(data);
+        SetSystemFreeze(false);
     }
 
     [YarnCommand("unhighlight")]
@@ -121,38 +210,300 @@ public class TutorialManager : MonoBehaviour
         var inst = Instance;
         if (inst == null) return;
 
-        foreach (var h in inst._activeHighlights)
+        // ì—­ìˆœìœ¼ë¡œ ëŒë©´ì„œ ëª¨ë“  í•˜ì´ë¼ì´íŠ¸ í•´ì œ
+        for (int i = inst._activeHighlights.Count - 1; i >= 0; i--)
         {
+            var h = inst._activeHighlights[i];
+
+            if (h.outlineInstance != null) Destroy(h.outlineInstance);
+
             if (h.target != null && h.originalParent != null)
             {
-                // ¿ø·¡ ºÎ¸ğ·Î º¹±¸
-                h.target.transform.SetParent(h.originalParent);
+                // ì›ë˜ ë¶€ëª¨ì™€ ìˆœì„œë¡œ ë³µêµ¬
+                h.target.transform.SetParent(h.originalParent, true);
                 h.target.transform.SetSiblingIndex(h.originalIndex);
             }
         }
+
         inst._activeHighlights.Clear();
         inst.darkOverlay.SetActive(false);
-        inst.yellowOutline.gameObject.SetActive(false);
         inst.SetSystemFreeze(true);
+
+        Canvas.ForceUpdateCanvases();
     }
-    [YarnCommand("waitForEndDay")]
-    public static void WaitForEndDay() // staticÀ» ºÙ¿©¾ß 'Target' ¿¡·¯°¡ ¾È ³³´Ï´Ù.
+
+    [YarnCommand("highlightSources")]
+    public static void HighlightSources()
     {
         var inst = Instance;
-        if (inst == null || inst.endDayButton == null) return;
+        if (inst == null) return;
 
-        // 1. ±âÁ¸¿¡ ¹öÆ°¿¡ ºÙ¾îÀÖ´ø ±â´Éµé ½Ï Á¤¸® (Áßº¹ ½ÇÇà ¹æÁö)
-        inst.endDayButton.onClick.RemoveAllListeners();
+        // ğŸš¨ ê°œë³„ ì•„ì´í…œì´ ì•„ë‹ˆë¼, ì†ŒìŠ¤ë“¤ì´ ë‹´ê¸´ 'íŒ(Grid)'ì„ í†µì§¸ë¡œ ì°¾ìŠµë‹ˆë‹¤.
+        GameObject gridNew = GameObject.Find("Grid_New");
 
-        // 2. ¹öÆ°À» ´©¸£¸é ½ÇÇàµÉ µ¿ÀÛ µü ÇÏ³ª¸¸ µî·Ï
-        inst.endDayButton.onClick.AddListener(() =>
+        if (gridNew != null)
         {
-            Unhighlight(); // À±°û¼± ²ô±â
-            inst.dialogueRunner.StartDialogue("ShowEndDayStep"); // ´ÙÀ½ ³ëµå ½ÃÀÛ
+            Debug.Log("[íŠœí† ë¦¬ì–¼] Grid_Newë¥¼ í†µì§¸ë¡œ í•˜ì´ë¼ì´íŠ¸í•©ë‹ˆë‹¤.");
+            inst.ApplyHighlight(gridNew);
+        }
+        else
+        {
+            Debug.LogWarning("[íŠœí† ë¦¬ì–¼] Grid_New ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤! ì´ë¦„ì„ í™•ì¸í•´ì£¼ì„¸ìš”.");
+        }
+    }
+
+    // ==========================================
+    // 2. ë°°ê²½ ë° ì‚¬ìš´ë“œ ì„¤ì •
+    // ==========================================
+
+    [YarnCommand("set_bg")]
+    public static void SetBackground(string bgName)
+    {
+        if (Instance == null || Instance.backgroundDisplay == null) return;
+
+        // 1. ë¹ˆ ë¬¸ìì—´("")ì´ê±°ë‚˜ "None"ì´ë©´ false, ê·¸ ì™¸(Start ë“±)ëŠ” true
+        bool shouldActive = !string.IsNullOrEmpty(bgName) && bgName != "None";
+        Instance.backgroundDisplay.gameObject.SetActive(shouldActive);
+    }
+
+    [YarnCommand("playSFX")]
+    public static void PlaySFX(int id) => AudioManager.Instance?.PlaySFX(id);
+
+
+    // ==========================================
+    // ì§„í–‰ í•¨ìˆ˜ë“¤
+    // ==========================================
+
+    [YarnCommand("spawnTutorialReceipt")]
+    public static void SpawnTutorialReceipt()
+    {
+        if (Instance == null || Instance.receiptLineManager == null) return;
+
+        // 1. ì˜ìˆ˜ì¦ ìƒì„± ë° ë°ì´í„° ì„¤ì •
+        Receipt tutorialReceipt = new Receipt(DateTime.Now, 1);
+        tutorialReceipt.AddOrder("êµ°ì ë–¡ë³¶ì´", new Dictionary<string, int>());
+        Instance.receiptLineManager.AddNewReceipt(tutorialReceipt);
+
+        // 2. ìƒì„±ëœ ì˜ìˆ˜ì¦ ì˜¤ë¸Œì íŠ¸ ì°¾ê¸°
+        var slots = Instance.receiptLineManager.GetReceiptSlots();
+        if (slots.Count > 0)
+        {
+            var lastItem = slots[slots.Count - 1];
+            // ğŸš¨ ì´ë¦„ì„ ë°”ê¿”ì„œ ë‚˜ì¤‘ì— Highlightë‚˜ GameObject.Findë¡œ ì°¾ê¸° ì‰½ê²Œ ë§Œë“­ë‹ˆë‹¤.
+            lastItem.gameObject.name = "TutorialReceipt";
+
+            // ğŸš¨ [ìˆ˜ì •] ì—¬ê¸°ì„œ RemoveAllListeners()ë¥¼ ì ˆëŒ€ í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤! 
+            // ì˜ìˆ˜ì¦ í´ë¦­ ì‹œ ì›ë˜ ì°½ì´ ëœ¨ëŠ” ê¸°ëŠ¥ì€ ê·¸ëŒ€ë¡œ ìœ ì§€í•´ì•¼ í•˜ë‹ˆê¹Œìš”.
+        }
+    }
+
+    [YarnCommand("spawnWok")]
+    public static void SpawnWok()
+    {
+        var inst = Instance;
+        if (inst == null || inst.targetStoveSlot == null) return;
+
+        // 1. StoveManagerì—ê²Œ ë¨¼ì € ì•Œë ¤ì„œ ì‹œìŠ¤í…œ ìƒíƒœë¥¼ ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.
+        StoveManager.Instance.SelectSlot(inst.targetStoveSlot);
+
+        // 2. ê·¸ ë‹¤ìŒ ì§ì ‘ SetSelectedë¥¼ í˜¸ì¶œí•˜ì—¬ ë¹„ì£¼ì–¼ì„ ê°±ì‹ í•©ë‹ˆë‹¤.
+        inst.targetStoveSlot.SetSelected(true);
+    }
+
+    // ë§¤ê°œë³€ìˆ˜ë¡œ ì›ì˜ ë°ì´í„°ë¥¼ ë°›ë„ë¡ ìˆ˜ì •
+    private bool CheckRecipeCondition(Dictionary<string, int> wokData)
+    {
+        return wokData.GetValueOrDefault("ë–¡", 0) >= 2 &&
+               wokData.GetValueOrDefault("ì˜¤ë…", 0) >= 2 &&
+               wokData.GetValueOrDefault("íŒŒ", 0) >= 1 &&
+               wokData.GetValueOrDefault("ì–‘ë°°ì¶”", 0) >= 1;
+    }
+
+
+    [YarnCommand("startBoiling")]
+    public static void StartBoiling()
+    {
+        // [ìˆ˜ì •] ì˜¤ë””ì˜¤ ë§¤ë‹ˆì €ë¥¼ í†µí•´ ìš”ë¦¬ ì‹œì‘ ì†Œë¦¬(101)ë¥¼ ì¬ìƒí•©ë‹ˆë‹¤.
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX(101);
+        }
+
+        Instance?.targetStoveSlot?.StartTutorialCook();
+    }
+
+    // ==========================================
+    // Wait For - í•¨ìˆ˜ë“¤
+    // ==========================================
+
+    [YarnCommand("waitForReceiptClick")]
+    public static IEnumerator WaitForReceiptClick()
+    {
+        var inst = Instance;
+        if (inst == null) yield break;
+
+        GameObject receipt = GameObject.Find("TutorialReceipt");
+        if (receipt == null) yield break;
+
+        Button btn = receipt.GetComponent<Button>();
+        if (btn == null) yield break;
+
+        bool isClicked = false;
+        // ğŸš¨ íŠœí† ë¦¬ì–¼ ì „ìš© ë¦¬ìŠ¤ë„ˆë§Œ ì‚´ì§ ì¶”ê°€
+        UnityEngine.Events.UnityAction tutorialAction = () => isClicked = true;
+
+        btn.onClick.AddListener(tutorialAction);
+        inst.SetSystemFreeze(false); // í´ë¦­í•  ìˆ˜ ìˆê²Œ í•´ë™
+
+        // ğŸš¨ í´ë¦­í•  ë•Œê¹Œì§€ Yarn Runner ëŒ€ê¸°
+        yield return new WaitUntil(() => isClicked);
+
+        // ë³¼ì¼ ëë‚¬ìœ¼ë‹ˆ ë¦¬ìŠ¤ë„ˆ ì œê±°
+        btn.onClick.RemoveListener(tutorialAction);
+
+        inst.SetSystemFreeze(true);
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
+    }
+
+    [YarnCommand("waitIngredients")]
+    public static IEnumerator WaitIngredients()
+    {
+        var inst = Instance;
+        if (inst == null) yield break;
+
+        inst.SetSystemFreeze(false);
+        Debug.Log("[íŠœí† ë¦¬ì–¼] ì¬ë£Œ íˆ¬ì… ëŒ€ê¸° ì¤‘...");
+
+        // ğŸš¨ [ìˆ˜ì •] ì¡°ê±´ì´ ë§ì„ ë•Œê¹Œì§€ ì—¬ê¸°ì„œ Yarn Runnerë¥¼ ë¶™ì¡ì•„ë‘¡ë‹ˆë‹¤.
+        yield return new WaitUntil(() => {
+            var currentInWok = inst.targetStoveSlot.GetPendingIngredientsCopy();
+            return inst.CheckRecipeCondition(currentInWok);
         });
 
-        // 3. ¹öÆ°À» ´©¸¦ ¼ö ÀÖ°Ô ½Ã½ºÅÛ Àá±İ ÇØÁ¦
+        Debug.Log("[íŠœí† ë¦¬ì–¼] ì¬ë£Œ íˆ¬ì… ì™„ë£Œ!");
+        inst.SetSystemFreeze(true);
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
+    }
+
+    [YarnCommand("waitSauce")]
+    public static IEnumerator WaitSauce()
+    {
+        var inst = Instance;
+        if (inst == null) yield break;
+
         inst.SetSystemFreeze(false);
+        bool sauceAdded = false;
+
+        // ì†ŒìŠ¤ ë²„íŠ¼ ë¦¬ìŠ¤ë„ˆ ì„¤ì •
+        foreach (var ib in FindObjectsByType<IngredientButton>(FindObjectsSortMode.None))
+        {
+            if (ib.ingredientName == "êµ°ì ì†ŒìŠ¤")
+            {
+                Button btn = ib.GetComponent<Button>();
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => {
+                    if (IsFreeze) return;
+                    sauceAdded = true;
+                });
+            }
+        }
+
+        // ğŸš¨ ì†ŒìŠ¤ë¥¼ ë„£ì„ ë•Œê¹Œì§€ ëŒ€ê¸°
+        yield return new WaitUntil(() => sauceAdded);
+
+        inst.SetSystemFreeze(true);
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
+    }
+
+    [YarnCommand("waitForBoiled")]
+    public static IEnumerator WaitForBoiled()
+    {
+        if (Instance?.targetStoveSlot == null) yield break;
+
+        // 1. ìš”ë¦¬ê°€ 'ì‹œì‘'ë  ë•Œê¹Œì§€ ëŒ€ê¸°
+        yield return new WaitUntil(() => Instance.targetStoveSlot.IsCooking);
+
+        // 2. ìš”ë¦¬ê°€ 'ëë‚ ' ë•Œê¹Œì§€ ëŒ€ê¸°
+        while (Instance.targetStoveSlot.IsCooking) yield return null;
+
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
+    }
+
+    [YarnCommand("waitForPacking")]
+    public static IEnumerator WaitForPacking()
+    {
+        var inst = Instance;
+        if (inst == null) yield break;
+
+        // 1. ì¡°ì‘ í—ˆìš©: ìŒì‹ì„ ë“œë˜ê·¸í•´ì„œ ì˜®ê²¨ì•¼ í•˜ë‹ˆê¹Œìš”!
+        inst.SetSystemFreeze(false);
+
+        bool isPacked = false;
+
+        // 2. ì–´ë–¤ í¬ì¥ ìŠ¬ë¡¯ì´ë“  ìŒì‹ì´ ë“¤ì–´ì˜¬ ë•Œê¹Œì§€ ëŒ€ê¸°
+        // (ì‚¬ì¥ë‹˜ì´ í•˜ì´ë¼ì´íŠ¸í•œ PackagingSlot ì˜¤ë¸Œì íŠ¸ë¥¼ í¬í•¨í•œ ëª¨ë“  ìŠ¬ë¡¯ ëŒ€ìƒ)
+        while (!isPacked)
+        {
+            var allSlots = UnityEngine.Object.FindObjectsByType<PackagingSlot>(FindObjectsSortMode.None);
+            foreach (var slot in allSlots)
+            {
+                if (slot.HasAnyFood()) // PackagingSlotì— êµ¬í˜„ë˜ì–´ ìˆëŠ” ë©”ì„œë“œ í™œìš©
+                {
+                    isPacked = true;
+                    break;
+                }
+            }
+            yield return null; // í•œ í”„ë ˆì„ ì‰¼
+        }
+
+        Debug.Log("[íŠœí† ë¦¬ì–¼] ìŒì‹ í¬ì¥ëŒ€ ì•ˆì°© í™•ì¸!");
+
+        // 3. ë‹¤ì‹œ ì¡°ì‘ ì ê¸ˆ ë° í•˜ì´ë¼ì´íŠ¸ í•´ì œ
+        inst.SetSystemFreeze(true);
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
+    }
+
+    [YarnCommand("waitForReceiptAttached")]
+    public static IEnumerator WaitForReceiptAttached()
+    {
+        var inst = Instance;
+        if (inst == null) yield break;
+
+        inst.SetSystemFreeze(false);
+
+        // 1. ì˜ìˆ˜ì¦ì´ ì”¬ì— ë‚˜íƒ€ë‚  ë•Œê¹Œì§€ ë¨¼ì € ëŒ€ê¸°
+        yield return new WaitUntil(() => GameObject.Find("TutorialReceipt") != null);
+        Debug.Log("[íŠœí† ë¦¬ì–¼] ì˜ìˆ˜ì¦ ë°œê²¬ë¨. ë¶€ì°© ëŒ€ê¸° ì¤‘...");
+
+        // 2. ì˜ìˆ˜ì¦ì´ 'ì§„ì§œ ì§‘(ìŒì‹)'ì„ ì°¾ì„ ë•Œê¹Œì§€ ëŒ€ê¸°
+        yield return new WaitUntil(() => {
+            GameObject receipt = GameObject.Find("TutorialReceipt");
+
+            // ì˜ìˆ˜ì¦ì´ íŒŒê´´ë˜ì—ˆë‹¤ë©´ (ì„±ê³µì ìœ¼ë¡œ ë¶™ì¸ ë’¤ ì‚­ì œë˜ëŠ” ë¡œì§ì¼ ê²½ìš°) ì™„ë£Œ
+            if (receipt == null) return true;
+
+            Transform currentParent = receipt.transform.parent;
+            if (currentParent == null) return false;
+
+            // ğŸš¨ ë“œë˜ê·¸ ì¤‘ì´ê±°ë‚˜ í•˜ì´ë¼ì´íŠ¸ ë ˆì´ì–´ì— ìˆì„ ë•ŒëŠ” 'ë¯¸ì™„ë£Œ' ìƒíƒœì…ë‹ˆë‹¤.
+            // ë¶€ëª¨ ì´ë¦„ì´ "Cooked", "Food", "Box", "Slot" ë“±ìœ¼ë¡œ ë°”ë€Œì—ˆì„ ë•Œë§Œ ì„±ê³µìœ¼ë¡œ ê°„ì£¼í•©ë‹ˆë‹¤.
+            bool isAttached = currentParent.name.Contains("Cooked") ||
+                              currentParent.name.Contains("Food") ||
+                              currentParent.name.Contains("Slot");
+
+            return isAttached;
+        });
+
+        Debug.Log("[íŠœí† ë¦¬ì–¼] ì˜ìˆ˜ì¦ ë¶€ì°© ì™„ë£Œ ë¡œê·¸ í™•ì¸!");
+
+        inst.SetSystemFreeze(true);
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
     }
 
     [YarnCommand("waitForPayment")]
@@ -162,72 +513,70 @@ public class TutorialManager : MonoBehaviour
         if (inst == null || inst.paymentButton == null) yield break;
 
         bool isClicked = false;
-        UnityEngine.Events.UnityAction action = null;
-        action = () =>
-        {
-            isClicked = true;
-            // Å¬¸¯ °¨Áö Áï½Ã ¸®½º³Ê Á¦°Å (Áßº¹ ½ÇÇà ¹æÁö)
-            inst.paymentButton.onClick.RemoveListener(action);
-        };
-        inst.paymentButton.onClick.AddListener(action);
+        // ğŸš¨ ê¸°ì¡´ ë¦¬ìŠ¤ë„ˆë¥¼ ì§€ìš°ì§€ ì•Šê³ , íŠœí† ë¦¬ì–¼ìš© ì²´í¬ í•¨ìˆ˜ë§Œ ì •ì˜í•©ë‹ˆë‹¤.
+        UnityEngine.Events.UnityAction tutorialAction = () => isClicked = true;
 
-        inst.SetSystemFreeze(false); // ¹öÆ°À» ´©¸¦ ¼ö ÀÖ°Ô ÇÁ¸®Áî ÇØÁ¦
+        // ë¦¬ìŠ¤ë„ˆ ì¶”ê°€ (ê¸°ì¡´ ê¸°ëŠ¥ + íŠœí† ë¦¬ì–¼ ì‹ í˜¸)
+        inst.paymentButton.onClick.AddListener(tutorialAction);
+        inst.SetSystemFreeze(false);
 
-        // 1. ÇÃ·¹ÀÌ¾î°¡ ¼¼±İ ¹öÆ°À» ´©¸¦ ¶§±îÁö ¿©±â¼­ ´ë±âÇÕ´Ï´Ù.
+        // í”Œë ˆì´ì–´ê°€ ëˆ„ë¥¼ ë•Œê¹Œì§€ ëŒ€ê¸°
         yield return new WaitUntil(() => isClicked);
 
-        // 2. [Áß¿ä] »óÁ¡ÀÌ ¿­¸®±â Á÷Àü¿¡ Æ©Åä¸®¾ó ¸ğµå¸¦ ¹Ì¸® ÄÕ´Ï´Ù.
-        // ±×·¡¾ß »óÁ¡ÀÇ SafePopulate()°¡ µ¹¾Æ°¥ ¶§ PopulateTutorialShop()À» Ã£¾Æ°©´Ï´Ù.
-        var shopUI = UnityEngine.Object.FindAnyObjectByType<IngredientShopUI>();
-        if (shopUI != null)
-        {
-            shopUI.isTutorialMode = true;
-        }
+        // ğŸš¨ [í•µì‹¬] ë³¼ì¼ ëë‚¬ìœ¼ë‹ˆ íŠœí† ë¦¬ì–¼ ë¦¬ìŠ¤ë„ˆë§Œ ì œê±° (ì›ë˜ ê¸°ëŠ¥ì€ ë³´ì¡´)
+        inst.paymentButton.onClick.RemoveListener(tutorialAction);
 
-        // 3. UI Á¤¸®
-        Unhighlight();
+        // ìƒì  ëª¨ë“œ ì„¤ì • ë¡œì§
+        var shopUI = FindAnyObjectByType<IngredientShopUI>();
+        if (shopUI != null) shopUI.isTutorialMode = true;
+
+        // ë§Œì•½ ìˆ˜ë™ìœ¼ë¡œ ì¼œì¤˜ì•¼ í•˜ëŠ” íŒ¨ë„ì´ ìˆë‹¤ë©´ ìœ ì§€
         if (inst.endOfDayParent != null) inst.endOfDayParent.SetActive(true);
 
-        // 4. ¾ÆÁÖ ÂªÀº ´ë±â ÈÄ Áï½Ã ´ÙÀ½ ³ëµå('ShowShopStep') ½ÃÀÛ!
-        yield return new WaitForSeconds(0.1f);
-        inst.dialogueRunner.StartDialogue("ShowShopStep");
-
-        // 5. ´Ù½Ã ½Ã½ºÅÛ ÇÁ¸®Áî (´ëÈ­ Ã¢¿¡ ÁıÁß)
         inst.SetSystemFreeze(true);
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
     }
 
-    // -----------------------------
-    // -----------------------------
-
-    // 2. ¼Ò½ºµé¸¸ Ã£¾Æ¼­ ÇÏÀÌ¶óÀÌÆ® (¼öÁ¤)
-    [YarnCommand("highlightSources")]
-    public static void HighlightSources()
+    [YarnCommand("waitForEndDay")]
+    public static IEnumerator WaitForEndDay() // voidì—ì„œ IEnumeratorë¡œ ë³€ê²½
     {
-        var items = UnityEngine.Object.FindObjectsByType<ShopItemUI>(FindObjectsSortMode.None);
-        foreach (var item in items)
-        {
-            // »óÁ¡ ¾ÆÀÌÅÛ »ı¼º ½Ã obj.name = data.Name; ·Î ¼³Á¤µÇ¾î ÀÖ¾î¾ß ÇÕ´Ï´Ù.
-            if (item.gameObject.name.Contains("¼Ò½º"))
-            {
-                // »ç¿ëÀÚ´ÔÀÇ ¸Ş¼­µå: stringÀ» ¹ŞÀ¸¹Ç·Î .nameÀ» ³Ñ±é´Ï´Ù.
-                Highlight(item.gameObject.name);
-            }
-        }
+        var inst = Instance;
+        if (inst == null || inst.endDayButton == null) yield break;
+
+        bool isClicked = false;
+        UnityEngine.Events.UnityAction tutorialAction = () => isClicked = true;
+
+        // ê¸°ì¡´ ê¸°ëŠ¥ì„ ë°©í•´í•˜ì§€ ì•Šê³  íŠœí† ë¦¬ì–¼ ì‹ í˜¸ë§Œ ì¶”ê°€
+        inst.endDayButton.onClick.AddListener(tutorialAction);
+        inst.SetSystemFreeze(false);
+
+        yield return new WaitUntil(() => isClicked);
+
+        // ë¦¬ìŠ¤ë„ˆ ì œê±° ë° ì •ë¦¬
+        inst.endDayButton.onClick.RemoveListener(tutorialAction);
+
+        inst.SetSystemFreeze(true);
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
     }
 
     [YarnCommand("waitForAnySourceClick")]
     public static IEnumerator WaitForAnySourceClick()
     {
         var inst = Instance;
+        if (inst == null) yield break;
+
         inst.SetSystemFreeze(false);
         string sauceName = "";
 
-        // ÇÃ·¹ÀÌ¾î°¡ ¼Ò½º Áß ÇÏ³ª¸¦ Ã¼Å©ÇÒ ¶§±îÁö ´ë±â
         yield return new WaitUntil(() =>
         {
-            var items = UnityEngine.Object.FindObjectsByType<ShopItemUI>(FindObjectsSortMode.None);
-            // ½Å±Ô ÀÔ°í(Locked) ±¸¿ª¿¡ ÀÖ´Â ¼Ò½º Áß Ã¼Å©µÈ °Í Ã£±â
-            var selected = items.FirstOrDefault(i => i.selectToggle.isOn && i.gameObject.name.Contains("¼Ò½º"));
+            var items = FindObjectsByType<ShopItemUI>(FindObjectsSortMode.None);
+            var selected = items.FirstOrDefault(i =>
+                i.selectToggle.isOn &&
+                (i.gameObject.name.Contains("ì†ŒìŠ¤") || i.gameObject.name.ToLower().Contains("sauce"))
+            );
 
             if (selected != null)
             {
@@ -237,292 +586,90 @@ public class TutorialManager : MonoBehaviour
             return false;
         });
 
-        // ¾á ½ºÅ©¸³Æ®¿¡ ¼±ÅÃÇÑ ¼Ò½º ÀÌ¸§ Àü´Ş
         inst.dialogueRunner.VariableStorage.SetValue("$SelectedSource", sauceName);
 
-        Unhighlight();
+        // ğŸš¨ [ìˆ˜ì •] ì—¬ê¸°ì„œ StartDialogueë¥¼ ë¶€ë¥´ì§€ ì•ŠìŠµë‹ˆë‹¤.
         inst.SetSystemFreeze(true);
-
-        // ¼±ÅÃ ¿Ï·á ÈÄ ´ÙÀ½ ´ë»ç ³ëµå·Î ÀÌµ¿
-        inst.dialogueRunner.StartDialogue("BuySauceStep");
-    }
-
-    // ==========================================
-    // 2. ¹è°æ ¹× »ç¿îµå ¼³Á¤
-    // ==========================================
-
-    [YarnCommand("set_bg")]
-    public static IEnumerator SetBackground(string bgName)
-    {
-        if (Instance?.backgroundDisplay == null) yield break;
-        Instance.backgroundDisplay.texture = (bgName == "Desktop") ? Instance.desktopTexture : Instance.mainShopTexture;
-        Instance.backgroundDisplay.color = Color.white;
+        Unhighlight();
         yield return new WaitForEndOfFrame();
     }
 
-    [YarnCommand("playSFX")]
-    public static void PlaySFX(int id) => AudioManager.Instance?.PlaySFX(id);
-
-    // ==========================================
-    // 4. °ÔÀÓÇÃ·¹ÀÌ ·ÎÁ÷ (¿ä¸®, ¿µ¼öÁõ, Æ÷Àå µî)
-    // ==========================================
-
-    [YarnCommand("spawnTutorialReceipt")]
-    public static void SpawnTutorialReceipt()
-    {
-        if (Instance == null || Instance.receiptLineManager == null) return;
-        Receipt tutorialReceipt = new Receipt(DateTime.Now, 1);
-        tutorialReceipt.AddOrder("±ºÀÚ ¶±ººÀÌ", new Dictionary<string, int>());
-        Instance.receiptLineManager.AddNewReceipt(tutorialReceipt);
-
-        var slots = Instance.receiptLineManager.GetReceiptSlots();
-        if (slots.Count > 0)
-        {
-            var lastItem = slots[slots.Count - 1];
-            lastItem.gameObject.name = "TutorialReceipt";
-            var btn = lastItem.GetComponent<Button>();
-            btn?.onClick.RemoveAllListeners();
-            btn?.onClick.AddListener(() =>
-            {
-                if (IsFreeze) return;
-                Instance.receiptLineManager.combinedIngredientManager?.DisplayAllCombinedIngredients(lastItem.GetReceipt());
-                Unhighlight();
-                Instance.dialogueRunner.StartDialogue("AddIngredientStep");
-            });
-        }
-    }
-
-    [YarnCommand("waitIngredients")]
-    public static void WaitIngredients()
-    {
-        if (Instance == null) return;
-        Instance._tutorialTally.Clear();
-        Instance.SetSystemFreeze(false);
-        foreach (var ib in FindObjectsByType<IngredientButton>(FindObjectsSortMode.None))
-        {
-            ib.GetComponent<Button>()?.onClick.AddListener(() => Instance.OnIngredientClick(ib.ingredientName));
-        }
-    }
-
-    private void OnIngredientClick(string name)
-    {
-        if (IsFreeze || targetStoveSlot == null) return;
-
-        // 1. [Áß¿ä] ¹öÆ°À» ´©¸£¸é '½ÇÁ¦ ¿÷'¿¡ Àç·á¸¦ ³Ö½À´Ï´Ù.
-        targetStoveSlot.AddIngredient(name);
-
-        // 2. [¼öÁ¤] ¿÷¿¡ ´ã±ä ½ÇÁ¦ °³¼ö¸¦ °¡Á®¿Í¼­ Ã¼Å©ÇÕ´Ï´Ù.
-        var currentInWok = targetStoveSlot.GetPendingIngredientsCopy();
-
-        // 3. Á¶°Ç Ã¼Å©
-        if (name == "±ºÀÚ ¼Ò½º")
-        {
-            SetSystemFreeze(true);
-            Unhighlight();
-            dialogueRunner.StartDialogue("BoilingStep");
-        }
-        // ³» ÀåºÎ(_tutorialTally) ´ë½Å ¿÷ÀÇ µ¥ÀÌÅÍ(currentInWok)¸¦ ³Ñ°ÜÁİ´Ï´Ù.
-        else if (CheckRecipeCondition(currentInWok))
-        {
-            SetSystemFreeze(true);
-            Unhighlight();
-            dialogueRunner.StartDialogue("AddSauceStep");
-        }
-    }
-
-    // ¸Å°³º¯¼ö·Î ¿÷ÀÇ µ¥ÀÌÅÍ¸¦ ¹Şµµ·Ï ¼öÁ¤
-    private bool CheckRecipeCondition(Dictionary<string, int> wokData)
-    {
-        return wokData.GetValueOrDefault("¶±", 0) >= 2 &&
-               wokData.GetValueOrDefault("¿Àµ­", 0) >= 2 &&
-               wokData.GetValueOrDefault("ÆÄ", 0) >= 1 &&
-               wokData.GetValueOrDefault("¾ç¹èÃß", 0) >= 1;
-    }
-
-    [YarnCommand("waitSauce")]
-    public static void WaitSauce() => Instance?.SetSystemFreeze(false);
-
-    [YarnCommand("startBoiling")]
-    public static void StartBoiling()
-    {
-        // [¼öÁ¤] ¿Àµğ¿À ¸Å´ÏÀú¸¦ ÅëÇØ ¿ä¸® ½ÃÀÛ ¼Ò¸®(404¹ø)¸¦ Àç»ıÇÕ´Ï´Ù.
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlaySFX(404);
-        }
-
-        Instance?.targetStoveSlot?.StartTutorialCook();
-    }
-
-    [YarnCommand("waitForDone")]
-    public static IEnumerator WaitForDone()
-    {
-        if (Instance?.targetStoveSlot == null) yield break;
-        while (Instance.targetStoveSlot.IsCooking) yield return null;
-        Unhighlight();
-    }
-
-    [YarnCommand("waitForPacking")]
-    public static IEnumerator WaitForPacking()
-    {
-        if (Instance?.packagingArea == null) yield break;
-        bool detected = false;
-        while (!detected)
-        {
-            foreach (var s in Instance.packagingArea.GetComponentsInChildren<PackagingSlot>())
-            { if (s.HasAnyFood()) { detected = true; break; } }
-            yield return null;
-        }
-        Unhighlight();
-    }
-
-    [YarnCommand("waitForReceipt")]
-    public static IEnumerator WaitForReceipt()
-    {
-        GameObject receipt = GameObject.Find("TutorialReceipt");
-        while (receipt != null) yield return null;
-        Unhighlight();
-        Instance.dialogueRunner?.StartDialogue("DeliveryStep");
-    }
-
-    [YarnCommand("spawnWok")]
-    public static void SpawnWok()
-    {
-        var inst = Instance;
-        if (inst == null || inst.targetStoveSlot == null) return;
-
-        // 1. È­±¸ ÀÚÃ¼¸¦ È°¼ºÈ­
-        inst.targetStoveSlot.OnPointerClick(null);
-        inst.targetStoveSlot.SetSelected(true);
-
-        // 2. [Ãß°¡] StoveManager¿¡°Ô ÇöÀç '¼±ÅÃµÈ È­±¸'°¡ ÀÌ°ÍÀÓÀ» °­Á¦ ÁÖÀÔ
-        // StoveManager¿¡ SelectSlotÀÌ publicÀ¸·Î ÀÖÀ¸¹Ç·Î ÀÌ¸¦ È£ÃâÇÕ´Ï´Ù.
-        StoveManager.Instance.SelectSlot(inst.targetStoveSlot);
-    }
     [YarnCommand("waitForOrderClick")]
     public static IEnumerator WaitForOrderClick()
     {
         var inst = Instance;
-        // ¾À¿¡¼­ »óÁ¡ UI¸¦ Á÷Á¢ Ã£½À´Ï´Ù. (Find ¹æ½Ä)
         var shopUI = UnityEngine.Object.FindAnyObjectByType<IngredientShopUI>();
-
-        if (inst == null || shopUI == null)
-        {
-            Debug.LogError("[Æ©Åä¸®¾ó] »óÁ¡ UI¸¦ Ã£À» ¼ö ¾ø¾î ÁÖ¹® ´ë±â¸¦ ½ÃÀÛÇÒ ¼ö ¾ø½À´Ï´Ù.");
-            yield break;
-        }
+        if (inst == null || shopUI == null) yield break;
 
         bool isOrdered = false;
-        inst.SetSystemFreeze(false); // ¹öÆ° Å¬¸¯ÀÌ °¡´ÉÇÏµµ·Ï ÇÁ¸®Áî ÇØÁ¦
+        inst.SetSystemFreeze(false);
 
-        // ÁÖ¹® ¿Ï·á ½Ã ½ÇÇàµÉ ¾×¼Ç µî·Ï
         UnityEngine.Events.UnityAction action = null;
-        action = () =>
-        {
+        action = () => {
             isOrdered = true;
             shopUI.OnShopProcessFinished.RemoveListener(action);
         };
-
         shopUI.OnShopProcessFinished.AddListener(action);
 
-        // ÇÃ·¹ÀÌ¾î°¡ 'ÁÖ¹®ÇÏ±â'¸¦ ´©¸¦ ¶§±îÁö ¿©±â¼­ ´ë±âÇÕ´Ï´Ù.
+        // âœ¨ ì£¼ë¬¸ ë²„íŠ¼ì„ ëˆ„ë¥¼ ë•Œê¹Œì§€ ëŒ€ê¸°
         yield return new WaitUntil(() => isOrdered);
-        Debug.Log("[½Ã½ºÅÛ] ÁÖ¹® È®ÀÎµÊ! ´ÙÀ½ ³ëµå·Î ÀÌµ¿ ½Ãµµ.");
-
-        inst.SetSystemFreeze(true); // ´ëÈ­ ÁıÁßÀ» À§ÇØ ´Ù½Ã ÇÁ¸®Áî
-        inst.SafeStartDialogue("CheckingStep");
+        inst.SetSystemFreeze(true);
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
     }
+
     [YarnCommand("waitForChecking")]
     public static IEnumerator WaitForChecking()
     {
         var inst = Instance;
-        if (inst == null) yield break;
-
-        // 1. ÀÌ¸§À¸·Î Á÷Á¢ Åä±Û ¿ÀºêÁ§Æ®¸¦ Ã£½À´Ï´Ù.
         GameObject receiptObj = GameObject.Find("Toggle_CheckReceipt");
         GameObject ingredientObj = GameObject.Find("Toggle_CheckIngredient");
+        if (receiptObj == null || ingredientObj == null) yield break;
 
-        if (receiptObj == null || ingredientObj == null)
-        {
-            Debug.LogError("[Æ©Åä¸®¾ó] Åä±Û ¿ÀºêÁ§Æ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù! ÀÌ¸§À» È®ÀÎÇÏ¼¼¿ä.");
-            yield break;
-        }
-
-        Toggle receiptToggle = receiptObj.GetComponent<Toggle>();
-        Toggle ingredientToggle = ingredientObj.GetComponent<Toggle>();
+        Toggle t1 = receiptObj.GetComponent<Toggle>();
+        Toggle t2 = ingredientObj.GetComponent<Toggle>();
 
         inst.SetSystemFreeze(false);
-
-        // 2. µÎ Åä±ÛÀÌ ¸ğµÎ ÄÑÁú ¶§±îÁö ´ë±â
-        yield return new WaitUntil(() => receiptToggle.isOn && ingredientToggle.isOn);
-
+        yield return new WaitUntil(() => t1.isOn && t2.isOn);
         inst.SetSystemFreeze(true);
-        inst.SafeStartDialogue("ClosingStep");
+        Unhighlight();
+        yield return new WaitForEndOfFrame();
     }
 
     [YarnCommand("waitForClosing")]
     public static IEnumerator WaitForClosing()
     {
         var inst = Instance;
+        if (inst == null) yield break;
+
         GameObject closeBtnObj = GameObject.Find("Button_NextDay");
         if (closeBtnObj == null) yield break;
 
         Button closeBtn = closeBtnObj.GetComponent<Button>();
+        bool isClicked = false;
+
+        // ğŸš¨ íŠœí† ë¦¬ì–¼ ì „ìš© ë¦¬ìŠ¤ë„ˆë¥¼ ì´ë¦„ì´ ìˆëŠ” ì•¡ì…˜ìœ¼ë¡œ ì •ì˜í•©ë‹ˆë‹¤.
+        UnityEngine.Events.UnityAction tutorialAction = null;
+        tutorialAction = () => isClicked = true;
+
+        // 1. ë¦¬ìŠ¤ë„ˆ ì¶”ê°€ ë° ì‹œìŠ¤í…œ í•´ì œ
+        closeBtn.onClick.AddListener(tutorialAction);
         inst.SetSystemFreeze(false);
 
-        bool isClicked = false;
-        closeBtn.onClick.AddListener(() => isClicked = true);
-
-        // 1. ¹öÆ° Å¬¸¯ ´ë±â
+        // 2. í´ë¦­ë  ë•Œê¹Œì§€ ëŒ€ê¸°
         yield return new WaitUntil(() => isClicked);
 
-        // 2. ? [Ãß°¡] ¼ÅÅÍ°¡ ³»·Á¿À´Â ½Ã°£(¾à 0.6~1ÃÊ)¸¸Å­ Àá±ñ ±â´Ù·ÁÁİ´Ï´Ù.
-        // ¼ÅÅÍ°¡ Äç! ´İÈù µÚ¿¡ ´ë»ç°¡ ³ª¿À´Â °Ô ´õ ÀÚ¿¬½º·´±â ¶§¹®ÀÔ´Ï´Ù.
+        // ğŸš¨ [ì¤‘ìš”] í´ë¦­ ì§í›„ íŠœí† ë¦¬ì–¼ ì „ìš© ë¦¬ìŠ¤ë„ˆë§Œ ì œê±°! (ê¸°ì¡´ ê²Œì„ ë¡œì§ì€ ë³´ì¡´)
+        closeBtn.onClick.RemoveListener(tutorialAction);
+
+        // 3. âœ¨ í…Œë‘ë¦¬ ì¦‰ì‹œ ì œê±° (ì…”í„°ê°€ ë‚´ë ¤ì˜¤ê¸° ì „)
+        Unhighlight();
+
+        // 4. ì…”í„° ì• ë‹ˆë©”ì´ì…˜ ì‹œê°„ ëŒ€ê¸°
+        Debug.Log("[íŠœí† ë¦¬ì–¼] ë‹¤ìŒ ë‚  ë²„íŠ¼ í´ë¦­ í™•ì¸. ì…”í„° ëŒ€ê¸° ì¤‘...");
         yield return new WaitForSeconds(1.0f);
 
-        inst.SetSystemFreeze(true); 
-        inst.SafeStartDialogue("ClosedStep");
-    }
-
-    [YarnCommand("startScene")]
-    public static void StartScene(string sceneName)
-    {
-        Debug.Log($"[Æ©Åä¸®¾ó] {sceneName} ¾ÀÀ¸·Î ÀÌµ¿ÇÕ´Ï´Ù.");
-
-        // CompleteTutorial
-        // if (Instance != null) Instance.IsTutorial = false;
-        // GameSaveManager.Instance.SetTutorialComplete();
-
-        // ¼ÅÅÍ°¡ ³»·Á°¡ ÀÖ´Â »óÅÂ¿¡¼­ ¾ÀÀ» ÀüÈ¯ÇÕ´Ï´Ù.
-        // ¾ÀÀÌ ¹Ù²î¸é »õ·Î¿î ¾ÀÀÇ GameManager°¡ ¼ÅÅÍ¸¦ ´Ù½Ã ¿Ã¸®°Ô µË´Ï´Ù.
-        // SceneManager.LoadScene(sceneName);
-    }
-    public void SafeStartDialogue(string nodeName)
-    {
-        if (dialogueRunner == null) return;
-
-        // 1. ÇöÀç TutorialManager¿¡¼­ µ¹°í ÀÖ´Â ´Ù¸¥ ´ë±â ÄÚ·çÆ¾ÀÌ ÀÖ´Ù¸é Áß´Ü
-        StopAllCoroutines();
-        Debug.Log("SafeStartDialogue;;");
-        // 2. ´ëÈ­ ½ÃÀÛÀ» À§ÇÑ ¾ÈÀü ·çÆ¾ ½ÇÇà
-        StartCoroutine(SafeStartRoutine(nodeName));
-    }
-
-    private IEnumerator SafeStartRoutine(string nodeName)
-    {
-        // 3. ¸¸¾à ´ëÈ­°¡ ÀÌ¹Ì ½ÇÇà ÁßÀÌ¶ó¸é (¼±ÅÃÁö ´ë±â Æ÷ÇÔ) ¹«Á¶°Ç Áß´Ü
-        if (dialogueRunner.IsDialogueRunning)
-        {
-            Debug.Log($"[Æ©Åä¸®¾ó] ±âÁ¸ ´ëÈ­¸¦ °­Á¦ Áß´ÜÇÏ°í '{nodeName}' ³ëµå ÁØºñ...");
-            dialogueRunner.Stop();
-
-            // ? [ÇÙ½É] Yarn VMÀÌ Áß´Ü ¸í·ÉÀ» Ã³¸®ÇÏ°í ³»ºÎ »óÅÂ(¼±ÅÃÁö µî)¸¦ 
-            // ¿ÏÀüÈ÷ ºñ¿ï ¼ö ÀÖµµ·Ï ÃÖ¼Ò 1~2ÇÁ·¹ÀÓÀ» ±â´Ù·ÁÁİ´Ï´Ù.
-            yield return null;
-            yield return null;
-        }
-
-        // 4. ÀÌÁ¦ ±ú²ıÇØÁø »óÅÂ¿¡¼­ »õ ³ëµå ½ÃÀÛ
-        dialogueRunner.StartDialogue(nodeName);
+        inst.SetSystemFreeze(true);
+        yield return new WaitForEndOfFrame();
     }
 }
