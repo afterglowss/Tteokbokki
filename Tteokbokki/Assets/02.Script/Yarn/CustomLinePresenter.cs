@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
@@ -353,7 +353,7 @@ namespace Yarn.Unity
             // if we are set to autoadvance how long do we hold for before continuing?
             if (WaitInputManager.ForceNextLineManual)
             {
-                WaitInputManager.ForceNextLineManual = false; // ÇÑ ÁÙ¸¸ °­Á¦ ¼öµ¿
+                WaitInputManager.ForceNextLineManual = false; // í•œ ì¤„ë§Œ ê°•ì œ ìˆ˜ë™
                 await YarnTask.WaitUntilCanceled(token.NextLineToken).SuppressCancellationThrow();
             }
             else if(autoAdvance)

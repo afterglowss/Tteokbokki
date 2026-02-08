@@ -48,6 +48,10 @@ public class IngredientShopUI : MonoBehaviour
     private Dictionary<string, IngredientMetaData> selectedItems = new Dictionary<string, IngredientMetaData>();
     private List<ShopItemUI> spawnedItems = new List<ShopItemUI>();
 
+    [Header("Tutorial Settings")]
+    public bool isTutorialMode = false;
+    public List<string> tutorialItems = new List<string> { "카레 소스", "크림 소스", "로제 소스", "마라 소스", "간장 소스", "짜장 소스" };
+
     void Start()
     {
         selectAllButton.onClick.AddListener(OnSelectAllToggle);
@@ -58,15 +62,29 @@ public class IngredientShopUI : MonoBehaviour
 
         if (OnShopProcessFinished == null) OnShopProcessFinished = new UnityEvent();
     }
-
     public void OpenShop()
     {
-        shopPanel.SetActive(true);
-        PopulateShop();
+        // 1. 부모부터 자신까지 모두 활성화되었는지 보장합니다.
+        this.gameObject.SetActive(true);
+        if (shopPanel != null) shopPanel.SetActive(true);
+
+        // 2. 튜토리얼 상태 결정
+        if (TutorialManager.Instance != null)
+            isTutorialMode = TutorialManager.Instance.IsTutorial;
+
+        // 3. 아이템 생성
+        if (isTutorialMode) PopulateTutorialShop();
+        else PopulateShop();
+
         UpdateTotalCostUI();
         UpdateButtonOutlines();
 
-        StartCoroutine(ResetScrollCoroutine());
+        // 4. ✨ [방어 코드] 하이어라키에서 활성화된 상태일 때만 코루틴 실행
+        if (this.gameObject.activeInHierarchy)
+        {
+            StopAllCoroutines();
+            StartCoroutine(ResetScrollCoroutine());
+        }
     }
 
     public void CloseShop()
@@ -156,6 +174,7 @@ public class IngredientShopUI : MonoBehaviour
         // 초기 버튼 상태 갱신
         UpdateButtonOutlines();
         StartCoroutine(ResetScrollCoroutine());
+        Debug.Log($"[상점] 생성된 아이템 개수: {spawnedItems.Count}");
     }
 
     // ✨ 스크롤 초기화 헬퍼 함수
@@ -290,5 +309,44 @@ public class IngredientShopUI : MonoBehaviour
             Debug.Log("[상점] 주문 없이 넘어갑니다.");
         }
         OnShopProcessFinished?.Invoke();
+    }
+    void PopulateTutorialShop()
+    {
+        selectedItems.Clear();
+        spawnedItems.Clear();
+        ClearGrid(unlockedGridParent);
+        ClearGrid(lockedGridParent);
+
+        // IngredientStockManager를 통해 실제 데이터와 대조합니다.
+        foreach (var name in tutorialItems)
+        {
+            if (!IngredientEconomyDatabase.Data.TryGetValue(name, out var data)) continue;
+
+            // ✨ [정석 로직] 실제 구매 이력을 확인합니다.
+            bool hasPurchased = IngredientStockManager.Instance.HasPurchasedBefore(name);
+
+            // 산 적 있으면 위(Unlocked), 없으면 아래(Locked)
+            Transform targetParent = hasPurchased ? unlockedGridParent : lockedGridParent;
+
+            // 아이템 생성 (기존 방식 유지)
+            GameObject obj = Instantiate(shopItemPrefab, targetParent);
+            obj.name = name;
+
+            ShopItemUI ui = obj.GetComponent<ShopItemUI>();
+            if (ui == null) continue;
+            spawnedItems.Add(ui);
+
+            bool isOrdered = IngredientStockManager.Instance.HasOrderedToday(name);
+            ui.Setup(data, isOrdered, false, (isOn) => {
+                if (isOn) { if (!selectedItems.ContainsKey(name)) selectedItems.Add(name, data); }
+                else { selectedItems.Remove(name); }
+                UpdateTotalCostUI();
+                UpdateButtonOutlines();
+            });
+        }
+
+        // 아이템이 있는 구역만 제목을 켭니다.
+        reorderTitleObject.SetActive(unlockedGridParent.childCount > 0);
+        newArrivalTitleObject.SetActive(lockedGridParent.childCount > 0);
     }
 }

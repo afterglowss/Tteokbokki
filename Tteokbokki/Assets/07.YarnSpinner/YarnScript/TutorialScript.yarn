@@ -1,32 +1,50 @@
 ﻿title: TutorialStart
 ---
+<<declare $SelectedSource = "" >>
 <<if getSawTutorial() == true>>
     <<jump TutorialSkip>>
 <<endif>>
+    <<jump Tutorial>>
+===
+
+title: TutorialSkip
+---
+뱁새의 가르침을 받지 않고 진행하시겠습니까?
+    -> 예
+        //Day1
+    -> 아니오
+        //<<jump DeliveryStep>>
+        <<jump Tutorial>>
+===
+
+title: Tutorial
+---
+<<setIsTutorial true>>
+<<set_bg "Start">>
 암담한 취업난 시대에 좋은 알바를 발견했다. 
 집도 가깝고 무엇보다 다른 알바보다 돈을 더 많이 주는 데다 한 달 동안 잘 하면 정직원이 된다니!
 반드시 합격해야 한다.
 
-// 문 열리는 소리
+<<playSFX 401>> //문 여는 소리
+<<playSFX 403>> //걷는 소리
+<<set_bg "">>
 안녕하세요. 저 알바 면접 보러 왔는데요.
 
 ??: 아, 어서 오세요!
-// 우당탕탕 소리
+<<playSFX 402>> //우당탕탕 소리
 뱁새: 반가워요!
 
 어...?
 새다...
 
-뱁새: 이쪽으로 앉으세요!
-// 의자 끄는 소리
 <<set $Junk = setFace("smile")>>
 뱁새: 제 모습을 보고 놀라지 않은 사람은 처음이에요! 
 
 아하하
 
-<<set $Junk = setFace("idle")>>
 뱁새: 저는 어렸을 때부터 떡볶이를 정말 좋아했어요. 
 뱁새: 그래서 열심히 돈을 모아 드디어 떡볶이 가게를 열었는데?
+<<set $Junk = setFace("idle")>>
 뱁새: 보시다시피 새는 요리를 하는 데 어려움이 있죠. 
 뱁새: 그래서 저를 대신해 요리를 해줄 알바생을 구하고 있어요.
 
@@ -47,151 +65,130 @@
 뱁새: 지금 있는 메뉴는 '군자 떡볶이'와 '성인군자 떡볶이'에요.
 
 <<spawnTutorialReceipt>>
-<<highlight "Image_Highlight_Receipt">>
 뱁새: 마침 주문이 들어왔네요!
 뱁새: 한 번 만들어 볼까요?
 뱁새: 영수증을 누르면 어떤 재료를 넣어야 하는지 알 수 있어요.
+<<highlight TutorialReceipt>>
+<<waitForReceiptClick>>
 
-===
-
-title: AddIngredientStep
----
-<<objectDelete "Image_Highlight_Receipt">>
+//튜토리얼 영수증 선택 완료
+<<spawnWok>>
 뱁새: 앞에 있는 웍에 재료를 담고 끓이면 돼요. 간단하죠?
+<<highlight GridLayerGroup_IngredientButton>>
+뱁새: 우선 <b>떡과 오뎅</b>은 두 번, <b>파, 양배추</b>는 한 번씩 담아보실래요?
+<<waitIngredients>>
 
-<<highlight "Image_Highlight_Ingredients">>
-뱁새: 우선 <b>떡, 오뎅, 파, 양배추</b>를 담아보실래요?
-===
-
-title: AddSauceStep
----
-<<objectDelete "Image_Highlight_Ingredients">>
-<<highlight "Image_Highlight_GunjaSauce">>
+//떡볶이 재료 선택 완료
 뱁새: 그리고 <b>군자 소스</b>를 담아주세요. 
 뱁새: 제가 만든 특별한 소스랍니다.
-===
+<<highlight GridLayerGroup_SauceButton>>
+<<waitSauce>>
 
-title: BoilingStep
----
-<<objectDelete "Image_Highlight_GunjaSauce">>
-// 뚜껑 덮이고 끓는 효과음 (10초)
-// 조리 완성 / 메인 화면 위쪽에 "1번 조리 완료" 표시
-<<highlight "Image_Highlight_Wok">>
+//군자 소스 선택 완료
+<<startBoiling>>
+뱁새: 이렇게 요리를 하시면 돼요.
+<<waitForBoiled>>
 
-뱁새: 이렇게 요리를 하시면 돼요. 조리가 완료되면 위에 몇 번 조리가 완료되었는지 표시돼요. 
-뱁새: 완성된 음식은 <b>포장대</b> 위에 놓으면 제가 포장할 거예요.
-<<highlight "Image_Highlight_PackingTable">>
-===
+<<highlight Button_StoveSlot>>
+//<<highlight TooltipManager_UI>>
+뱁새: 조리가 완료되면 위에 몇 번 조리가 완료되었는지 표시돼요.
+뱁새: 조리가 완료된 음식은 <b>포장대</b> 위에 놓으면 제가 포장할 거예요.
+<<highlight Button_StoveSlot>>
+<<highlight PackagingSlot>>
+<<waitForPacking>>
 
-title: PackingStep
----
-<<objectDelete "Image_Highlight_Wok">>
-<<objectDelete "Image_Highlight_PackingTable">>
+뱁새: 포장된 음식에는 배달 기사님이 배달할 수 있도록 <b>영수증</b>을 붙여야 해요. 
+뱁새: 붙여볼까요?
+<<highlight TutorialReceipt>>
+<<highlight PackagingSlot>>
+<<waitForReceiptAttached>>
 
-<<highlight "Image_Highlight_Receipt">>
-<<highlight "Image_Highlight_PackedFood">>
-뱁새: 포장된 음식에는 배달 기사님이 배달할 수 있도록 <b>영수증</b>을 붙여야 해요. 붙여볼까요?
-===
-
-title: DeliveryStep
----
-<<objectDelete "Image_Highlight_Receipt">>
-<<objectDelete "Image_Highlight_PackedFood">>
-
+//영수증 붙임 완료
 <<set $Junk = setFace("smile")>>
-<<highlight "Image_Highlight_MoneyUI">>
-뱁새: 잘하시네요! 배달이 출발하면 <b>잔고</b>에 바로 수익이 표시돼요.
-<<objectDelete "Image_Highlight_MoneyUI">>
+뱁새: 잘하시네요! 
+
+<<highlight Balance>>
+뱁새: 배달이 출발하면 <b>잔고</b>에 바로 수익이 표시돼요.
+
 <<set $Junk = setFace("idle")>>
-뱁새: 이제 마감 하는 법을 알려드릴게요. 
-뱁새: 원래는 지금 문을 닫을 수 없지만 오늘은 특별히 지금 마감해 볼게요.  
+<<unhighlight>>
+뱁새: 떡볶이와 영수증은 휴지통에 버릴 수 있어요.
+뱁새: 만약 잘못 조리했거나 재료가 없어 조리하지 못하는 경우에는 무리하지 말고 휴지통에 버려주세요.
 
-<<highlight "Image_Highlight_EndDayButton">>
+뱁새: 이제 마감 하는 법을 알려드릴게요.
+뱁새: 원래는 지금 문을 닫을 수 없지만 오늘은 특별히 지금 마감해 볼게요.
 뱁새: <b>'하루 마치기'</b> 버튼을 눌러주세요.
-===
 
-title: ShowEndDayStep
----
-<<objectDelete "Image_Highlight_EndDayButton">>
+<<highlight Button_EndOfDay>>
+<<waitForEndDay>>
 
-뱁새: 마감은 컴퓨터로 처리할 거예요! 
-뱁새: '정산'에서 오늘 받은 영수증과 <b>주문 성공, 실패</b>를 확인할 수 있어요.  
+//하루 마치기 버튼 클릭 완료
+<<unhighlight>>
+<<wait 3.0>>
+뱁새: 마감은 컴퓨터로 처리할 거예요!
+뱁새: '정산'에서 오늘 받은 영수증과 <b>주문 성공, 실패</b>를 확인할 수 있어요. 
+<<highlight Image_MissedTitle>>
+<<highlight Image_SuccessedTitle>>
+뱁새: 아까 성공한 주문과 실패한 주문이 여기 표시돼요. 확인하셨나요?
+<<unhighlight>>
 
-<<highlight "Image_Highlight_OrderSummary">>
-뱁새: 아까 성공한 주문이 보이죠?
-<<objectDelete "Image_Highlight_OrderSummary">>
-
-<<highlight "Image_Highlight_TaxUI">>
+<<highlight Text_IncomeAndTax>>
 뱁새: 그리고 세금이 얼마나 나갔는지도 확인 할 수 있어요.
-뱁새: 돈이 부족해서 <b>세금</b>을 내지 못하면 장사를 할 수없으니 잘 확인해 주세요.
+뱁새: 돈이 부족해서 <b>세금</b>을 내지 못하면 장사를 할 수 없으니 잘 확인해 주세요.
 
-<<objectDelete "Image_Highlight_TaxUI">>
-<<highlight "Image_Highlight_Ingredient">>
-<마감 화면 - 재료, '재료' 윤곽선 처리 후 재료에 상호작용>
-===
+<<unhighlight>>
+뱁새: 이제 세금을 내고 재료를 사러 가볼까요? '세금 납부' 버튼을 눌러주세요.
+<<highlight Button_Payment>>
+<<waitForPayment>>
 
-title: ShowIngredientShopStep
----
-<<objectDelete "Image_Highlight_Ingredient">>
+//세금 납부 버튼 클릭 완료
+<<wait 1.0>>
 뱁새: 그리고 오늘 번 돈으로 재료를 구매할 수 있어요.
 뱁새: 주문한 재료는 내일 바로 받아볼 수 있답니다.
 뱁새: 떡볶이에 기본으로 들어가는 재료 외에 추가 재료를 구매할 수 있어요.
 뱁새: 소스를 구매해서 새로운 떡볶이를 추가할 수도 있고요.
+뱁새: 새로운 재료와 소스가 추가되면 손님이 더 많아지겠죠?
 <<set $Junk = setFace("smile")>>
-<<highlight "Image_Highlight_Sauces">>
 뱁새: 우선 새로운 <b>소스</b>를 구매해 볼까요?
-===
 
-title: BuySauceStep
----
-<<objectDelete "Image_Highlight_Sauces">>
+<<highlightSources>>
+<<waitForAnySourceClick>>
 
-뱁새: { getSelectedSauce() }를 선택하셨군요!
-<<if getSelectedSauce() == "임시소스">>
-뱁새: { getSelectedSauce() }: 테스트중
-<<endif>>
-<<if getSelectedSauce() == "마라소스" || getSelectedSauce()== "로제소스">>
-뱁새: { getSelectedSauce() }는 인기가 많죠! 좋은 선택이에요.
-<<endif>>
-<<if getSelectedSauce() == "크림소스" || getSelectedSauce() == "간장소스" || getSelectedSauce() == "카레소스" || getSelectedSauce() == "짜장소스">>
-뱁새: {getSelectedSauce() }는 특별하죠! 좋은 선택이에요.
+//소스 선택 완료
+뱁새: <b>{$SelectedSource}</b>를 선택하셨군요!
+
+<<if $SelectedSource == "마라 소스" || $SelectedSource == "로제 소스">>
+    뱁새: {$SelectedSource}는 인기가 많죠! 좋은 선택이에요.
+<<else>>
+    뱁새: {$SelectedSource}는 특별하죠! 좋은 선택이에요.
 <<endif>>
 뱁새: 사기 위해 선택한 재료는 빨간색 체크로 표시돼요. 
-<<highlight "Image_Highlight_OrderButton">>
-뱁새: <b>'주문하기'</b>를 눌러 구매해 보세요.
-===
 
-title: FinishBuyStep
----
-<<objectDelete "Image_Highlight_OrderButton">>
 뱁새: 그리고 장사가 잘되어 재고가 부족해지면 상점에 빨간색으로 표시될 예정이에요.
 뱁새: 잘 확인해서 미리미리 재고를 구비해 두시는 걸 추천드려요!
+
 뱁새: 아, 그리고 한 가지 더!
 뱁새: 며칠에 한 번 특별한 이벤트가 있을 예정이에요.
 뱁새: 바로 특정 재료에 보너스가 붙을 거랍니다!
 뱁새: 그러니 이것도 꼼꼼히 확인해 주세요.
 
-<<highlight "Image_Highlight_EndPanelIngredient">>
-뱁새: 이제 마지막으로 <b>마감</b>을 알려드릴게요.
-===
+뱁새: 그럼 이제 <b>'주문하기'</b>를 눌러 구매해 보세요.
+<<highlight Button_Order>>
+<<waitForOrderClick>>
 
-title: ChecklistStep
----
-<<objectDelete "Image_Highlight_EndPanelIngredient">>
-<<highlight "Image_Highlight_Checklist">>
-뱁새: <b>영수증 확인, 세금 납부, 재료 확인</b>을 모두 체크해 주세요.
-===
+//소스 주문 완료
+뱁새: 마지막으로 <b>마감</b>을 알려드릴게요!
+뱁새: 영수증 확인, 세금 납부, 재료 확인 및 구매 모두 확인했으니 체크해 주세요.
+<<highlight Toggle_CheckReceipt>>
+<<highlight Toggle_CheckIngredient>>
+<<waitForChecking>>
 
-title: ClosingStep
----
-<<objectDelete "Image_Highlight_Checklist">>
-<<highlight "Image_Highlight_CloseDayButton">>
+//마감 - 체크 완료
 뱁새: 이제 <b>'마감하기'</b>를 눌러 보세요.
-===
+<<highlight Button_NextDay>>
+<<waitForClosing>>
 
-title: ClosedStep
----
-<<objectDelete "Image_Highlight_CloseDayButton">>
+//마감 버튼 누르기 완료
 뱁새: 이렇게 마감하는 것까지 알려드렸어요!
 뱁새: 어떤가요? 할 만 하신가요?
     -> 네. 괜찮아요. 
@@ -216,23 +213,12 @@ title: TutorialBadEnd
 뱁새: 아쉽네요. 그래도 손님으로 오시면 서비스 드릴게요. 
 뱁새: 도와주실 분을 구할 수 있을지는 모르겠지만.... 
 뱁새: 안녕히 가세요...
-
-//StartScene 로드
+<<loadScene StartScene>>
 ===
 
 title: TutorialEndOK
 ---
-<<setSawTutorial>>
 <<set $Junk = setFace("smile")>>
 뱁새: 좋아요! 그러면 장사를 시작해 봐요!
-//Day1 시작
-===
-
-title: TutorialSkip
----
-뱁새의 가르침을 받지 않고 진행하시겠습니까?
-    -> 예
-        //Day1 시작
-    -> 아니오
-        <<jump TutorialStart>>
+<<loadScene MainScene>>
 ===

@@ -173,6 +173,12 @@ public class EndOfDayUIHandler : MonoBehaviour
 
     private void InitializeSettlementData(bool animate = false)
     {
+        if (IngredientStockManager.Instance == null || ReceiptLineManager.Instance == null || PlayerWalletManager.Instance == null)
+        {
+            Debug.LogWarning("[정산] 매니저가 아직 준비되지 않아 초기화를 건너뜁니다.");
+            return;
+        }
+
         // ... (기존 로직 동일) ...
         isTaxPaid = false;
         int successTotal = 0;
@@ -366,6 +372,13 @@ public class EndOfDayUIHandler : MonoBehaviour
                 AudioManager.Instance.PlaySFX(116);
 
             closeSeq.Append(shutterRect.DOAnchorPos(Vector2.zero, shutterMoveDuration).SetEase(Ease.OutBounce));
+        }
+        //Tutorial중이라면 중단
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial)
+        {
+            Debug.Log("[튜토리얼] 셔터를 내린 채로 대기합니다.");
+            // 여기서 return을 해서 뒷부분(GameManager.Instance.StartOfDay 호출 등)이 실행되지 않게 합니다.
+            return;
         }
 
         if (mainWindowRect != null) closeSeq.Join(mainWindowRect.DOScale(0f, 0.3f));

@@ -80,6 +80,7 @@ public class ReceiptLineItem : MonoBehaviour
 
     private void Update()
     {
+        if (TutorialManager.IsFreeze) return;
         DateTime now = GameClock.gameTime;
 
         TimeSpan elapsed = now - orderStartTime;
