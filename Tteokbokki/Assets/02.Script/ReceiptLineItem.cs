@@ -29,6 +29,19 @@ public class ReceiptLineItem : MonoBehaviour
 
     private bool isTweening = false;
 
+    [Header("Highlight")]
+    public Outline selectionOutline;
+
+    [Header("Time Visuals")]
+    // ✨ [NEW] 색상이 변할 배경 이미지 (Inspector에서 연결)
+    public Image targetGraphic;
+
+    // ✨ [NEW] 시작할 때 색상 (평화로움)
+    public Color safeColor = Color.white;
+
+    // ✨ [NEW] 시간이 다 됐을 때 색상 (위험!)
+    public Color dangerColor = new Color(1f, 0.4f, 0.4f); // 연한 빨강
+
     public void CachePosition()
     {
         originalPosition = GetComponent<RectTransform>().anchoredPosition;
@@ -76,16 +89,29 @@ public class ReceiptLineItem : MonoBehaviour
         CachePosition();    // 드래그 이전 자리 기억
 
         receiptButton.onClick.AddListener(OnClick);
+        // ✨ [NEW] 시작 시 색상 초기화
+        if (targetGraphic != null) targetGraphic.color = safeColor;
     }
 
     private void Update()
     {
-        if (TutorialManager.IsFreeze) return;
+        // ** 여기 영수증 시간이 안흘러서 테스트 불가. 일단 주석 처리 해둘테니 필요할때 바꾸는 걸로
+        //if (TutorialManager.IsFreeze) return;
         DateTime now = GameClock.gameTime;
 
         TimeSpan elapsed = now - orderStartTime;
 
         //Debug.Log($"[영수증 {receipt.OrderID}] 경과 시간: {elapsed.TotalMinutes:F2}분 / 제한: {cookTimeSeconds / 60f}분");
+        float elapsedSeconds = (float)elapsed.TotalSeconds;
+        // ✨ [NEW] 색상 변경 로직
+        if (targetGraphic != null && cookTimeSeconds > 0)
+        {
+            // 진행률 (0 ~ 1) 계산
+            float ratio = elapsedSeconds / cookTimeSeconds;
+
+            // 색상 보간 (Safe -> Danger로 서서히 이동)
+            targetGraphic.color = Color.Lerp(safeColor, dangerColor, ratio);
+        }
 
         if (elapsed.TotalMinutes >= cookTimeSeconds / 60f)
         {
@@ -153,7 +179,18 @@ public class ReceiptLineItem : MonoBehaviour
         orderStartTime = GameClock.gameTime.AddSeconds(-(cookTimeSeconds - clampedRemaining));
 
         // 4. 디버깅 로그 (선택)
-        // Debug.Log($"제한시간: {cookTimeSeconds}, 남은시간: {clampedRemaining}, 역산된 시작시간: {orderStartTime}");
+        //Debug.Log($"제한시간: {cookTimeSeconds}, 남은시간: {clampedRemaining}, 역산된 시작시간: {orderStartTime}");
+    }
+
+    public void SetHighlight(bool isActive)
+    {
+        if (selectionOutline != null)
+        {
+            selectionOutline.enabled = isActive;
+
+            // (선택 사항) 색상도 코드에서 제어하고 싶다면:
+            // if (isActive) selectionOutline.effectColor = Color.yellow;
+        }
     }
 
 }

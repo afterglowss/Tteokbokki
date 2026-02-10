@@ -4517,6 +4517,7 @@ GameObject:
   - component: {fileID: 7879585990088417159}
   - component: {fileID: 1081799701365650998}
   - component: {fileID: 642715223956512856}
+  - component: {fileID: 5615757301079074651}
   m_Layer: 5
   m_Name: Button_SelectAll
   m_TagString: Untagged
@@ -4641,6 +4642,20 @@ MonoBehaviour:
   m_EffectColor: {r: 0.61960787, g: 0.53333336, b: 0.43529415, a: 1}
   m_EffectDistance: {x: 3, y: 3}
   m_UseGraphicAlpha: 1
+--- !u!114 &5615757301079074651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2473693466547909200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
 --- !u!1 &2548100640366485238
 GameObject:
   m_ObjectHideFlags: 0
@@ -4926,6 +4941,7 @@ GameObject:
   - component: {fileID: 7964717444974001710}
   - component: {fileID: 4135167643951306520}
   - component: {fileID: 301367961596861301}
+  - component: {fileID: 3697124139608112863}
   m_Layer: 5
   m_Name: Button_ClearCart
   m_TagString: Untagged
@@ -5050,6 +5066,20 @@ MonoBehaviour:
   m_EffectColor: {r: 0.61960787, g: 0.53333336, b: 0.43529415, a: 1}
   m_EffectDistance: {x: 3, y: 3}
   m_UseGraphicAlpha: 1
+--- !u!114 &3697124139608112863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2593275721784215884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
 --- !u!1 &2724377914403926814
 GameObject:
   m_ObjectHideFlags: 0
@@ -6581,8 +6611,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3521933773915642012}
   m_HandleRect: {fileID: 3716732047497404196}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 1
+  m_Value: 0
+  m_Size: 0.000000107306995
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -9895,6 +9925,7 @@ GameObject:
   - component: {fileID: 7173322373674537278}
   - component: {fileID: 6915059277199683890}
   - component: {fileID: 747777345087845604}
+  - component: {fileID: 3819259388398486779}
   m_Layer: 5
   m_Name: Button_SelectLowStockButton
   m_TagString: Untagged
@@ -10019,6 +10050,20 @@ MonoBehaviour:
   m_EffectColor: {r: 0.6156863, g: 0.53333336, b: 0.43529415, a: 1}
   m_EffectDistance: {x: 3, y: 3}
   m_UseGraphicAlpha: 1
+--- !u!114 &3819259388398486779
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5321816644359174665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
 --- !u!1 &5325468807571582494
 GameObject:
   m_ObjectHideFlags: 0
@@ -11064,7 +11109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0.3803922, g: 0.3019608, b: 0.2509804, a: 1}
+  m_EffectColor: {r: 0.61960787, g: 0.53333336, b: 0.43529415, a: 1}
   m_EffectDistance: {x: 3, y: 3}
   m_UseGraphicAlpha: 1
 --- !u!1 &6122133404009679839
@@ -11896,7 +11941,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7097790047287483185}
   m_HandleRect: {fileID: 5838353884746132202}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -13769,7 +13814,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 568.7901}
+  m_AnchoredPosition: {x: 0, y: 568.79016}
   m_SizeDelta: {x: 1611.41, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1384660210919412880

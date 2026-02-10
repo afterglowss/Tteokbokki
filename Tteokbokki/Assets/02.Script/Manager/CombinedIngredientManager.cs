@@ -69,7 +69,13 @@ public class CombinedIngredientManager : MonoBehaviour
             StartCoroutine(ResetScrollCoroutine());
         }
 
-        string result = $"주문번호 {receipt.OrderID}의 메뉴별 재료\n\n";
+        // 1. 시간 포맷팅 (HH:mm -> 14:30 형식)
+        // 🚨 만약 Receipt 스크립트의 시간 변수명이 OrderTime이 아니라면, 해당 변수명으로 바꿔주세요.
+        string timeStr = receipt.OrderDateTime.ToString("HH:mm");
+
+        // 2. 제목에 시간 추가
+        // 예: "[14:30] 주문번호 1의 메뉴별 재료"
+        string result = $"[{timeStr}] 주문번호 {receipt.OrderID}의 메뉴별 재료\n\n";
 
         foreach (var order in receipt.GetOrders())
         {

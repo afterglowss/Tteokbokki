@@ -373,4 +373,18 @@ public class ReceiptLineManager : MonoBehaviour
 
         Debug.Log("[마감] 남아있던 모든 영수증을 실패 처리했습니다.");
     }
+
+    public void UpdateSelectionOutlines(Receipt activeReceipt)
+    {
+        foreach (var item in receiptSlots)
+        {
+            if (item == null) continue;
+
+            // 내 영수증이 activeReceipt와 같은지 비교
+            bool isSelected = (item.GetReceipt() == activeReceipt);
+
+            // 상태 적용
+            item.SetHighlight(isSelected);
+        }
+    }
 }

@@ -13,6 +13,9 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     [Header("UI References")]
     public TextMeshProUGUI timerText;
 
+    // ✨ [NEW] 조리 진행도 표시용 슬라이더
+    public Slider cookProgressSlider;
+
     // ✨ Image 컴포넌트 제어 (Sprite 교체용)
     public Image wokImage;
     public Image wokOverlayImage;  // ✨ [NEW] 위에 겹쳐질 이미지 (완성될 상태, 서서히 나타남)
@@ -78,6 +81,12 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             cookButton.onClick.RemoveAllListeners();
             cookButton.onClick.AddListener(TryStartCooking);
             cookButton.gameObject.SetActive(false);
+        }
+
+        if (cookProgressSlider != null)
+        {
+            cookProgressSlider.gameObject.SetActive(false);
+            cookProgressSlider.value = 0; // 초기화
         }
     }
 
@@ -158,7 +167,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         // 재료가 들어갔으므로 '재료 담긴 웍' 이미지로 변경
         SetWokState(wokIngredientsSprite);
 
-        timerText.text = "준비중";
+        if (timerText != null) timerText.text = "준비중";
         if (cookButton != null) cookButton.gameObject.SetActive(true);
 
         UpdateInfoUI();
@@ -180,7 +189,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             wokImage.gameObject.SetActive(false);
         }
 
-        timerText.text = "대기중";
+        if (timerText != null) timerText.text = "대기중";
         if (cookButton != null) cookButton.gameObject.SetActive(false);
 
         UpdateInfoUI();
@@ -245,6 +254,14 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             Color c = wokOverlayImage.color;
             c.a = 0f;
             wokOverlayImage.color = c;
+        }
+
+        // ✨ [수정/확인] 조리 시작 시 슬라이더를 반드시 켜줘야 합니다!
+        if (cookProgressSlider != null)
+        {
+            cookProgressSlider.gameObject.SetActive(true); // 👈 이 줄이 필수입니다!
+            cookProgressSlider.value = 0f;
+            cookProgressSlider.maxValue = 1f;
         }
 
         // 🔥 [사운드] 1. 조리 시작 '치이익' 소리는 화구별로 나도 됨 (ID 105)
@@ -354,17 +371,26 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         cookTimeRemaining -= Time.deltaTime * (60f / 3f);
 
-        // ✨ [NEW] 투명도 조절 (크로스페이드 연출)
-        if (wokOverlayImage != null && cookTimeSeconds > 0)
+        // 진행률 (0 ~ 1)
+        float progress = 0f;
+        if (cookTimeSeconds > 0)
         {
-            // 진행률 (0 ~ 1)
-            float progress = 1f - (cookTimeRemaining / cookTimeSeconds);
+            progress = 1f - (cookTimeRemaining / cookTimeSeconds);
             progress = Mathf.Clamp01(progress);
+        }
 
-            // 알파값 적용
+        // 1. 오버레이 이미지 알파값 적용
+        if (wokOverlayImage != null)
+        {
             Color c = wokOverlayImage.color;
             c.a = progress;
             wokOverlayImage.color = c;
+        }
+
+        // ✨ [NEW] 슬라이더 진행률 갱신
+        if (cookProgressSlider != null)
+        {
+            cookProgressSlider.value = progress;
         }
 
         if (cookTimeRemaining <= 0)
@@ -383,7 +409,10 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         isCooking = false;
         isCooked = true;
-        timerText.text = "완료!";
+        if (timerText != null) timerText.text = "완료!";
+
+        // ✨ [NEW] 조리 완료 시 슬라이더 숨김
+        if (cookProgressSlider != null) cookProgressSlider.gameObject.SetActive(false);
 
         // 화구 이미지는 숨김 (CookedFoodUI가 대신 보여줌)
         if (wokImage != null) wokImage.gameObject.SetActive(false);
@@ -429,7 +458,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     {
         int minutes = Mathf.FloorToInt(cookTimeRemaining / 60);
         int seconds = Mathf.FloorToInt(cookTimeRemaining % 60);
-        timerText.text = $"{minutes:D2}:{seconds:D2}";
+        if (timerText != null) timerText.text = $"{minutes:D2}:{seconds:D2}";
     }
 
     public void NotifyFoodPickedUp()
@@ -453,7 +482,11 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         if (wokImage != null) wokImage.gameObject.SetActive(false);
         if (wokOverlayImage != null) wokOverlayImage.gameObject.SetActive(false); // 이거 추가!
-        timerText.text = "대기중";
+
+        // ✨ [NEW] 리셋 시 슬라이더 숨김
+        if (cookProgressSlider != null) cookProgressSlider.gameObject.SetActive(false);
+
+        if (timerText != null) timerText.text = "대기중";
 
         SetSelected(false);
 
@@ -492,7 +525,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             currentIngredients = new Dictionary<string, int>(data.currentIngredients);
             isCooked = true;
             isCooking = false;
-            timerText.text = "완료!";
+            if (timerText != null) timerText.text = "완료!";
 
             // 완료 상태에서는 웍 이미지가 꺼져야 함 (음식이 생성되므로)
             wokImage.gameObject.SetActive(false);
@@ -519,6 +552,14 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             SetWokState(wokLidSprite);
             UpdateTimerDisplay();
 
+            // ✨ [NEW] 로드 시 조리 중이면 슬라이더 켜기
+            if (cookProgressSlider != null)
+            {
+                cookProgressSlider.gameObject.SetActive(true);
+                cookProgressSlider.maxValue = 1f;
+                cookProgressSlider.value = 1f - (cookTimeRemaining / cookTimeSeconds);
+            }
+
             // 🔥 [사운드] 로드 시 '조리 중'이었다면 끓는 소리 다시 켜주기 (선택 사항)
             // 만약 로드했을 때 조용하길 원하면 이 부분은 빼셔도 됩니다.
             if (AudioManager.Instance != null)
@@ -533,7 +574,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
             // 재료 담긴 이미지 복원
             SetWokState(wokIngredientsSprite);
-            timerText.text = "준비중";
+            if (timerText != null) timerText.text = "준비중";
 
             if (cookButton != null) cookButton.gameObject.SetActive(true);
         }
@@ -566,6 +607,14 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         {
             wokImage.sprite = wokLidSprite;
             wokImage.gameObject.SetActive(true);
+        }
+
+        // ✨ [NEW] 튜토리얼 조리 시에도 슬라이더 켜기
+        if (cookProgressSlider != null)
+        {
+            cookProgressSlider.gameObject.SetActive(true);
+            cookProgressSlider.value = 0f;
+            cookProgressSlider.maxValue = 1f;
         }
 
         if (cookButton != null) cookButton.gameObject.SetActive(false);

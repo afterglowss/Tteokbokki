@@ -40,7 +40,18 @@ MonoBehaviour:
   m_defaultSpriteAssetPath: Sprite Assets/
   m_enableEmojiSupport: 1
   m_MissingCharacterSpriteUnicode: 0
-  m_EmojiFallbackTextAssets: []
+  m_EmojiFallbackTextAssets:
+  - {fileID: 11400000, guid: bf48dcac520699d4aa62d8b3bbbf4ec1, type: 2}
+  - {fileID: 11400000, guid: 7ae8b1741c6a13c499d5fdbcf45c0a88, type: 2}
+  - {fileID: 11400000, guid: 5f20821d500aa4745823a24e3a288717, type: 2}
+  - {fileID: 11400000, guid: a8416067cbbd1724e8210ac858e0efde, type: 2}
+  - {fileID: 11400000, guid: dfcfe52884b536848a10acc2a084aa60, type: 2}
+  - {fileID: 11400000, guid: b8a9cf9032dfde54fa85f25011df7038, type: 2}
+  - {fileID: 11400000, guid: 9db6936c52f5fab4a9060434be276ae2, type: 2}
+  - {fileID: 11400000, guid: da7e15f6c741df54db28583ddd12f960, type: 2}
+  - {fileID: 11400000, guid: 07fcf8f1330283143b6159d15d164f05, type: 2}
+  - {fileID: 11400000, guid: 9bd791a534977e548bb8c0145451578b, type: 2}
+  - {fileID: 11400000, guid: 76e2e59e278c88a47a059f1afd6ae6ca, type: 2}
   m_defaultColorGradientPresetsPath: Color Gradient Presets/
   m_defaultStyleSheet: {fileID: 11400000, guid: f952c082cb03451daed3ee968ac6c63e, type: 2}
   m_StyleSheetsResourcePath: 

@@ -138,7 +138,7 @@ public class IngredientShopUI : MonoBehaviour
         {
             string bonusNames = DailyBonusManager.Instance.GetTodayBonusString();
             // ✨ [COLOR] 노란색 대신 진한 오렌지(#D95400)로 변경
-            bonusInfoText.text = $"오늘의 보너스: <color=#D95400>{bonusNames}</color> (수익 증가!)";
+            bonusInfoText.text = $"내일의 보너스: <color=#D95400>{bonusNames}</color> (수익 증가!)";
         }
         else
         {
@@ -232,7 +232,7 @@ public class IngredientShopUI : MonoBehaviour
         {
             UpdateTotalCostUI();
             // 취소/삭제 느낌의 사운드 (예: 109번)
-            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
+            //if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
         }
         else
         {
@@ -259,7 +259,7 @@ public class IngredientShopUI : MonoBehaviour
         if (anyChanged)
         {
             UpdateTotalCostUI();
-            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
+            //if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
         }
         else
         {
@@ -291,7 +291,7 @@ public class IngredientShopUI : MonoBehaviour
         if (anyChanged)
         {
             UpdateTotalCostUI();
-            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
+            //if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
         }
         else
         {
@@ -308,7 +308,7 @@ public class IngredientShopUI : MonoBehaviour
         {
             bool isActive = !cartPopupPanel.activeSelf;
             cartPopupPanel.SetActive(isActive);
-            if (isActive && AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
+            //if (isActive && AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
         }
     }
 
