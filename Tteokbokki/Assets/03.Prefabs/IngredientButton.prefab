@@ -800,7 +800,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caf46ee41ba611043b2dfde5c3ebb8ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ingredientName: 
+  ingredientName: "\uB5A1"
   nameText: {fileID: 1613049760448925027}
   stockText: {fileID: 142001823199550148}
   iconImage: {fileID: 2622390821389679643}

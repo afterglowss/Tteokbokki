@@ -115,7 +115,7 @@ public class OrderSpawner : MonoBehaviour
     private float CalculateCurrentOrderProbability()
     {
         float performanceFactor = Mathf.Clamp(previousDaySuccessRate * 1.2f, 0.3f, 0.8f);
-        float timeFactor = GetTimeBuzzFactor(GameClock.gameTime.Hour);
+        float timeFactor = GetTimeBuzzFactor(GameClock.gameTime);
         float dayFactor = GetWeekdayBuzzFactor(GameClock.gameTime.DayOfWeek);
         float diversityFactor = GetIngredientDiversityFactor();
 
@@ -123,10 +123,22 @@ public class OrderSpawner : MonoBehaviour
     }
 
     // ... (GetTimeBuzzFactor, GetWeekdayBuzzFactor, GetIngredientDiversityFactor 등 기존 코드 유지) ...
-    private float GetTimeBuzzFactor(int hour)
+    private float GetTimeBuzzFactor(DateTime currentTime)
     {
+        int hour = currentTime.Hour;
+        int minute = currentTime.Minute;
+
+        // 1. 점심 피크 (기존 유지): 12:00 ~ 13:59
         if (hour >= 12 && hour < 14) return 1.5f;
-        if (hour >= 17 && hour < 20) return 1.8f;
+
+        // 2. 저녁 피크 (수정): 17:30 ~ 19:59
+        // 17시인 경우 30분 이상인지 체크, 18~19시는 무조건 피크
+        if ((hour == 17 && minute >= 30) || (hour >= 18 && hour < 20))
+        {
+            return 1.8f;
+        }
+
+        // 3. 일반 시간
         return 0.8f;
     }
 

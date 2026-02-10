@@ -69,12 +69,12 @@ public class CombinedIngredientManager : MonoBehaviour
             StartCoroutine(ResetScrollCoroutine());
         }
 
-        string result = $"주문번호 {receipt.OrderID}의 메뉴별 재료 목록\n\n";
+        string result = $"주문번호 {receipt.OrderID}의 메뉴별 재료\n\n";
 
         foreach (var order in receipt.GetOrders())
         {
             var combined = GetCombinedIngredients(order.Menu, order.GetExtras());
-            result += $"[{order.ItemID}] {order.Menu.Name} 전체 재료 목록\n";
+            result += $"[{order.ItemID}] {order.Menu.Name}\n";
             result += GetIngredientsText(combined);
             result += "\n";
         }

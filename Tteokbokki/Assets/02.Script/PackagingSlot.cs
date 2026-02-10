@@ -107,6 +107,7 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
                 PhoneCallManager.Instance.TriggerCall(FailReason.WrongDelivery);
 
             ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
+            AudioManager.Instance.PlaySFX(118);
         }
         else
         {

@@ -5,109 +5,148 @@ using UnityEngine.Events;
 
 public class ShopItemUI : MonoBehaviour
 {
-    [Header("UI 연결")]
+    [Header("UI References")]
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI priceText;
     public TextMeshProUGUI amountText;
-    public TextMeshProUGUI statusText;
 
-    [Header("이미지 및 토글")]
-    public Image ingredientIconImage;
+    [Header("Stock Info")]
+    public TextMeshProUGUI currentStockText;
+
+    [Header("Quantity Control")]
+    public Button minusButton;
+    public Button plusButton;
+    public TextMeshProUGUI countText;
+
+    [Header("Tutorial Compatibility")]
     public Toggle selectToggle;
-    public Button imageButton;
 
-    [Header("강조 효과 (아웃라인)")]
+    [Header("Visuals")]
+    public Image ingredientIconImage;
     public Outline outline;
+    public Color normalOutlineColor = Color.white;
+    public Color lowStockOutlineColor = Color.red;
 
-    // ✨ 색상 설정 변수 추가
-    public Color normalOutlineColor = Color.white; // 평소 색상 (예: 흰색)
-    public Color lowStockOutlineColor = Color.red; // 부족할 때 색상 (빨강)
+    // ✨ [NEW] 최대 구매 수량 상수
+    private const int MAX_QUANTITY = 3;
 
+    // 내부 데이터
+    public int CurrentCount { get; private set; } = 0;
+    public IngredientMetaData Data { get; private set; }
     public bool IsLowStock { get; private set; }
-    public bool IsOrdered { get; private set; }
 
-    public void Setup(IngredientMetaData data, bool isOrdered, bool isLowStock, UnityAction<bool> onToggleChanged)
+    private UnityAction onCountChanged;
+
+    public void Setup(IngredientMetaData data, bool hasPurchased, int currentStock, bool isLowStock, UnityAction onChanged)
     {
-        IsOrdered = isOrdered;
+        Data = data;
         IsLowStock = isLowStock;
+        onCountChanged = onChanged;
+        CurrentCount = 0;
 
         // 1. 텍스트 설정
-        nameText.text = data.Name;
-        priceText.text = $"{data.OrderCost:N0}원";
-        amountText.text = $"{data.ServingsPerOrder}인분";
+        if (nameText != null) nameText.text = data.Name;
+        if (priceText != null) priceText.text = $"{data.OrderCost:N0}원";
+        if (amountText != null) amountText.text = $"(+{data.ServingsPerOrder}인분)";
 
-        // 2. 이미지 설정
-        Sprite icon = IngredientSpriteManager.Instance.GetSprite(data.Name);
-        if (icon != null)
+        // 2. 재고 표시
+        if (currentStockText != null)
         {
-            ingredientIconImage.sprite = icon;
-            ingredientIconImage.color = Color.white;
-        }
-        else
-        {
-            ingredientIconImage.color = Color.clear;
-        }
-
-        // 3. 이미 주문한 상태 처리
-        if (isOrdered)
-        {
-            selectToggle.interactable = false;
-            selectToggle.isOn = false;
-            statusText.text = "주문 완료";
-            if (imageButton != null) imageButton.interactable = false;
-
-            // ✨ 주문 완료 시: 아웃라인을 평소 색상으로 돌리거나, 아예 끄고 싶으면 enabled = false 처리
-            if (outline != null)
+            if (!hasPurchased)
+                currentStockText.text = "<color=#888888>미입고</color>";
+            else
             {
-                outline.enabled = true; // 항상 켜둠
-                outline.effectColor = normalOutlineColor; // 평소 색상
-            }
-        }
-        else
-        {
-            selectToggle.interactable = true;
-            selectToggle.SetIsOnWithoutNotify(false);
-            statusText.text = "";
-            if (imageButton != null) imageButton.interactable = true;
-
-            // ✨ 4. 아웃라인 색상 변경 로직 (핵심!)
-            if (outline != null)
-            {
-                outline.enabled = true; // 항상 켜둠
-
-                if (isLowStock)
-                {
-                    // 부족하면 설정한 경고 색상(빨강)
-                    outline.effectColor = lowStockOutlineColor;
-                }
-                else
-                {
-                    // 부족하지 않으면 평소 색상(흰색 등)
-                    outline.effectColor = normalOutlineColor;
-                }
+                string colorHex = currentStock <= 0 ? "red" : "#00AA00";
+                currentStockText.text = $"<color={colorHex}>{currentStock}</color>";
             }
         }
 
-        // 5. 토글 이벤트 연결
-        selectToggle.onValueChanged.RemoveAllListeners();
-        selectToggle.onValueChanged.AddListener(onToggleChanged);
-
-        // 6. 이미지 클릭 연결
-        if (imageButton != null)
+        // 3. 이미지 설정
+        if (IngredientSpriteManager.Instance != null && ingredientIconImage != null)
         {
-            imageButton.onClick.RemoveAllListeners();
-            imageButton.onClick.AddListener(() =>
-            {
-                selectToggle.isOn = !selectToggle.isOn;
-            });
+            ingredientIconImage.sprite = IngredientSpriteManager.Instance.GetSprite(data.Name);
+        }
+
+        // 4. 버튼 리스너 연결
+        if (minusButton != null)
+        {
+            minusButton.onClick.RemoveAllListeners();
+            minusButton.onClick.AddListener(OnMinusClick);
+        }
+        if (plusButton != null)
+        {
+            plusButton.onClick.RemoveAllListeners();
+            plusButton.onClick.AddListener(OnPlusClick);
+        }
+
+        UpdateUI();
+    }
+
+    // 외부에서 수량 강제 설정 (버튼 기능용)
+    public void SetCount(int count)
+    {
+        // ✨ 최대 수량 제한 적용
+        CurrentCount = Mathf.Clamp(count, 0, MAX_QUANTITY);
+        UpdateUI();
+        onCountChanged?.Invoke();
+    }
+
+    private void OnPlusClick()
+    {
+        // ✨ [NEW] 3개 제한 체크
+        if (CurrentCount >= MAX_QUANTITY)
+        {
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "한 번에 최대 3개까지만 구매 가능합니다.", 1f);
+            return;
+        }
+
+        CurrentCount++;
+        UpdateUI();
+        onCountChanged?.Invoke();
+    }
+
+    private void OnMinusClick()
+    {
+        if (CurrentCount > 0)
+        {
+            CurrentCount--;
+            UpdateUI();
+            onCountChanged?.Invoke();
         }
     }
 
-    public void SetToggle(bool isOn)
+    private void UpdateUI()
     {
-        if (selectToggle.interactable)
+        if (countText != null) countText.text = CurrentCount.ToString();
+
+        // 마이너스 버튼은 0보다 클 때만 활성
+        if (minusButton != null) minusButton.interactable = CurrentCount > 0;
+
+        // ✨ 플러스 버튼은 최대 수량 미만일 때만 활성 (선택사항, 툴팁을 띄우려면 항상 켜둬야 함)
+        // if (plusButton != null) plusButton.interactable = CurrentCount < MAX_QUANTITY;
+
+        // 튜토리얼 호환성
+        if (selectToggle != null)
         {
-            selectToggle.isOn = isOn;
+            selectToggle.SetIsOnWithoutNotify(CurrentCount > 0);
+        }
+
+        // 아웃라인 처리
+        if (outline != null)
+        {
+            outline.enabled = true;
+            if (CurrentCount > 0)
+            {
+                outline.effectColor = normalOutlineColor;
+            }
+            else if (IsLowStock)
+            {
+                outline.effectColor = lowStockOutlineColor;
+            }
+            else
+            {
+                outline.enabled = false;
+            }
         }
     }
 }

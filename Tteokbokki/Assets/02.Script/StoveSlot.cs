@@ -101,6 +101,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             if (!isCooking && !isCooked && pendingIngredients.Count == 0)
             {
                 SetWokState(wokEmptySprite);
+                AudioManager.Instance.PlaySFX(119);
             }
             UpdateInfoUI();
         }

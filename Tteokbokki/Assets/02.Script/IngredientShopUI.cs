@@ -1,104 +1,154 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using TMPro;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Events;
-using System.Collections;
+using System.Text;
 
 public class IngredientShopUI : MonoBehaviour
 {
     [Header("UI References")]
     public GameObject shopPanel;
     public GameObject shopItemPrefab;
-
     public ScrollRect shopScrollRect;
 
-    // ✨ 기존 ingredientListParent는 더 이상 직접 쓰지 않고, 전체 구조의 부모 역할만 합니다.
-    public Transform contentRoot;
+    // 상단 보너스 표시
+    public TextMeshProUGUI bonusInfoText;
 
-    [Header("Categorized Grids & Titles")]
-    public GameObject reorderTitleObject; // "재주문" 제목 오브젝트
-    public Transform unlockedGridParent;  // "재주문" 그리드
+    [Header("Cart Popup UI")]
+    public GameObject cartPopupPanel;
+    public TextMeshProUGUI cartContentText;
+    public Button cartButton;
+    public TextMeshProUGUI cartCountBadgeText;
 
-    public GameObject newArrivalTitleObject; // "신규 입고" 제목 오브젝트
-    public Transform lockedGridParent;       // "신규 입고" 그리드
+    [Header("Categorized Grids")]
+    public GameObject reorderTitleObject;
+    public Transform unlockedGridParent;
+    public GameObject newArrivalTitleObject;
+    public Transform lockedGridParent;
 
     [Header("Bottom UI")]
     public TextMeshProUGUI totalCostText;
+    public TextMeshProUGUI cartInfoText;
     public TextMeshProUGUI warningText;
+
     public Button orderButton;
     public TextMeshProUGUI orderButtonText;
 
-    [Header("Select Buttons")]
+    [Header("Convenience Buttons")]
+    // ✨ [NEW] 버튼 분리: 전체 1개씩 담기
     public Button selectAllButton;
     public TextMeshProUGUI selectAllButtonText;
-    public Outline selectAllButtonOutline;
 
-    [Header("New Feature")]
+    // ✨ [NEW] 버튼 분리: 부족한 것만 1개씩 담기
     public Button selectLowStockButton;
-    public Outline selectLowStockButtonOutline;
+    public TextMeshProUGUI selectLowStockButtonText;
 
-    [Header("Outline Colors")]
-    public Color defaultButtonOutlineColor = Color.white;
-    public Color activeButtonOutlineColor = Color.red;
-
-    public UnityEvent OnShopProcessFinished;
-
-    private Dictionary<string, IngredientMetaData> selectedItems = new Dictionary<string, IngredientMetaData>();
-    private List<ShopItemUI> spawnedItems = new List<ShopItemUI>();
+    // ✨ [NEW] 장바구니 비우기 (전체 해제)
+    public Button clearCartButton;
+    public TextMeshProUGUI clearCartButtonText;
 
     [Header("Tutorial Settings")]
     public bool isTutorialMode = false;
-    public List<string> tutorialItems = new List<string> { "카레 소스", "크림 소스", "로제 소스", "마라 소스", "간장 소스", "짜장 소스" };
+    public List<string> tutorialItems;
+
+    // 내부 관리용
+    private List<ShopItemUI> spawnedItems = new List<ShopItemUI>();
+    public UnityEvent OnShopProcessFinished;
+
+    // ✨ 최대 구매 수량 (ShopItemUI와 동일하게 맞춤)
+    private const int MAX_QUANTITY = 3;
+
+    // ✨ [NEW] 버튼 원래 텍스트 색상 저장용
+    private Color originalButtonTextColor = Color.black;
+
+    private void Awake()
+    {
+        if (OnShopProcessFinished == null) OnShopProcessFinished = new UnityEvent();
+    }
 
     void Start()
     {
-        selectAllButton.onClick.AddListener(OnSelectAllToggle);
-        orderButton.onClick.AddListener(OnOrderButtonClicked);
+        // 1. 전체 담기 버튼 (SelectAll)
+        if (selectAllButton != null)
+        {
+            selectAllButton.onClick.RemoveAllListeners();
+            selectAllButton.onClick.AddListener(OnSelectAllClicked);
+        }
 
+        // 2. 부족분 담기 버튼 (LowStock)
         if (selectLowStockButton != null)
-            selectLowStockButton.onClick.AddListener(OnSelectLowStockButtonClicked);
+        {
+            selectLowStockButton.onClick.RemoveAllListeners();
+            selectLowStockButton.onClick.AddListener(OnSelectLowStockClicked);
+        }
 
-        if (OnShopProcessFinished == null) OnShopProcessFinished = new UnityEvent();
+        // ✨ 3. 장바구니 비우기
+        if (clearCartButton != null)
+        {
+            clearCartButton.onClick.RemoveAllListeners();
+            clearCartButton.onClick.AddListener(OnClearCartClicked);
+        }
+
+        // 3. 주문 버튼
+        if (orderButton != null)
+        {
+            orderButton.onClick.RemoveAllListeners();
+            orderButton.onClick.AddListener(OnOrderButtonClicked);
+            if (orderButtonText != null) originalButtonTextColor = orderButtonText.color;
+        }
+
+        // 4. 장바구니 버튼
+        if (cartButton != null)
+        {
+            cartButton.onClick.RemoveAllListeners();
+            cartButton.onClick.AddListener(ToggleCartPopup);
+        }
+
+        if (cartPopupPanel != null) cartPopupPanel.SetActive(false);
     }
+
     public void OpenShop()
     {
-        // 1. 부모부터 자신까지 모두 활성화되었는지 보장합니다.
-        this.gameObject.SetActive(true);
+        gameObject.SetActive(true);
         if (shopPanel != null) shopPanel.SetActive(true);
 
-        // 2. 튜토리얼 상태 결정
-        if (TutorialManager.Instance != null)
-            isTutorialMode = TutorialManager.Instance.IsTutorial;
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial)
+        {
+            isTutorialMode = true;
+        }
 
-        // 3. 아이템 생성
-        if (isTutorialMode) PopulateTutorialShop();
-        else PopulateShop();
-
+        PopulateShop();
+        UpdateBonusText();
         UpdateTotalCostUI();
-        UpdateButtonOutlines();
 
-        // 4. ✨ [방어 코드] 하이어라키에서 활성화된 상태일 때만 코루틴 실행
-        if (this.gameObject.activeInHierarchy)
+        if (gameObject.activeInHierarchy)
         {
             StopAllCoroutines();
             StartCoroutine(ResetScrollCoroutine());
         }
     }
 
-    public void CloseShop()
+    private void UpdateBonusText()
     {
-        shopPanel.SetActive(false);
+        if (bonusInfoText == null) return;
+
+        if (DailyBonusManager.Instance != null)
+        {
+            string bonusNames = DailyBonusManager.Instance.GetTodayBonusString();
+            // ✨ [COLOR] 노란색 대신 진한 오렌지(#D95400)로 변경
+            bonusInfoText.text = $"오늘의 보너스: <color=#D95400>{bonusNames}</color> (수익 증가!)";
+        }
+        else
+        {
+            bonusInfoText.text = "보너스 정보 없음";
+        }
     }
 
     void PopulateShop()
     {
-        selectAllButtonText.text = "모두 선택";
-        selectedItems.Clear();
         spawnedItems.Clear();
-
-        // 1. 그리드 청소
         ClearGrid(unlockedGridParent);
         ClearGrid(lockedGridParent);
 
@@ -106,185 +156,272 @@ public class IngredientShopUI : MonoBehaviour
         List<string> lowStockList = IngredientStockManager.Instance.GetLowStockIngredients();
         HashSet<string> lowStockSet = new HashSet<string>(lowStockList);
 
-        // 카테고리별 아이템 개수 카운트 (UI 끄기/켜기용)
+        IEnumerable<string> itemsToShow;
+        if (isTutorialMode && tutorialItems != null && tutorialItems.Count > 0)
+        {
+            itemsToShow = tutorialItems;
+        }
+        else
+        {
+            itemsToShow = IngredientEconomyDatabase.Data.Keys;
+        }
+
         int unlockedCount = 0;
         int lockedCount = 0;
 
-        foreach (var kv in IngredientEconomyDatabase.Data)
+        foreach (var name in itemsToShow)
         {
-            var data = kv.Value;
-            string name = data.Name;
+            if (!IngredientEconomyDatabase.Data.TryGetValue(name, out var data)) continue;
 
-            // ✨ [구역 분리 로직]
             bool hasPurchased = IngredientStockManager.Instance.HasPurchasedBefore(name);
-            Transform targetParent;
+            int currentStock = IngredientStockManager.Instance.GetStock(name);
 
-            if (hasPurchased)
-            {
-                targetParent = unlockedGridParent;
-                unlockedCount++;
-            }
-            else
+            Transform targetParent;
+            if (isTutorialMode)
             {
                 targetParent = lockedGridParent;
                 lockedCount++;
             }
+            else
+            {
+                targetParent = hasPurchased ? unlockedGridParent : lockedGridParent;
+                if (hasPurchased) unlockedCount++; else lockedCount++;
+            }
 
-            // 부모가 연결 안 되어있으면 예외처리
-            if (targetParent == null) continue;
-
-            // ✨ [버그 수정] 부모를 targetParent로 지정해야 분류가 됩니다!
             GameObject obj = Instantiate(shopItemPrefab, targetParent);
-            ShopItemUI ui = obj.GetComponent<ShopItemUI>();
+            obj.name = name;
 
+            ShopItemUI ui = obj.GetComponent<ShopItemUI>();
             if (ui == null) continue;
 
             spawnedItems.Add(ui);
 
-            bool isOrdered = IngredientStockManager.Instance.HasOrderedToday(name);
             bool isLowStock = lowStockSet.Contains(name);
 
-            ui.Setup(data, isOrdered, isLowStock, (isOn) =>
+            ui.Setup(data, hasPurchased, currentStock, isLowStock, () =>
             {
-                if (isOn)
-                {
-                    if (!selectedItems.ContainsKey(name))
-                        selectedItems.Add(name, data);
-                }
-                else
-                {
-                    if (selectedItems.ContainsKey(name))
-                        selectedItems.Remove(name);
-                }
-
-                // 버튼 상태 갱신은 토글이 바뀔 때마다 즉시 반영
-                CheckSelectAllButtonState();
                 UpdateTotalCostUI();
-                UpdateButtonOutlines();
             });
         }
 
-        // ✨ [UI 정리] 아이템이 없는 카테고리는 제목과 그리드를 숨겨서 깔끔하게 만듦
-        if (reorderTitleObject != null) reorderTitleObject.SetActive(unlockedCount > 0);
-        if (unlockedGridParent != null) unlockedGridParent.gameObject.SetActive(unlockedCount > 0);
-
+        if (reorderTitleObject != null) reorderTitleObject.SetActive(unlockedCount > 0 && !isTutorialMode);
         if (newArrivalTitleObject != null) newArrivalTitleObject.SetActive(lockedCount > 0);
-        if (lockedGridParent != null) lockedGridParent.gameObject.SetActive(lockedCount > 0);
 
-        // 초기 버튼 상태 갱신
-        UpdateButtonOutlines();
-        StartCoroutine(ResetScrollCoroutine());
-        Debug.Log($"[상점] 생성된 아이템 개수: {spawnedItems.Count}");
+        // 버튼 텍스트 설정
+        if (selectAllButtonText != null) selectAllButtonText.text = "전체 1개씩";
+        if (selectLowStockButtonText != null) selectLowStockButtonText.text = "부족분 1개씩";
+        // ✨ 비우기 버튼 텍스트 설정
+        if (clearCartButtonText != null) clearCartButtonText.text = "비우기";
     }
 
-    // ✨ 스크롤 초기화 헬퍼 함수
-    private IEnumerator ResetScrollCoroutine()
+    // ✨ [NEW] 장바구니 비우기 로직
+    public void OnClearCartClicked()
     {
-        // 1. 레이아웃이 갱신될 때까지 한 프레임 대기
-        yield return null;
+        bool anyChanged = false;
 
-        // 2. 혹시 모르니 강제 업데이트 한 번 더 (선택사항이지만 안전함)
-        if (shopScrollRect != null)
+        foreach (var item in spawnedItems)
         {
-            Canvas.ForceUpdateCanvases();
-            shopScrollRect.verticalNormalizedPosition = 1f;
+            if (item.CurrentCount > 0)
+            {
+                item.SetCount(0); // 0개로 초기화
+                anyChanged = true;
+            }
+        }
+
+        if (anyChanged)
+        {
+            UpdateTotalCostUI();
+            // 취소/삭제 느낌의 사운드 (예: 109번)
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
+        }
+        else
+        {
+            // 이미 비어있음
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "장바구니가 이미 비어있습니다.", 1f);
         }
     }
 
-    private void UpdateButtonOutlines()
+    // ✨ [NEW] 모든 재료를 최소 1개씩 담기
+    public void OnSelectAllClicked()
     {
-        // 1. "모두 선택" 버튼
-        var allActiveItems = spawnedItems.Where(item => !item.IsOrdered).ToList();
-        if (allActiveItems.Count > 0 && selectAllButtonOutline != null)
+        bool anyChanged = false;
+
+        foreach (var item in spawnedItems)
         {
-            bool allOn = allActiveItems.All(item => item.selectToggle.isOn);
-            selectAllButtonOutline.effectColor = allOn ? activeButtonOutlineColor : defaultButtonOutlineColor;
-            selectAllButtonText.text = allOn ? "모두 해제" : "모두 선택";
+            // 3개 미만인 것들만 1개 추가
+            if (item.CurrentCount < MAX_QUANTITY)
+            {
+                item.SetCount(item.CurrentCount + 1);
+                anyChanged = true;
+            }
         }
 
-        // 2. "부족한 재료" 버튼
-        var lowStockItems = spawnedItems.Where(item => !item.IsOrdered && item.IsLowStock).ToList();
-        if (lowStockItems.Count > 0 && selectLowStockButtonOutline != null)
+        if (anyChanged)
         {
-            bool allLowStockOn = lowStockItems.All(item => item.selectToggle.isOn);
-            selectLowStockButtonOutline.effectColor = allLowStockOn ? activeButtonOutlineColor : defaultButtonOutlineColor;
+            UpdateTotalCostUI();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
         }
-        else if (selectLowStockButtonOutline != null)
+        else
         {
-            // 부족한 재료가 아예 없으면 기본 색상
-            selectLowStockButtonOutline.effectColor = defaultButtonOutlineColor;
+            // 변경된 게 없다는 건 이미 모두 꽉 찼다는 뜻
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "모든 재료가 구매 제한(3개)에 도달했습니다.", 1f);
         }
     }
 
-    public void OnSelectLowStockButtonClicked()
+    // ✨ [NEW] 부족한 재료만 최소 1개씩 담기
+    public void OnSelectLowStockClicked()
     {
-        var targetItems = spawnedItems
-            .Where(item => !item.IsOrdered && item.IsLowStock)
-            .ToList();
+        bool anyChanged = false;
+        bool hasLowStockItems = false;
 
-        if (targetItems.Count == 0) return;
+        foreach (var item in spawnedItems)
+        {
+            if (item.IsLowStock)
+            {
+                hasLowStockItems = true;
+                // 부족한 재료 중 3개 미만인 것만 +1
+                if (item.CurrentCount < MAX_QUANTITY)
+                {
+                    item.SetCount(item.CurrentCount + 1);
+                    anyChanged = true;
+                }
+            }
+        }
 
-        bool areAllSelected = targetItems.All(item => item.selectToggle.isOn);
-        bool newToggleState = !areAllSelected;
-
-        foreach (var item in targetItems) item.SetToggle(newToggleState);
-
-        UpdateButtonOutlines();
-        UpdateTotalCostUI(); // 금액 갱신 추가
+        if (anyChanged)
+        {
+            UpdateTotalCostUI();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
+        }
+        else
+        {
+            if (!hasLowStockItems)
+                TooltipManager.ShowFollowMouse(TooltipType.UI, "부족한 재료가 없습니다.", 1f);
+            else
+                TooltipManager.ShowFollowMouse(TooltipType.UI, "부족한 재료들이 이미 구매 제한(3개)에 도달했습니다.", 1f);
+        }
     }
 
-    public void OnSelectAllToggle()
+    public void ToggleCartPopup()
     {
-        var targetItems = spawnedItems.Where(item => !item.IsOrdered).ToList();
-
-        if (targetItems.Count == 0) return;
-
-        bool areAllSelected = targetItems.All(item => item.selectToggle.isOn);
-        bool newToggleState = !areAllSelected;
-
-        foreach (var item in targetItems) item.SetToggle(newToggleState);
-
-        UpdateButtonOutlines();
-        UpdateTotalCostUI(); // 금액 갱신 추가
-    }
-
-    private void CheckSelectAllButtonState()
-    {
-        var activeItems = spawnedItems.Where(i => !i.IsOrdered).ToList();
-        if (activeItems.Count == 0) return;
-        bool allOn = activeItems.All(i => i.selectToggle.isOn);
-        selectAllButtonText.text = allOn ? "모두 해제" : "모두 선택";
+        if (cartPopupPanel != null)
+        {
+            bool isActive = !cartPopupPanel.activeSelf;
+            cartPopupPanel.SetActive(isActive);
+            if (isActive && AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
+        }
     }
 
     void UpdateTotalCostUI()
     {
-        int totalCost = selectedItems.Values.Sum(i => i.OrderCost);
-        totalCostText.text = $"총 주문 금액: {totalCost:N0}원";
+        int totalCost = 0;
+        int totalItemsCount = 0;
+        int totalQuantity = 0;
+
+        StringBuilder cartSb = new StringBuilder();
+
+        foreach (var item in spawnedItems)
+        {
+            if (item.CurrentCount > 0)
+            {
+                totalCost += item.Data.OrderCost * item.CurrentCount;
+                totalItemsCount++;
+                totalQuantity += item.CurrentCount;
+
+                // ✨ [COLOR] 여기 수량 표시도 진한 오렌지로 변경
+                cartSb.AppendLine($"{item.Data.Name} <color=#D95400>x{item.CurrentCount}</color>");
+            }
+        }
+
+        if (cartContentText != null)
+        {
+            if (totalItemsCount > 0)
+                cartContentText.text = cartSb.ToString();
+            else
+                cartContentText.text = "<color=#888888>장바구니가 비어있습니다.</color>";
+        }
+
+        // ✨ [COLOR] 총액 표시 색상 변경 (진한 오렌지)
+        if (totalCostText != null)
+            totalCostText.text = $"총 주문 금액: <color=#D95400>{totalCost:N0}원</color>";
+
+        if (cartInfoText != null)
+        {
+            cartInfoText.text = totalItemsCount > 0
+                ? $"<size=80%>(총 {totalQuantity}개 품목)</size>"
+                : "";
+        }
+
+        if (cartCountBadgeText != null)
+        {
+            cartCountBadgeText.text = totalQuantity > 0 ? totalQuantity.ToString() : "";
+            cartCountBadgeText.transform.parent.gameObject.SetActive(totalQuantity > 0);
+        }
 
         bool canAfford = totalCost <= PlayerWalletManager.Instance.CurrentBalance;
 
-        if (selectedItems.Count == 0)
+        // 1. 장바구니가 비어있는 경우 -> "넘어가기" (항상 가능)
+        if (totalItemsCount == 0)
         {
-            warningText.gameObject.SetActive(false);
-            orderButton.interactable = true;
-            if (orderButtonText != null) orderButtonText.text = "넘어가기";
+            if (orderButton != null) orderButton.interactable = true;
+            if (orderButtonText != null)
+            {
+                orderButtonText.text = "넘어가기";
+                orderButtonText.color = originalButtonTextColor;
+            }
         }
+        // 2. 장바구니에 내용물이 있는 경우
         else
         {
-            if (orderButtonText != null) orderButtonText.text = "주문하기";
-
-            if (!canAfford)
+            if (canAfford)
             {
-                warningText.gameObject.SetActive(true);
-                warningText.text = "잔고 부족!";
-                orderButton.interactable = false;
+                // 돈이 충분함 -> "주문하기" (가능)
+                if (orderButton != null) orderButton.interactable = true;
+                if (orderButtonText != null)
+                {
+                    orderButtonText.text = "주문하기";
+                    orderButtonText.color = originalButtonTextColor;
+                }
             }
             else
             {
-                warningText.gameObject.SetActive(false);
-                orderButton.interactable = true;
+                // 돈이 부족함 -> "잔고 부족" (불가능 & 빨간색)
+                if (orderButton != null) orderButton.interactable = false;
+                if (orderButtonText != null)
+                {
+                    orderButtonText.text = "잔고 부족";
+                    orderButtonText.color = Color.red; // 🔴 빨간색 강조
+                }
             }
         }
+    }
+
+    public void OnOrderButtonClicked()
+    {
+        int purchaseCount = 0;
+
+        foreach (var item in spawnedItems)
+        {
+            if (item.CurrentCount > 0)
+            {
+                for (int i = 0; i < item.CurrentCount; i++)
+                {
+                    IngredientStockManager.Instance.OrderIngredient(item.Data.Name);
+                }
+                purchaseCount++;
+            }
+        }
+
+        if (purchaseCount > 0)
+        {
+            PopulateShop();
+            UpdateTotalCostUI();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(110);
+        }
+
+        if (cartPopupPanel != null) cartPopupPanel.SetActive(false);
+
+        OnShopProcessFinished?.Invoke();
     }
 
     private void ClearGrid(Transform grid)
@@ -293,60 +430,13 @@ public class IngredientShopUI : MonoBehaviour
         foreach (Transform child in grid) Destroy(child.gameObject);
     }
 
-    public void OnOrderButtonClicked()
+    private IEnumerator ResetScrollCoroutine()
     {
-        if (selectedItems.Count > 0)
+        yield return null;
+        if (shopScrollRect != null)
         {
-            foreach (var entry in selectedItems)
-                IngredientStockManager.Instance.OrderIngredient(entry.Key);
-
-            PopulateShop();
-            UpdateTotalCostUI();
-            UpdateButtonOutlines();
+            Canvas.ForceUpdateCanvases();
+            shopScrollRect.verticalNormalizedPosition = 1f;
         }
-        else
-        {
-            Debug.Log("[상점] 주문 없이 넘어갑니다.");
-        }
-        OnShopProcessFinished?.Invoke();
-    }
-    void PopulateTutorialShop()
-    {
-        selectedItems.Clear();
-        spawnedItems.Clear();
-        ClearGrid(unlockedGridParent);
-        ClearGrid(lockedGridParent);
-
-        // IngredientStockManager를 통해 실제 데이터와 대조합니다.
-        foreach (var name in tutorialItems)
-        {
-            if (!IngredientEconomyDatabase.Data.TryGetValue(name, out var data)) continue;
-
-            // ✨ [정석 로직] 실제 구매 이력을 확인합니다.
-            bool hasPurchased = IngredientStockManager.Instance.HasPurchasedBefore(name);
-
-            // 산 적 있으면 위(Unlocked), 없으면 아래(Locked)
-            Transform targetParent = hasPurchased ? unlockedGridParent : lockedGridParent;
-
-            // 아이템 생성 (기존 방식 유지)
-            GameObject obj = Instantiate(shopItemPrefab, targetParent);
-            obj.name = name;
-
-            ShopItemUI ui = obj.GetComponent<ShopItemUI>();
-            if (ui == null) continue;
-            spawnedItems.Add(ui);
-
-            bool isOrdered = IngredientStockManager.Instance.HasOrderedToday(name);
-            ui.Setup(data, isOrdered, false, (isOn) => {
-                if (isOn) { if (!selectedItems.ContainsKey(name)) selectedItems.Add(name, data); }
-                else { selectedItems.Remove(name); }
-                UpdateTotalCostUI();
-                UpdateButtonOutlines();
-            });
-        }
-
-        // 아이템이 있는 구역만 제목을 켭니다.
-        reorderTitleObject.SetActive(unlockedGridParent.childCount > 0);
-        newArrivalTitleObject.SetActive(lockedGridParent.childCount > 0);
     }
 }

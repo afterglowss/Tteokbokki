@@ -93,6 +93,8 @@ public class ReceiptLineItem : MonoBehaviour
             if (PhoneCallManager.Instance != null)
                 PhoneCallManager.Instance.TriggerCall(FailReason.Timeout);
 
+            AudioManager.Instance.PlaySFX(118);
+
             ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
             manager.RemoveReceipt(this);
             return;

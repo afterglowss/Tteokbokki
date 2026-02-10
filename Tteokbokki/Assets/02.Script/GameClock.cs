@@ -25,7 +25,7 @@ public class GameClock : MonoBehaviour
     public float realSecondsPerGameMinute = 2f; // 현실 3초 = 게임 1분
 
     [Header("영업 시간")]
-    public static int openingHour = 12;
+    public static int openingHour = 17;
     public static int closingHour = 21;
 
     public static bool isPaused = false;

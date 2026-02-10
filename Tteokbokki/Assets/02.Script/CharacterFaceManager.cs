@@ -30,28 +30,23 @@ public class CharacterFaceManager : MonoBehaviour
         Instance = this;
     }
 
-    public void SetFace(string expressionName)
+    // 기존 SetFace는 표정을 바꿀 때만 호출 (Yarn Script용)
+    public void SetFace(string expressionName, string speakerName = "")
     {
         if (faceImage == null) return;
-
-        // 1. 만약 이름이 비어있으면 (독백 시) 이미지 컴포넌트만 끕니다.
-        // 이렇게 하면 오브젝트는 살아있어서 자식인 텍스트(lineText) 에러가 안 납니다!
-        if (string.IsNullOrEmpty(expressionName))
-        {
-            faceImage.enabled = false;
-            return;
-        }
-
-        // 2. 표정을 세팅할 때는 다시 이미지를 활성화합니다.
-        faceImage.enabled = true;
 
         if (faceDictionary.TryGetValue(expressionName, out var sprite))
         {
             faceImage.sprite = sprite;
         }
-        else
-        {
-            Debug.LogWarning($"표정 '{expressionName}'에 해당하는 스프라이트가 없습니다.");
-        }
+    }
+
+    // 매 라인마다 Presenter가 호출할 자동 토글 함수
+    public void ToggleFaceBySpeaker(string speakerName)
+    {
+        if (faceImage == null) return;
+
+        // 화자가 '뱁새'일 때만 이미지 컴포넌트를 활성화
+        faceImage.enabled = (speakerName == "뱁새");
     }
 }

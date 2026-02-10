@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -7,21 +7,21 @@ public class DailyBonusManager : MonoBehaviour
 {
     public static DailyBonusManager Instance { get; private set; }
 
-    private HashSet<string> todayBonusIngredients = new();    // ¿À´Ã Àû¿ë ÁßÀÎ º¸³Ê½º Àç·á
-    private HashSet<string> tomorrowBonusCandidates = new();  // ¸¶°¨ ½Ã º¸¿©ÁÙ ³»ÀÏ º¸³Ê½º Àç·á
+    private HashSet<string> todayBonusIngredients = new();    // ì˜¤ëŠ˜ ì ìš© ì¤‘ì¸ ë³´ë„ˆìŠ¤ ì¬ë£Œ
+    private HashSet<string> tomorrowBonusCandidates = new();  // ë§ˆê° ì‹œ ë³´ì—¬ì¤„ ë‚´ì¼ ë³´ë„ˆìŠ¤ ì¬ë£Œ
 
-    private const int bonusPerIngredient = 5000; // 1°³ Æ÷ÇÔ´ç º¸³Ê½º ±İ¾×
+    private const int bonusPerIngredient = 5000; // 1ê°œ í¬í•¨ë‹¹ ë³´ë„ˆìŠ¤ ê¸ˆì•¡
 
     public TextMeshProUGUI bonusText;
 
     [SerializeField]
     private static readonly HashSet<string> excludedBonusIngredients = new()
 {
-    "¶±",
-    "¿Àµ­",
-    "ÆÄ",
-    "¾ç¹èÃß",
-    "±ºÀÚ ¼Ò½º",
+    "ë–¡",
+    "ì˜¤ë…",
+    "íŒŒ",
+    "ì–‘ë°°ì¶”",
+    "êµ°ì ì†ŒìŠ¤",
 };
 
     private void Awake()
@@ -41,14 +41,14 @@ public class DailyBonusManager : MonoBehaviour
 
     public void SetTomorrowBonusIngredients()
     {
-        tomorrowBonusCandidates = PickRandomIngredients(2);  // ·£´ı 2Á¾ ¼±ÅÃ
-        Debug.Log($"[º¸³Ê½º] ³»ÀÏ º¸³Ê½º Àç·á ¿¹Á¤: {string.Join(", ", tomorrowBonusCandidates)}");
+        tomorrowBonusCandidates = PickRandomIngredients(2);  // ëœë¤ 2ì¢… ì„ íƒ
+        Debug.Log($"[ë³´ë„ˆìŠ¤] ë‚´ì¼ ë³´ë„ˆìŠ¤ ì¬ë£Œ ì˜ˆì •: {string.Join(", ", tomorrowBonusCandidates)}");
     }
 
     public void ApplyNewDayBonus()
     {
         todayBonusIngredients = new HashSet<string>(tomorrowBonusCandidates);
-        Debug.Log($"[º¸³Ê½º] ¿À´Ã º¸³Ê½º Àç·á Àû¿ëµÊ: {string.Join(", ", todayBonusIngredients)}");
+        Debug.Log($"[ë³´ë„ˆìŠ¤] ì˜¤ëŠ˜ ë³´ë„ˆìŠ¤ ì¬ë£Œ ì ìš©ë¨: {string.Join(", ", todayBonusIngredients)}");
     }
 
     public int CalculateBonusFromIngredients(Dictionary<string, int> ingredients)
@@ -71,17 +71,17 @@ public class DailyBonusManager : MonoBehaviour
     public string GetTomorrowBonusText()
     {
         if (tomorrowBonusCandidates.Count == 0)
-            return "¿¹Á¤µÈ º¸³Ê½º Àç·á ¾øÀ½";
+            return "ì˜ˆì •ëœ ë³´ë„ˆìŠ¤ ì¬ë£Œ ì—†ìŒ";
 
-        bonusText.text = "³»ÀÏÀÇ º¸³Ê½º Àç·á: " + string.Join(", ", tomorrowBonusCandidates);
+        bonusText.text = "ë‚´ì¼ì˜ ë³´ë„ˆìŠ¤ ì¬ë£Œ: " + string.Join(", ", tomorrowBonusCandidates);
 
-        return "³»ÀÏÀÇ º¸³Ê½º Àç·á: " + string.Join(", ", tomorrowBonusCandidates);
+        return "ë‚´ì¼ì˜ ë³´ë„ˆìŠ¤ ì¬ë£Œ: " + string.Join(", ", tomorrowBonusCandidates);
     }
 
     private HashSet<string> PickRandomIngredients(int count)
     {
         var eligible = IngredientEconomyDatabase.Data.Keys
-            .Where(name => !excludedBonusIngredients.Contains(name)) // Á¦¿Ü ´ë»ó Á¦°Å
+            .Where(name => !excludedBonusIngredients.Contains(name)) // ì œì™¸ ëŒ€ìƒ ì œê±°
             .ToList();
 
         var result = new HashSet<string>();
@@ -97,5 +97,15 @@ public class DailyBonusManager : MonoBehaviour
     public HashSet<string> GetTomorrowBonusIngredients()
     {
         return new HashSet<string>(tomorrowBonusCandidates);
+    }
+
+    // âœ¨ [ì¶”ê°€] ì™¸ë¶€(ìƒì  UI)ì—ì„œ ì˜¤ëŠ˜ ë³´ë„ˆìŠ¤ ì¬ë£Œê°€ ë­”ì§€ ë¬¼ì–´ë³¼ ë•Œ ëŒ€ë‹µí•´ì£¼ëŠ” í•¨ìˆ˜
+    public string GetTodayBonusString()
+    {
+        if (tomorrowBonusCandidates.Count == 0)
+            return "ì—†ìŒ";
+
+        // HashSetì— ìˆëŠ” ì¬ë£Œ ì´ë¦„ë“¤ì„ ", "ë¡œ ì—°ê²°í•´ì„œ ë¬¸ìì—´ë¡œ ë°˜í™˜
+        return string.Join(", ", tomorrowBonusCandidates);
     }
 }

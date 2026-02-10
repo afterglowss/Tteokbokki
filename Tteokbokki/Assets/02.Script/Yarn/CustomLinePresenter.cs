@@ -267,6 +267,19 @@ namespace Yarn.Unity
         /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/returns"/>
         public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
+            string speakerName = "";
+            if (line.CharacterName != null)
+            {
+                speakerName = line.CharacterName;
+            }
+
+            if (CharacterFaceManager.Instance != null)
+            {
+                // 화자가 '뱁새'라면 이미지를 유지/표시하고, 아니면 즉시 끕니다.
+                // 이때 expressionName은 빈 문자열을 보내 기존 표정을 유지하게 합니다.
+                CharacterFaceManager.Instance.ToggleFaceBySpeaker(speakerName);
+            }
+
             if (lineText == null)
             {
                 Debug.LogError($"{nameof(CustomLinePresenter)} does not have a text view. Skipping line {line.TextID} (\"{line.RawText}\")");
