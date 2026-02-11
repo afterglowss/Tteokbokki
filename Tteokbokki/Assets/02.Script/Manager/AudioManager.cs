@@ -21,6 +21,9 @@ public class AudioManager : MonoBehaviour
     private float bgmVol = 0.5f;
     private float sfxVol = 0.5f;
 
+    // BGM 개별 볼륨 기억용 변수
+    private float currentBgmScale = 1.0f;
+
     [System.Serializable]
     public struct SoundData
     {
@@ -37,12 +40,18 @@ public class AudioManager : MonoBehaviour
 
         foreach (var data in soundClips)
             soundDict[data.id] = data.clip;
+
+        // ✨ [핵심 수정] 게임 시작 시 저장된 볼륨 불러오기
+        // (저장된 값이 없으면 기본값 1f, 0.5f 사용)
+        masterVol = PlayerPrefs.GetFloat("MasterVolume", 1f);
+        bgmVol = PlayerPrefs.GetFloat("BGMVolume", 0.5f);
+        sfxVol = PlayerPrefs.GetFloat("SFXVolume", 0.5f);
     }
 
     private void Start()
     {
         UpdateAllVolumes();
-        PlayBGM(201, 0.5f);
+        PlayBGM(201, GetBGMVolume());
     }
 
     // --- 1. 단발성 효과음 (SFX) ---
@@ -144,7 +153,7 @@ public class AudioManager : MonoBehaviour
     }
 
     // BGM 개별 볼륨 기억용 변수
-    private float currentBgmScale = 1.0f;
+    //private float currentBgmScale = 1.0f;
 
     // --- 볼륨 조절 (기존 유지 + Loop/BGM 스케일 반영) ---
     // ... (SetMasterVolume, SetBGMVolume, SetSFXVolume 등은 그대로) ...
@@ -180,18 +189,50 @@ public class AudioManager : MonoBehaviour
     public void SetMasterVolume(float volume)
     {
         masterVol = Mathf.Clamp01(volume);
+
+        // ✨ 변경된 값 저장
+        PlayerPrefs.SetFloat("MasterVolume", masterVol);
+        PlayerPrefs.Save();
+
         UpdateAllVolumes();
     }
 
     public void SetBGMVolume(float volume)
     {
         bgmVol = Mathf.Clamp01(volume);
+
+        // ✨ 변경된 값 저장
+        PlayerPrefs.SetFloat("BGMVolume", bgmVol);
+        PlayerPrefs.Save();
+
         UpdateAllVolumes();
     }
 
     public void SetSFXVolume(float volume)
     {
         sfxVol = Mathf.Clamp01(volume);
+
+        // ✨ 변경된 값 저장
+        PlayerPrefs.SetFloat("SFXVolume", sfxVol);
+        PlayerPrefs.Save();
+
         UpdateAllVolumes();
+    }
+
+    public float GetMasterVolume()
+    {
+        // AudioMixer를 쓴다면 mixer.GetFloat(...)를 써야 하지만,
+        // 간단하게는 PlayerPrefs나 내부 변수를 반환하면 됩니다.
+        return PlayerPrefs.GetFloat("MasterVolume", 1f);
+    }
+
+    public float GetBGMVolume()
+    {
+        return PlayerPrefs.GetFloat("BGMVolume", 0.5f);
+    }
+
+    public float GetSFXVolume()
+    {
+        return PlayerPrefs.GetFloat("SFXVolume", 0.5f);
     }
 }

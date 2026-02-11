@@ -9,6 +9,13 @@ using UnityEngine.EventSystems;
 
 public class PauseMenuUI : MonoBehaviour
 {
+    [Header("설정")]
+    [SerializeField] private bool isMainMenu = false;
+
+    [Header("버튼들")]
+    [SerializeField] private GameObject saveButtonObj;   // 저장 버튼 오브젝트
+    [SerializeField] private GameObject titleButtonObj;  // 타이틀로 가기 버튼 오브젝트
+
     [Header("Black Curtain (배경 어둡게)")]
     [SerializeField] private Image blackCurtainImage;
     [SerializeField] private float fadeDuration = 0.4f;
@@ -74,6 +81,12 @@ public class PauseMenuUI : MonoBehaviour
 
     private void Start()
     {
+        if (isMainMenu)
+        {
+            if (saveButtonObj != null) saveButtonObj.SetActive(false);
+            if (titleButtonObj != null) titleButtonObj.SetActive(false);
+        }
+
         closeButton.onClick.AddListener(TogglePausePanel);
         if (optionButton != null)
         {
@@ -108,14 +121,22 @@ public class PauseMenuUI : MonoBehaviour
         sliderSFX.onValueChanged.AddListener((value) => { AudioManager.Instance?.SetSFXVolume(value); });
 
         // 슬라이더 초기값 설정
+        // ✨ [수정] 슬라이더 초기값 설정 (AudioManager와 동기화)
         if (AudioManager.Instance != null)
         {
-            // 오디오 매니저가 있다면 현재 볼륨을 가져와 반영 (없다면 기본값 유지)
-            // 여기서는 구현 편의상 기본값으로 둡니다. 필요시 AudioManager에서 GetVolume 추가 필요
+            // 매니저에 저장된 실제 볼륨 값을 가져와서 슬라이더에 반영합니다.
+            // (슬라이더 값을 바꾸면 리스너가 트리거되지만, 같은 값으로 설정되므로 문제 없습니다.)
+            sliderMaster.value = AudioManager.Instance.GetMasterVolume();
+            sliderBGM.value = AudioManager.Instance.GetBGMVolume();
+            sliderSFX.value = AudioManager.Instance.GetSFXVolume();
         }
-        sliderMaster.value = 1f;
-        sliderBGM.value = 0.5f;
-        sliderSFX.value = 0.5f;
+        else
+        {
+            // 오디오 매니저가 없는 경우(테스트 등)에만 기본값 사용
+            sliderMaster.value = 1f;
+            sliderBGM.value = 0.5f;
+            sliderSFX.value = 0.5f;
+        }
 
         // 디스플레이 설정 초기화
         FilterResolutions();
@@ -195,6 +216,9 @@ public class PauseMenuUI : MonoBehaviour
 
         if (isPauseOpen)
         {
+            ShowPanel(0);
+            ResetAllScrollViews();
+
             // ⏸️ 게임 시간 정지
             Time.timeScale = 0f;
 
@@ -341,5 +365,20 @@ public class PauseMenuUI : MonoBehaviour
     {
         Resolution selectedResolution = resolutions[resolutionDropdown.value];
         Screen.SetResolution(selectedResolution.width, selectedResolution.height, Screen.fullScreen);
+    }
+
+    private void ResetAllScrollViews()
+    {
+        foreach (var panel in rightPanels)
+        {
+            if (panel == null) continue;
+
+            // 패널 안에 있는 ScrollRect 컴포넌트들을 찾음
+            var scrolls = panel.GetComponentsInChildren<ScrollRect>(true);
+            foreach (var scroll in scrolls)
+            {
+                scroll.verticalNormalizedPosition = 1f; // 맨 위로
+            }
+        }
     }
 }

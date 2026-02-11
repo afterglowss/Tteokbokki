@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foodStackParent: {fileID: 1930359342990221512}
-  stackYOffset: 35
+  stackYOffset: 40
   maxStackSize: 3
 --- !u!222 &1401808073692763138
 CanvasRenderer:

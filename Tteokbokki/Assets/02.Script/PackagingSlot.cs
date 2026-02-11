@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DG.Tweening;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -37,8 +38,8 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         // 2. 화구 상태 초기화
         if (foodUI.originStoveSlot != null)
         {
-            //foodUI.originStoveSlot.ResetSlot();
             foodUI.originStoveSlot.NotifyFoodPickedUp();
+            foodUI.originStoveSlot = null;
         }
     }
 
@@ -58,6 +59,11 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         // ✨ [핵심 추가] 포장대에 들어왔으니 "포장된 모습"으로 변신!
         food.SwitchToPackedState();
 
+        // ✨ [NEW] 띠용~ 효과 (음식이 담길 때 살짝 찌그러졌다가 펴짐)
+        // (x, y, z) 방향으로 0.3만큼 0.2초 동안 펀치를 날립니다. 
+        // 찌그러지는 느낌을 주려면 y를 음수로 주면 좋습니다.
+        food.transform.localScale = Vector3.one; // 크기 초기화
+        food.transform.DOPunchScale(new Vector3(0.1f, -0.1f, 0), 0.3f, 10, 1);
     }
 
     public void RemoveFood(CookedFoodUI food)
@@ -119,6 +125,13 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
             foreach (var dish in cookedIngredients)
             {
                 bonus += DailyBonusManager.Instance.CalculateBonusFromIngredients(dish);
+            }
+
+            // ✨ [NEW] 보너스 발생 시 매니저에 기록
+            if (bonus > 0)
+            {
+                DailyBonusManager.Instance.AddBonusIncome(bonus);
+                Debug.Log($"[보너스] {bonus:N0}원 보너스 지급 (보너스 재료 포함)");
             }
 
             int totalIncome = baseIncome + bonus;

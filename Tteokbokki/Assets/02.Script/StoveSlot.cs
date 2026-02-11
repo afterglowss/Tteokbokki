@@ -488,7 +488,17 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         if (timerText != null) timerText.text = "대기중";
 
-        SetSelected(false);
+        // ✨ [핵심 수정] 단순히 내 상태만 끄는 게 아니라, 매니저에게 해제 요청을 보냅니다.
+        // 내가 현재 선택된 슬롯이라면 -> 매니저를 통해 정식으로 해제 (UI 갱신 포함)
+        if (stoveManager != null && stoveManager.IsSelected(this))
+        {
+            stoveManager.DeselectCurrentSlot();
+        }
+        else
+        {
+            // 선택된 상태가 아니었다면 그냥 비주얼만 끔
+            SetSelected(false);
+        }
 
         if (spawnedFood != null)
         {

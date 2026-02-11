@@ -33,6 +33,7 @@ public class EndOfDayUIHandler : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textMissed;
     [SerializeField] private TextMeshProUGUI textSuccessAmount;
     [SerializeField] private TextMeshProUGUI textMissedAmount;
+    [SerializeField] private ScrollRect[] settlementScrollRect;
     [SerializeField] private TextMeshProUGUI textTotalAndTax;
     [SerializeField] private TextMeshProUGUI textNetIncome;
     [SerializeField] private Button buttonPayTaxAndNext;
@@ -108,6 +109,20 @@ public class EndOfDayUIHandler : MonoBehaviour
     {
         InitializeSettlementData(animate: true);
 
+        // ✨ [핵심] 창이 열리기 전에 스크롤뷰를 미리 투명하게 숨겨둡니다!
+        // 이렇게 해야 창이 커지는 애니메이션(Pop) 중에 이상한 위치의 스크롤이 보이지 않습니다.
+        if (settlementScrollRect != null)
+        {
+            foreach (var scroll in settlementScrollRect)
+            {
+                if (scroll == null) continue;
+                CanvasGroup cg = scroll.GetComponent<CanvasGroup>();
+                if (cg == null) cg = scroll.gameObject.AddComponent<CanvasGroup>();
+
+                cg.alpha = 0f; // 👻 일단 숨어있어!
+            }
+        }
+
         if (AudioManager.Instance != null)
             AudioManager.Instance.PlaySFX(109);
 
@@ -169,6 +184,19 @@ public class EndOfDayUIHandler : MonoBehaviour
                     macDecorationButtons[i].transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
             }
         }
+
+        // ✨ [핵심 수정] 애니메이션이 다 끝나고, 창 크기가 100%가 되었을 때 스크롤 초기화!
+        seq.OnComplete(() =>
+        {
+            if (settlementScrollRect != null)
+            {
+                for (int i = 0; i < settlementScrollRect.Length; i++)
+                {
+                    // 아까 만든 '강력한 ResetScrollCoroutine'을 여기서 호출
+                    StartCoroutine(ResetScrollCoroutine(settlementScrollRect[i]));
+                }
+            }
+        });
     }
 
     private void InitializeSettlementData(bool animate = false)
@@ -183,6 +211,7 @@ public class EndOfDayUIHandler : MonoBehaviour
         isTaxPaid = false;
         int successTotal = 0;
         int missedTotal = 0;
+        int bonusTotal = 0; // ✨ 변수 추가
 
         if (ReceiptLineManager.Instance != null)
         {
@@ -191,10 +220,25 @@ public class EndOfDayUIHandler : MonoBehaviour
             successTotal = ReceiptLineManager.Instance.GetTotalSuccessfulAmount();
             missedTotal = ReceiptLineManager.Instance.GetTotalMissedAmount();
 
+            // ✨ [NEW] 보너스 금액 가져오기
+            if (DailyBonusManager.Instance != null)
+                bonusTotal = DailyBonusManager.Instance.TodayAccumulatedBonus;
+
+            // ✨ [수정] 성공 금액 표시에 보너스 합산 (혹은 괄호로 표기)
+            // 방법 1: 그냥 합쳐서 보여주기 (깔끔함)
+            int finalSuccessTotal = successTotal + bonusTotal;
+
             if (textSuccessAmount != null)
             {
-                if (animate) AnimateMoneyText(textSuccessAmount, 0, successTotal, "총 성공 금액", "#008000", "+");
-                else textSuccessAmount.text = $"총 성공 금액: <color=#008000>+{successTotal:N0}원</color>";
+                // 예: "총 성공 금액: +18,000원" (보너스 포함됨)
+                if (animate) AnimateMoneyText(textSuccessAmount, 0, finalSuccessTotal, "총 성공 금액", "#008000", "+");
+                else textSuccessAmount.text = $"총 성공 금액: <color=#008000>+{finalSuccessTotal:N0}원</color>";
+
+                // (선택사항) 만약 보너스를 따로 괄호로 적어주고 싶다면 위 코드 대신 아래 사용:
+                /*
+                string bonusStr = bonusTotal > 0 ? $" <size=70%>(보너스 +{bonusTotal:N0})</size>" : "";
+                textSuccessAmount.text = $"총 성공 금액: <color=#008000>+{finalSuccessTotal:N0}원</color>{bonusStr}";
+                */
             }
             if (textMissedAmount != null)
             {
@@ -446,5 +490,44 @@ public class EndOfDayUIHandler : MonoBehaviour
         IngredientStockManager.Instance.UpdateLowStockList();
         lowStockTextUI.text = IngredientStockManager.Instance.GetLowStockText();
         textLowStockCost.text = IngredientStockManager.Instance.GetLowStockCostSummaryText();
+    }
+
+    private IEnumerator ResetScrollCoroutine(ScrollRect scroll)
+    {
+        if (scroll == null || scroll.content == null) yield break;
+
+        // 1. CanvasGroup 가져오기 (OnEnable에서 추가했겠지만 안전하게 확인)
+        CanvasGroup cg = scroll.GetComponent<CanvasGroup>();
+        if (cg == null) cg = scroll.gameObject.AddComponent<CanvasGroup>();
+
+        // 🚨 중요: 이미 OnEnable에서 alpha가 0이 되어 있습니다.
+        // 여기서 다시 0으로 만들 필요는 없지만, 확실히 하기 위해 유지해도 무방합니다.
+
+        // 2. 물리 엔진 차단
+        scroll.velocity = Vector2.zero;
+        scroll.StopMovement();
+        scroll.enabled = false;
+
+        // 3. 데이터 반영 대기
+        yield return null;
+
+        // 4. 레이아웃 강제 갱신
+        var contentRect = scroll.content;
+        var tmps = contentRect.GetComponentsInChildren<TextMeshProUGUI>();
+        foreach (var tmp in tmps) tmp.ForceMeshUpdate();
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
+
+        // 5. 📍 좌표 강제 고정 (안 보이는 상태에서 몰래 이동)
+        // 맨 위(0)로 순간이동!
+        Vector2 finalPos = contentRect.anchoredPosition;
+        finalPos.y = 0f;
+        contentRect.anchoredPosition = finalPos;
+
+        // 6. ScrollRect 부활
+        scroll.enabled = true;
+
+        // 7. ✨ [피날레] 이제 위치가 완벽하니 스르륵 보여줍니다.
+        cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad);
     }
 }

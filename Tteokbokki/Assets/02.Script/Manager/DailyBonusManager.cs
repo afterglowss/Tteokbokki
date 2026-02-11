@@ -14,6 +14,9 @@ public class DailyBonusManager : MonoBehaviour
 
     public TextMeshProUGUI bonusText;
 
+    // ✨ [NEW] 오늘 하루 누적된 보너스 금액
+    public int TodayAccumulatedBonus { get; private set; } = 0;
+
     [SerializeField]
     private static readonly HashSet<string> excludedBonusIngredients = new()
 {
@@ -48,7 +51,17 @@ public class DailyBonusManager : MonoBehaviour
     public void ApplyNewDayBonus()
     {
         todayBonusIngredients = new HashSet<string>(tomorrowBonusCandidates);
+
+        // ✨ [NEW] 하루 시작할 때 누적 금액 초기화
+        TodayAccumulatedBonus = 0;
+
         Debug.Log($"[보너스] 오늘 보너스 재료 적용됨: {string.Join(", ", todayBonusIngredients)}");
+    }
+
+    // ✨ [NEW] 보너스 금액 추가 (PackagingSlot에서 호출)
+    public void AddBonusIncome(int amount)
+    {
+        TodayAccumulatedBonus += amount;
     }
 
     public int CalculateBonusFromIngredients(Dictionary<string, int> ingredients)
@@ -107,5 +120,32 @@ public class DailyBonusManager : MonoBehaviour
 
         // HashSet에 있는 재료 이름들을 ", "로 연결해서 문자열로 반환
         return string.Join(", ", tomorrowBonusCandidates);
+    }
+
+    public bool IsBonusIngredient(string name)
+    {
+        return todayBonusIngredients.Contains(name);
+    }
+
+    // ✨ [NEW] 저장용: 리스트로 변환해서 반환
+    public List<string> GetTomorrowBonusForSave()
+    {
+        return new List<string>(tomorrowBonusCandidates);
+    }
+
+    // ✨ [NEW] 로드용: 저장된 리스트 복원
+    public void RestoreBonusData(List<string> savedBonuses)
+    {
+        tomorrowBonusCandidates.Clear();
+        if (savedBonuses != null)
+        {
+            foreach (var bonus in savedBonuses)
+            {
+                tomorrowBonusCandidates.Add(bonus);
+            }
+        }
+
+        // 로드 직후 UI 갱신 (선택 사항)
+        GetTomorrowBonusText();
     }
 }

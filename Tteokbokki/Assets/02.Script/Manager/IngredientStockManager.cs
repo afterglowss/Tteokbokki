@@ -48,7 +48,7 @@ public class IngredientStockManager : MonoBehaviour
     public int TotalSpent { get; private set; } = 0;
     private HashSet<string> orderedToday = new();
     private const int ShelfLifeDays = 5;
-    private HashSet<string> purchasedAtLeastOnce = new();
+    private List<string> purchasedAtLeastOnce = new List<string>();
     // ✨ 오늘 주문했는지 여부 (상점 UI 표시용으로만 사용하고, 주문 차단용으로는 쓰지 않음)
     private HashSet<string> orderedIngredientsToday = new HashSet<string>();
     private List<string> lowStockIngredients = new();
@@ -125,9 +125,13 @@ public class IngredientStockManager : MonoBehaviour
         List<string> sauceList = new List<string>();
         List<string> normalList = new List<string>();
 
-        foreach (var ingredientName in IngredientEconomyDatabase.Data.Keys)
+        // ✨ [핵심 수정] DB 순서(IngredientEconomyDatabase.Data.Keys)가 아니라
+        // 플레이어가 해금한 순서(purchasedAtLeastOnce)대로 순회합니다.
+        foreach (var ingredientName in purchasedAtLeastOnce)
         {
-            if (!purchasedAtLeastOnce.Contains(ingredientName)) continue;
+            // 이미 구매한 목록을 도는 것이므로 Contains 체크는 불필요하지만 안전장치로 둡니다.
+            if (string.IsNullOrEmpty(ingredientName)) continue;
+
             if (ingredientName.Contains("소스")) sauceList.Add(ingredientName);
             else normalList.Add(ingredientName);
         }
@@ -347,10 +351,10 @@ public class IngredientStockManager : MonoBehaviour
         TotalSpent += cost;
         orderedToday.Add(ingredientName);
 
-        // ✨ [중요] 구매 시 해금 목록에 추가
+        // ✨ [중요] 구매 시 해금 목록에 추가 (중복 방지 필수)
         if (!purchasedAtLeastOnce.Contains(ingredientName))
         {
-            purchasedAtLeastOnce.Add(ingredientName);
+            purchasedAtLeastOnce.Add(ingredientName); // 리스트의 맨 끝에 추가됨 -> 버튼도 맨 뒤에 생김
         }
 
         UpdateStockText(ingredientName);
@@ -506,6 +510,7 @@ public class IngredientStockManager : MonoBehaviour
         return purchasedAtLeastOnce.Count;
     }
 
+    // ✨ [수정] 해금 여부 확인 (List에는 Contains 메서드가 있으므로 코드는 동일하지만 내부 동작이 바뀜)
     public bool HasPurchasedBefore(string ingredientName)
     {
         return purchasedAtLeastOnce.Contains(ingredientName);
@@ -552,6 +557,7 @@ public class IngredientStockManager : MonoBehaviour
         return result;
     }
 
+
     public void RestoreStock(Dictionary<string, List<StockEntry>> savedStock)
     {
         stock.Clear();
@@ -571,10 +577,10 @@ public class IngredientStockManager : MonoBehaviour
             stock[pair.Key] = loadedList;
         }
 
-        foreach (var key in stock.Keys)
-        {
-            if (stock[key].Count > 0) purchasedAtLeastOnce.Add(key);
-        }
+        //foreach (var key in stock.Keys)
+        //{
+        //    if (stock[key].Count > 0) purchasedAtLeastOnce.Add(key);
+        //}
 
         if (autoGenerateButtons)
         {
@@ -589,7 +595,7 @@ public class IngredientStockManager : MonoBehaviour
         return new List<string>(purchasedAtLeastOnce);
     }
 
-    // ✨ [NEW] 로드용: 해금된 재료 목록 복원
+    // ✨ [NEW] 로드용: 해금된 재료 목록 복원 (저장된 순서 그대로 복원됨)
     public void RestorePurchasedHistory(List<string> savedHistory)
     {
         if (savedHistory == null) return;
@@ -597,7 +603,11 @@ public class IngredientStockManager : MonoBehaviour
         purchasedAtLeastOnce.Clear();
         foreach (var name in savedHistory)
         {
-            purchasedAtLeastOnce.Add(name);
+            // 중복 방지하며 순서대로 추가
+            if (!purchasedAtLeastOnce.Contains(name))
+            {
+                purchasedAtLeastOnce.Add(name);
+            }
         }
     }
 
@@ -619,7 +629,11 @@ public class IngredientStockManager : MonoBehaviour
             }
             stock[ingredientName][0].count += meta.ServingsPerOrder;
 
-            purchasedAtLeastOnce.Add(ingredientName);
+            // ✨ 리스트에 순서대로 추가
+            if (!purchasedAtLeastOnce.Contains(ingredientName))
+            {
+                purchasedAtLeastOnce.Add(ingredientName);
+            }
             UpdateStockText(ingredientName);
         }
     }
@@ -665,7 +679,7 @@ public class IngredientStockManager : MonoBehaviour
     {
         if (!IngredientEconomyDatabase.Data.TryGetValue(name, out var meta)) return;
 
-        // 해금 목록 추가
+        // ✨ 해금 목록 추가 (순서 보존)
         if (!purchasedAtLeastOnce.Contains(name)) purchasedAtLeastOnce.Add(name);
 
         // 재고 리스트 생성

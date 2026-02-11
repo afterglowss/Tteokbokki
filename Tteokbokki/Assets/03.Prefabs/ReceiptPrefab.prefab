@@ -144,7 +144,9 @@ MonoBehaviour:
   selectionOutline: {fileID: 5363782906190587010}
   targetGraphic: {fileID: 2526940402768155187}
   safeColor: {r: 1, g: 1, b: 1, a: 1}
-  dangerColor: {r: 1, g: 0, b: 0, a: 1}
+  dangerColor: {r: 1, g: 0.3803922, b: 0.3803922, a: 1}
+  shakeThreshold: 30
+  shakeStrength: 3
 --- !u!114 &4589638129478720298
 MonoBehaviour:
   m_ObjectHideFlags: 0

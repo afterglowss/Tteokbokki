@@ -130,6 +130,15 @@ public class IngredientShopUI : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        if (shopScrollRect != null)
+        {
+            StopAllCoroutines();
+            StartCoroutine(ResetScrollCoroutine());
+        }
+    }
+
     private void UpdateBonusText()
     {
         if (bonusInfoText == null) return;

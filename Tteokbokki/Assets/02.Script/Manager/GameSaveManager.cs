@@ -21,6 +21,7 @@ public class GameSaveData
     public List<ReceiptSlotSaveData> receiptSlots;
     public List<ReceiptData> pendingReceipts;
     public bool isTutorialCompleted;
+    public List<string> tomorrowBonusCandidates;
 }
 
 [Serializable]
@@ -59,7 +60,8 @@ public class GameSaveManager : MonoBehaviour
             unlockedIngredients = IngredientStockManager.Instance.GetPurchasedHistoryForSave(),
             packagingArea = PackagingAreaManager.Instance.GetSlotWiseCookedFoods(),
             stoveStates = new List<StoveSlotSaveData>(),
-            isTutorialCompleted = this.IsTutorialCompleted
+            isTutorialCompleted = this.IsTutorialCompleted,
+            tomorrowBonusCandidates = DailyBonusManager.Instance.GetTomorrowBonusForSave()
         };
 
         // 화구 상태 저장 (Pending 포함)
@@ -109,6 +111,11 @@ public class GameSaveManager : MonoBehaviour
         IngredientStockManager.Instance.RestoreStock(data.ingredientStocks);
         PackagingAreaManager.Instance.RestoreSlots(data.packagingArea);
         this.IsTutorialCompleted = data.isTutorialCompleted;
+
+        if (DailyBonusManager.Instance != null)
+        {
+            DailyBonusManager.Instance.RestoreBonusData(data.tomorrowBonusCandidates);
+        }
 
         // 화구 복원
         for (int i = 0; i < data.stoveStates.Count; i++)

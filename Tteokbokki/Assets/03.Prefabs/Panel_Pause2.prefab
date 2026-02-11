@@ -2576,7 +2576,7 @@ MonoBehaviour:
     \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.\r\n\u2022 <font=\"KimjungchulMyungjo-Bold SDF\">\uB0B4\uC77C\uC758
     \uBCF4\uB108\uC2A4</font>: \uB9E4\uC77C \uB9C8\uAC10 \uC2DC \uBCF4\uB108\uC2A4
     \uC7AC\uB8CC 2\uC885\uC774 \uBC1C\uD45C\uB429\uB2C8\uB2E4. \uC774 \uC7AC\uB8CC\uAC00
-    \uB4E4\uC5B4\uAC04 \uC74C\uC2DD\uC744 \uD314\uBA74 \uD558\uB098\uB2F9 <color=#FFD700>5,000\uC6D0</color>\uC758
+    \uB4E4\uC5B4\uAC04 \uC74C\uC2DD\uC744 \uD314\uBA74 \uD558\uB098\uB2F9 <color=#FF6347>5,000\uC6D0</color>\uC758
     \uBCF4\uB108\uC2A4\uB97C \uCD94\uAC00\uB85C \uBC1B\uC2B5\uB2C8\uB2E4.\r\n\r\n<size=80%><color=#888888>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</color></size>\r\n\r\n<size=125%><font=\"KimjungchulMyungjo-Bold
     SDF\"><color=#32CD32>\uBCA0\uD14C\uB791 \uC0AC\uC7A5\uB2D8\uC758 \uAFC0\uD301
     (Secret Tips)</color></font></size>\r\n1. <font=\"KimjungchulMyungjo-Bold SDF\">\uC601\uC218\uC99D\uC744
@@ -2875,6 +2875,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a1d13e6470c1dd49b053679cd16c6c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isMainMenu: 0
+  saveButtonObj: {fileID: 6741295219542606995}
+  titleButtonObj: {fileID: 1437743591740347071}
   blackCurtainImage: {fileID: 0}
   fadeDuration: 0.4
   curtainMaxAlpha: 0.7
@@ -2889,7 +2892,7 @@ MonoBehaviour:
   tabNames:
   - "\uC8FC\uBC29 \uC18C\uB9AC \uC870\uC808"
   - "\uD640 \uD658\uACBD\uC124\uC815"
-  - "\uC7AC\uACE0 \uBCF4\uAD00 \uBAA9\uB85D"
+  - "\uC6B4\uC601 \uB9E4\uB274\uC5BC"
   rightPanels:
   - {fileID: 8805329614838245293}
   - {fileID: 1298519688252119688}
@@ -7998,7 +8001,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3615195830008818239}
   m_Direction: 2
   m_Value: 1.0000004
-  m_Size: 0.33827752
+  m_Size: 0.3382775
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

@@ -11,9 +11,18 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
         {
             if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114);
 
-            // ... (기존 음식 버리기 코드 유지) ...
-            if (food.originStoveSlot != null) food.originStoveSlot.ResetSlot();
-            if (food.currentSlot != null) food.currentSlot.RemoveFood(food);
+            // ✨ [핵심 수정] 화구 리셋 조건 강화
+            // "화구 출신이면서(origin != null)" AND "현재 포장대에 있지 않을 때(currentSlot == null)"만 리셋
+            if (food.originStoveSlot != null && food.currentSlot == null)
+            {
+                food.originStoveSlot.ResetSlot();
+            }
+
+            // 포장대에서 왔다면 포장대 리스트에서 제거
+            if (food.currentSlot != null)
+            {
+                food.currentSlot.RemoveFood(food);
+            }
             Destroy(food.gameObject);
             return;
         }
