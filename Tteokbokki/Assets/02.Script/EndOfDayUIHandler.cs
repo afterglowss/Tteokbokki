@@ -109,6 +109,19 @@ public class EndOfDayUIHandler : MonoBehaviour
     {
         InitializeSettlementData(animate: true);
 
+        // ✨ [핵심 수정] 켜지자마자 크기를 0으로 만듭니다!
+        // 딜레이(0.1초) 동안 원본 크기로 보이는 것을 방지합니다.
+        if (mainWindowRect != null) mainWindowRect.localScale = Vector3.zero;
+
+        // 장식 버튼들도 같이 숨겨둡니다.
+        if (macDecorationButtons != null)
+        {
+            foreach (var btn in macDecorationButtons)
+            {
+                if (btn != null) btn.transform.localScale = Vector3.zero;
+            }
+        }
+
         // ✨ [핵심] 창이 열리기 전에 스크롤뷰를 미리 투명하게 숨겨둡니다!
         // 이렇게 해야 창이 커지는 애니메이션(Pop) 중에 이상한 위치의 스크롤이 보이지 않습니다.
         if (settlementScrollRect != null)
@@ -428,7 +441,18 @@ public class EndOfDayUIHandler : MonoBehaviour
         if (mainWindowRect != null) closeSeq.Join(mainWindowRect.DOScale(0f, 0.3f));
         if (blackCurtainImage != null) closeSeq.Join(blackCurtainImage.DOFade(0f, 0.3f));
 
-        closeSeq.AppendCallback(() => { GameManager.Instance.StartOfDay(); });
+        // ✨ [핵심 수정] 셔터가 내려간 뒤, '다음 날 세팅(StartOfDay)'을 하고 나서 바로 저장!
+        closeSeq.AppendCallback(() =>
+        {
+            // 1. 날짜 변경, 화구 초기화, 데일리 보너스 적용 등 '내일' 준비
+            GameManager.Instance.StartOfDay();
+
+            // 2. ✨ [NEW] 다음 날 상태로 자동 저장
+            // 이제 재료 구매 내역, 세금 납부 내역이 모두 반영된 'Day N+1' 상태가 저장됩니다.
+            // 여기서 게임을 끄고 다시 켜면, 17:00 영업 시작 상태로 로드됩니다.
+            GameSaveManager.Instance.SaveGame();
+            Debug.Log("[시스템] 다음 영업일 시작 상태로 자동 저장되었습니다.");
+        });
         closeSeq.AppendInterval(shutterStayDelay);
 
         if (shutterRect != null)

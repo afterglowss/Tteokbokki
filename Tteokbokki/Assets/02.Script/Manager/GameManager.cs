@@ -170,7 +170,7 @@ public class GameManager : MonoBehaviour
 
         // Yarn 대화 시작
         if(TutorialManager.Instance ==  null) {
-            dialogueRunner.StartDialogue("TomorrowBonusLine");
+            //dialogueRunner.StartDialogue("TomorrowBonusLine");
         };
         GameClock.SaveLastPlayedDate(today);
     }
