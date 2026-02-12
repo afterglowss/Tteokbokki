@@ -35,15 +35,31 @@ public class StoveManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-    }
 
-    private void Start()
-    {
         foreach (var slot in stoves)
         {
             slot.Initialize(this);
         }
     }
+
+    private void Start()
+    {
+        
+    }
+    // ✨ [NEW] 씬이 파괴되거나 매니저가 사라질 때 소리 정리
+    private void OnDestroy()
+    {
+        // 끓는 소리가 켜져 있었다면 끕니다.
+        if (globalBoilingSource != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopLoopSFX(globalBoilingSource);
+        }
+
+        // 안전하게 변수 초기화
+        globalBoilingSource = null;
+        activeCookingCount = 0;
+    }
+
 
     public void OnStoveClicked(int index) // 기존 함수 (UI 버튼 등에서 호출한다고 가정)
     {

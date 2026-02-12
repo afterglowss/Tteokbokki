@@ -126,6 +126,37 @@ public class AudioManager : MonoBehaviour
             Destroy(source.gameObject);
         }
     }
+    // ✨ [NEW] 1. 일시정지 시 반복 효과음들만 멈추기 (포즈 메뉴용)
+    public void PauseAllLoopSFX(bool isPaused)
+    {
+        foreach (var source in activeLoopingSources)
+        {
+            if (source == null) continue;
+
+            if (isPaused)
+            {
+                source.Pause(); // 일시정지
+            }
+            else
+            {
+                source.UnPause(); // 다시 재생
+            }
+        }
+    }
+    // ✨ [NEW] 2. 씬 이동 시 모든 반복 효과음 제거하기 (StartScene 갈 때용)
+    public void StopAllLoopSFX()
+    {
+        // 리스트를 역순으로 돌며 모두 파괴
+        for (int i = activeLoopingSources.Count - 1; i >= 0; i--)
+        {
+            if (activeLoopingSources[i] != null)
+            {
+                activeLoopingSources[i].Stop();
+                Destroy(activeLoopingSources[i].gameObject);
+            }
+        }
+        activeLoopingSources.Clear();
+    }
 
     // --- 3. BGM ---
 

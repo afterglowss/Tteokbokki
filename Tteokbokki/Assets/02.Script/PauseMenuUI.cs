@@ -342,6 +342,9 @@ public class PauseMenuUI : MonoBehaviour
                 blackCurtainImage.color = new Color(c.r, c.g, c.b, 0f);
                 blackCurtainImage.DOFade(curtainMaxAlpha, fadeDuration).SetEase(Ease.OutQuad).SetUpdate(true);
             }
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PauseAllLoopSFX(true);
         }
         else
         {
@@ -357,6 +360,9 @@ public class PauseMenuUI : MonoBehaviour
                 blackCurtainImage.DOFade(0f, fadeDuration).SetEase(Ease.InQuad).SetUpdate(true)
                     .OnComplete(() => { blackCurtainImage.gameObject.SetActive(false); });
             }
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PauseAllLoopSFX(false);
         }
     }
 
@@ -467,6 +473,14 @@ public class PauseMenuUI : MonoBehaviour
     {
         Time.timeScale = 1f;
         DOTween.KillAll();
+
+        // ✨ [핵심 해결] 씬을 나갈 때 좀비 사운드(부글부글)를 모조리 죽입니다.
+        // 이걸 해야 StartScene에서 소리가 안 들리고, 다시 들어왔을 때 중첩되지 않습니다.
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopAllLoopSFX();
+        }
+
         SceneManager.LoadScene("StartScene");
     }
 
