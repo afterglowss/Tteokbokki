@@ -20,6 +20,8 @@ public class GameSaveData
     public List<ReceiptData> successfulReceipts;
     public List<ReceiptSlotSaveData> receiptSlots;
     public List<ReceiptData> pendingReceipts;
+    public bool isTutorialCompleted;
+    public List<string> tomorrowBonusCandidates;
 }
 
 [Serializable]
@@ -35,6 +37,7 @@ public class StoveSlotSaveData
 public class GameSaveManager : MonoBehaviour
 {
     public static GameSaveManager Instance { get; private set; }
+    public bool IsTutorialCompleted { get; private set; }
     private const string SaveFilePath = "SaveData.json";
 
     private void Awake()
@@ -56,7 +59,9 @@ public class GameSaveManager : MonoBehaviour
             ingredientStocks = IngredientStockManager.Instance.GetCurrentStockForSave(),
             unlockedIngredients = IngredientStockManager.Instance.GetPurchasedHistoryForSave(),
             packagingArea = PackagingAreaManager.Instance.GetSlotWiseCookedFoods(),
-            stoveStates = new List<StoveSlotSaveData>()
+            stoveStates = new List<StoveSlotSaveData>(),
+            isTutorialCompleted = this.IsTutorialCompleted,
+            tomorrowBonusCandidates = DailyBonusManager.Instance.GetTomorrowBonusForSave()
         };
 
         // 화구 상태 저장 (Pending 포함)
@@ -105,6 +110,12 @@ public class GameSaveManager : MonoBehaviour
         IngredientStockManager.Instance.RestorePurchasedHistory(data.unlockedIngredients);
         IngredientStockManager.Instance.RestoreStock(data.ingredientStocks);
         PackagingAreaManager.Instance.RestoreSlots(data.packagingArea);
+        this.IsTutorialCompleted = data.isTutorialCompleted;
+
+        if (DailyBonusManager.Instance != null)
+        {
+            DailyBonusManager.Instance.RestoreBonusData(data.tomorrowBonusCandidates);
+        }
 
         // 화구 복원
         for (int i = 0; i < data.stoveStates.Count; i++)
@@ -127,5 +138,14 @@ public class GameSaveManager : MonoBehaviour
     {
         string fullPath = Path.Combine(Application.persistentDataPath, "SaveData.json");
         if (File.Exists(fullPath)) File.Delete(fullPath);
+    }
+
+    public void SetTutorialComplete()
+    {
+        // 1. 클래스 내부의 프로퍼티 값을 true로 변경
+        IsTutorialCompleted = true;
+        // 2. 변경된 상태를 JSON 파일에 즉시 물리적으로 기록
+        SaveGame();
+        Debug.Log("<color=green>[시스템] 튜토리얼 완료 상태가 세이브 데이터에 기록되었습니다.</color>");
     }
 }

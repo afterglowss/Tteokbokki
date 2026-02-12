@@ -27,6 +27,25 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
+    void Start()
+    {
+        //if (GameSaveManager.Instance.IsLoading)
+        //{
+        //    // A. 이어하기인 경우: 아무것도 안 함 (LoadGame이 RestoreStock을 부를 테니까)
+        //}
+        //else if (TutorialManager.Instance.IsTutorialJustFinished) // 튜토리얼 직후인지 확인하는 플래그 필요
+        //{
+        //    // B. 튜토리얼 끝내고 온 경우
+        //    IngredientStockManager.Instance.ApplyTutorialAftermath();
+        //    TutorialManager.Instance.IsTutorialJustFinished = false; // 플래그 초기화
+        //}
+        //else
+        //{
+        //    // C. 튜토리얼 스킵하고 바로 새 게임 (그냥 기본 재료만 지급)
+        //    IngredientStockManager.Instance.OrderBasicIngredients(); // 기존 함수 public으로 변경 필요
+        //}
+    }
+
     public void StartOfDay()
     {
         isEmergencyClosing = false; // ✨ 플래그 초기화
@@ -150,8 +169,9 @@ public class GameManager : MonoBehaviour
         dialogueRunner.VariableStorage.SetValue("$bonus2", bonusList.Count > 1 ? bonusList[1] : "");
 
         // Yarn 대화 시작
-        dialogueRunner.StartDialogue("TomorrowBonusLine");
-
+        if(TutorialManager.Instance ==  null) {
+            //dialogueRunner.StartDialogue("TomorrowBonusLine");
+        };
         GameClock.SaveLastPlayedDate(today);
     }
 

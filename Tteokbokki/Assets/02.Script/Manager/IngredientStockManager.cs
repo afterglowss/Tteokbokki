@@ -48,7 +48,9 @@ public class IngredientStockManager : MonoBehaviour
     public int TotalSpent { get; private set; } = 0;
     private HashSet<string> orderedToday = new();
     private const int ShelfLifeDays = 5;
-    private HashSet<string> purchasedAtLeastOnce = new();
+    private List<string> purchasedAtLeastOnce = new List<string>();
+    // ✨ 오늘 주문했는지 여부 (상점 UI 표시용으로만 사용하고, 주문 차단용으로는 쓰지 않음)
+    private HashSet<string> orderedIngredientsToday = new HashSet<string>();
     private List<string> lowStockIngredients = new();
 
 
@@ -77,6 +79,12 @@ public class IngredientStockManager : MonoBehaviour
     {
         if (debugUnlockAllIngredients) UnlockAllIngredientsHistory();
         if (startWithBasicIngredients) OrderBasicIngredients();
+
+        // (예시: 세이브 매니저가 로드할 데이터가 없다면 기본 재료 지급)
+        // if (!GameSaveManager.Instance.HasSaveData) 
+        // {
+        //      OrderBasicIngredients();
+        // }
 
         // ✨ 자동 생성 옵션이 켜져있다면 여기서 버튼을 쫙 만듭니다.
         if (autoGenerateButtons)
@@ -117,9 +125,13 @@ public class IngredientStockManager : MonoBehaviour
         List<string> sauceList = new List<string>();
         List<string> normalList = new List<string>();
 
-        foreach (var ingredientName in IngredientEconomyDatabase.Data.Keys)
+        // ✨ [핵심 수정] DB 순서(IngredientEconomyDatabase.Data.Keys)가 아니라
+        // 플레이어가 해금한 순서(purchasedAtLeastOnce)대로 순회합니다.
+        foreach (var ingredientName in purchasedAtLeastOnce)
         {
-            if (!purchasedAtLeastOnce.Contains(ingredientName)) continue;
+            // 이미 구매한 목록을 도는 것이므로 Contains 체크는 불필요하지만 안전장치로 둡니다.
+            if (string.IsNullOrEmpty(ingredientName)) continue;
+
             if (ingredientName.Contains("소스")) sauceList.Add(ingredientName);
             else normalList.Add(ingredientName);
         }
@@ -313,8 +325,8 @@ public class IngredientStockManager : MonoBehaviour
     /// </summary>
     public void OrderIngredient(string ingredientName)
     {
-        if (orderedToday.Contains(ingredientName)) return;
         if (!IngredientEconomyDatabase.Data.TryGetValue(ingredientName, out var meta)) return;
+        // if (orderedToday.Contains(ingredientName)) return;
 
         int servings = meta.ServingsPerOrder;
         int cost = meta.OrderCost;
@@ -339,13 +351,15 @@ public class IngredientStockManager : MonoBehaviour
         TotalSpent += cost;
         orderedToday.Add(ingredientName);
 
-        // ✨ [중요] 구매 시 해금 목록에 추가
+        // ✨ [중요] 구매 시 해금 목록에 추가 (중복 방지 필수)
         if (!purchasedAtLeastOnce.Contains(ingredientName))
         {
-            purchasedAtLeastOnce.Add(ingredientName);
+            purchasedAtLeastOnce.Add(ingredientName); // 리스트의 맨 끝에 추가됨 -> 버튼도 맨 뒤에 생김
         }
 
         UpdateStockText(ingredientName);
+
+        Debug.Log($"[재료 주문] {ingredientName} {meta.ServingsPerOrder}인분 추가 완료. (현재 총 {GetStock(ingredientName)}인분)");
     }
 
 
@@ -496,6 +510,7 @@ public class IngredientStockManager : MonoBehaviour
         return purchasedAtLeastOnce.Count;
     }
 
+    // ✨ [수정] 해금 여부 확인 (List에는 Contains 메서드가 있으므로 코드는 동일하지만 내부 동작이 바뀜)
     public bool HasPurchasedBefore(string ingredientName)
     {
         return purchasedAtLeastOnce.Contains(ingredientName);
@@ -542,6 +557,7 @@ public class IngredientStockManager : MonoBehaviour
         return result;
     }
 
+
     public void RestoreStock(Dictionary<string, List<StockEntry>> savedStock)
     {
         stock.Clear();
@@ -561,10 +577,10 @@ public class IngredientStockManager : MonoBehaviour
             stock[pair.Key] = loadedList;
         }
 
-        foreach (var key in stock.Keys)
-        {
-            if (stock[key].Count > 0) purchasedAtLeastOnce.Add(key);
-        }
+        //foreach (var key in stock.Keys)
+        //{
+        //    if (stock[key].Count > 0) purchasedAtLeastOnce.Add(key);
+        //}
 
         if (autoGenerateButtons)
         {
@@ -579,7 +595,7 @@ public class IngredientStockManager : MonoBehaviour
         return new List<string>(purchasedAtLeastOnce);
     }
 
-    // ✨ [NEW] 로드용: 해금된 재료 목록 복원
+    // ✨ [NEW] 로드용: 해금된 재료 목록 복원 (저장된 순서 그대로 복원됨)
     public void RestorePurchasedHistory(List<string> savedHistory)
     {
         if (savedHistory == null) return;
@@ -587,11 +603,15 @@ public class IngredientStockManager : MonoBehaviour
         purchasedAtLeastOnce.Clear();
         foreach (var name in savedHistory)
         {
-            purchasedAtLeastOnce.Add(name);
+            // 중복 방지하며 순서대로 추가
+            if (!purchasedAtLeastOnce.Contains(name))
+            {
+                purchasedAtLeastOnce.Add(name);
+            }
         }
     }
 
-    private void OrderBasicIngredients()
+    public void OrderBasicIngredients()
     {
         string[] basicIngredients = { "떡", "오뎅", "파", "양배추", "군자 소스" };
         foreach (string ingredientName in basicIngredients)
@@ -609,7 +629,11 @@ public class IngredientStockManager : MonoBehaviour
             }
             stock[ingredientName][0].count += meta.ServingsPerOrder;
 
-            purchasedAtLeastOnce.Add(ingredientName);
+            // ✨ 리스트에 순서대로 추가
+            if (!purchasedAtLeastOnce.Contains(ingredientName))
+            {
+                purchasedAtLeastOnce.Add(ingredientName);
+            }
             UpdateStockText(ingredientName);
         }
     }
@@ -620,5 +644,59 @@ public class IngredientStockManager : MonoBehaviour
             purchasedAtLeastOnce.Add(key);
         }
         Debug.Log("[Debug] 모든 재료의 '구매 이력'이 해금되었습니다. (재고는 0일 수 있음)");
+    }
+
+    // ✨ [NEW] 튜토리얼 종료 후 메인 씬 진입 시 딱 한 번 호출할 함수
+    public void ApplyTutorialAftermath()
+    {
+        Debug.Log("[시스템] 튜토리얼 종료 상태를 적용합니다.");
+
+        // 1. 재고 초기화 (중복 방지)
+        stock.Clear();
+        purchasedAtLeastOnce.Clear();
+
+        // 2. 기본 재료 지급 (떡, 오뎅, 파, 양배추, 군자소스)
+        OrderBasicIngredients();
+
+        // 3. 마라 소스 지급 (무료 해금 + 1세트 재고 추가)
+        AddStockDirectly("마라 소스");
+
+        // 4. 튜토리얼에서 사용한 만큼 차감
+        // 사용량: 떡 2, 오뎅 2, 파 1, 양배추 1, 군자 소스 1
+        DecreaseStockDirectly("떡", 2);
+        DecreaseStockDirectly("오뎅", 2);
+        DecreaseStockDirectly("파", 1);
+        DecreaseStockDirectly("양배추", 1);
+        DecreaseStockDirectly("군자 소스", 1);
+
+        // 5. UI 및 버튼 갱신
+        if (autoGenerateButtons) GenerateIngredientButtons();
+        UpdateAllStockTexts();
+    }
+
+    // 헬퍼: 돈 차감 없이 재고와 해금 목록에 추가 (마라 소스 보상용)
+    private void AddStockDirectly(string name)
+    {
+        if (!IngredientEconomyDatabase.Data.TryGetValue(name, out var meta)) return;
+
+        // ✨ 해금 목록 추가 (순서 보존)
+        if (!purchasedAtLeastOnce.Contains(name)) purchasedAtLeastOnce.Add(name);
+
+        // 재고 리스트 생성
+        if (!stock.ContainsKey(name)) stock[name] = new List<StockEntry>();
+        if (stock[name].Count == 0) stock[name].Add(new StockEntry { count = 0, dayRemaining = 999 });
+
+        // 수량 추가
+        stock[name][0].count += meta.ServingsPerOrder;
+    }
+
+    // 헬퍼: 재고 강제 차감 (튜토리얼 사용분 처리용)
+    private void DecreaseStockDirectly(string name, int amount)
+    {
+        if (stock.ContainsKey(name) && stock[name].Count > 0)
+        {
+            stock[name][0].count -= amount;
+            if (stock[name][0].count < 0) stock[name][0].count = 0; // 음수 방지
+        }
     }
 }

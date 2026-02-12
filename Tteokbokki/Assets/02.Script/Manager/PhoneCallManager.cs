@@ -93,7 +93,7 @@ public class PhoneCallManager : MonoBehaviour
         // 🔥 [사운드] 벨소리 Loop 재생 (AudioManager 사용)
         if (AudioManager.Instance != null)
         {
-            currentRingSource = AudioManager.Instance.PlayLoopSFX(ringSoundID, 0.2f);
+            currentRingSource = AudioManager.Instance.PlayLoopSFX(ringSoundID, 0.13f);
         }
 
         // 흔들림 연출 및 타이머 시작
@@ -104,7 +104,7 @@ public class PhoneCallManager : MonoBehaviour
     private IEnumerator RingRoutine()
     {
         float t = 0f;
-        float amp = 8f, speed = 12f; // 흔들림 강도
+        float amp = 8f, speed = 20f; // 흔들림 강도
 
         while (t < ringDuration && isRinging)
         {
@@ -158,7 +158,7 @@ public class PhoneCallManager : MonoBehaviour
 
     private void StartCall()
     {
-        AudioManager.Instance.PlaySFX(104);
+        AudioManager.Instance.PlaySFX(104, 0.5f);
 
         isInCall = true;
         // 통화 중 비주얼 (필요 시 ringingColor 유지하거나 변경)

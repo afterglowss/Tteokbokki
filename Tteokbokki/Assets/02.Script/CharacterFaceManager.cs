@@ -1,23 +1,23 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI; // ¸¸¾à Image »ç¿ëÇÒ °æ¿ì ÇÊ¿ä
+using UnityEngine.UI; // ë§Œì•½ Image ì‚¬ìš©í•  ê²½ìš° í•„ìš”
 
 public class CharacterFaceManager : MonoBehaviour
 {
     public static CharacterFaceManager Instance { get; private set; }
-    [Header("Ç¥Á¤À» Ç¥½ÃÇÒ ÀÌ¹ÌÁö ÄÄÆ÷³ÍÆ®")]
-    public Image faceImage; // UI¿ë
-    // public SpriteRenderer faceRenderer; // ¸¸¾à SpriteRenderer ¾µ °æ¿ì ´ëÃ¼ °¡´É
+    [Header("í‘œì •ì„ í‘œì‹œí•  ì´ë¯¸ì§€ ì»´í¬ë„ŒíŠ¸")]
+    public Image faceImage; // UIìš©
+    // public SpriteRenderer faceRenderer; // ë§Œì•½ SpriteRenderer ì“¸ ê²½ìš° ëŒ€ì²´ ê°€ëŠ¥
 
-    [Header("Ç¥Á¤ ÀÌ¸§°ú ½ºÇÁ¶óÀÌÆ® ¸ÅÇÎ")]
+    [Header("í‘œì • ì´ë¦„ê³¼ ìŠ¤í”„ë¼ì´íŠ¸ ë§¤í•‘")]
     public List<Sprite> faceSprites;
 
     private Dictionary<string, Sprite> faceDictionary = new();
 
     void Awake()
     {
-        // ÀÚµ¿ µî·Ï: Sprite ÀÌ¸§À¸·Î Dictionary ±¸¼º
+        // ìë™ ë“±ë¡: Sprite ì´ë¦„ìœ¼ë¡œ Dictionary êµ¬ì„±
         foreach (var sprite in faceSprites)
         {
             faceDictionary[sprite.name] = sprite;
@@ -30,16 +30,23 @@ public class CharacterFaceManager : MonoBehaviour
         Instance = this;
     }
 
-    public void SetFace(string expressionName)
+    // ê¸°ì¡´ SetFaceëŠ” í‘œì •ì„ ë°”ê¿€ ë•Œë§Œ í˜¸ì¶œ (Yarn Scriptìš©)
+    public void SetFace(string expressionName, string speakerName = "")
     {
+        if (faceImage == null) return;
+
         if (faceDictionary.TryGetValue(expressionName, out var sprite))
         {
             faceImage.sprite = sprite;
-            // faceRenderer.sprite = sprite; // SpriteRenderer »ç¿ë ½Ã
         }
-        else
-        {
-            Debug.LogWarning($"Ç¥Á¤ '{expressionName}'¿¡ ÇØ´çÇÏ´Â ½ºÇÁ¶óÀÌÆ®°¡ ¾ø½À´Ï´Ù.");
-        }
+    }
+
+    // ë§¤ ë¼ì¸ë§ˆë‹¤ Presenterê°€ í˜¸ì¶œí•  ìë™ í† ê¸€ í•¨ìˆ˜
+    public void ToggleFaceBySpeaker(string speakerName)
+    {
+        if (faceImage == null) return;
+
+        // í™”ìê°€ 'ë±ìƒˆ'ì¼ ë•Œë§Œ ì´ë¯¸ì§€ ì»´í¬ë„ŒíŠ¸ë¥¼ í™œì„±í™”
+        faceImage.enabled = (speakerName == "ë±ìƒˆ");
     }
 }

@@ -200,7 +200,7 @@ TextureImporter:
         width: 252
         height: 188
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 64, y: 0, z: 64, w: 64}
       customData: 
       outline: []
@@ -209,6 +209,50 @@ TextureImporter:
       bones: []
       spriteID: 536832dc52064814dae3d94148e5ba97
       internalID: 1335438737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 9-Sliced_3
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 2
+        width: 252
+        height: 188
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3ce4b02cab497e249b2e0d0116323840
+      internalID: 1335195489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 9-Sliced_4
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 2
+        width: 252
+        height: 188
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 64, y: 64, z: 64, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 91ba1e70ae1380c4eb48ea365e9515e4
+      internalID: 1029951964
       vertices: []
       indices: 
       edges: []
@@ -231,6 +275,8 @@ TextureImporter:
       9-Sliced_0: 1876260888
       9-Sliced_1: 341788896
       9-Sliced_2: 1335438737
+      9-Sliced_3: 1335195489
+      9-Sliced_4: 1029951964
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

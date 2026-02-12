@@ -1,0 +1,34 @@
+{
+    "name": "DialogueLine",
+    "maps": [
+        {
+            "name": "ContinueButton",
+            "id": "7c2d116b-674f-4429-8228-0b8a5059e016",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "a7f6a47b-57cc-43e4-b148-89d0c66fe1a4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a65b97b4-1055-415e-8b3a-5b8d1db3bd3c",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

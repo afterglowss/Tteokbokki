@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 8986962941596044032}
   - component: {fileID: 4589638129478720298}
   - component: {fileID: 5315316423906123581}
+  - component: {fileID: 7810852064210106456}
+  - component: {fileID: 5363782906190587010}
   m_Layer: 5
   m_Name: ReceiptPrefab
   m_TagString: Untagged
@@ -139,6 +141,12 @@ MonoBehaviour:
   receiptButton: {fileID: 1705297464719231334}
   orderIDText: {fileID: 1192050848182416696}
   cookTimeSeconds: 0
+  selectionOutline: {fileID: 5363782906190587010}
+  targetGraphic: {fileID: 2526940402768155187}
+  safeColor: {r: 1, g: 1, b: 1, a: 1}
+  dangerColor: {r: 1, g: 0.3803922, b: 0.3803922, a: 1}
+  shakeThreshold: 30
+  shakeStrength: 3
 --- !u!114 &4589638129478720298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -163,6 +171,35 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &7810852064210106456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4321631299712797681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ab39d9ed952b4eaee648d1a11437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundID: 107
+  playOnlyIfInteractable: 1
+--- !u!114 &5363782906190587010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4321631299712797681}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0.37647063, g: 0.3019608, b: 0.2509804, a: 1}
+  m_EffectDistance: {x: 3, y: -3}
+  m_UseGraphicAlpha: 1
 --- !u!1 &7743978660799412832
 GameObject:
   m_ObjectHideFlags: 0

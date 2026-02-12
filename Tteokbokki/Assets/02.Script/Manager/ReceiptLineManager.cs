@@ -216,22 +216,34 @@ public class ReceiptLineManager : MonoBehaviour
         }
     }
 
-    public string GetTodaySuccessfulReceiptsText()  // 오늘 날짜의 성공한 영수증 텍스트로 가져오기
+    public string GetTodaySuccessfulReceiptsText()
     {
         DateTime today = GameClock.gameTime.Date;
         if (successfulReceipts.Count == 0)
             return $"[{today:yyyy-MM-dd}] 성공한 영수증이 없습니다.\n";
 
         string result = $"=== [성공한 영수증] {today:yyyy-MM-dd} ===\n\n";
-        int total = 0;
+        int totalBase = 0;
 
         foreach (var receipt in successfulReceipts)
         {
             result += receipt.GetReceiptText() + "\n";
-            total += receipt.GetTotalPrice();
+            totalBase += receipt.GetTotalPrice();
         }
 
-        result += $"총 성공 금액: {total:N0}원\n";
+        result += "--------------------------------\n";
+        result += $"주문 기본 합계: {totalBase:N0}원\n";
+
+        // ✨ [NEW] 보너스 금액 표시 추가
+        int bonus = DailyBonusManager.Instance.TodayAccumulatedBonus;
+        if (bonus > 0)
+        {
+            result += $"<color=#D95400>+ 추가 보너스 수익: {bonus:N0}원</color>\n";
+        }
+
+        result += $"================================\n";
+        result += $"총 최종 수익: {totalBase + bonus:N0}원\n"; // 최종 합계
+
         return result;
     }
 
@@ -372,5 +384,19 @@ public class ReceiptLineManager : MonoBehaviour
         }
 
         Debug.Log("[마감] 남아있던 모든 영수증을 실패 처리했습니다.");
+    }
+
+    public void UpdateSelectionOutlines(Receipt activeReceipt)
+    {
+        foreach (var item in receiptSlots)
+        {
+            if (item == null) continue;
+
+            // 내 영수증이 activeReceipt와 같은지 비교
+            bool isSelected = (item.GetReceipt() == activeReceipt);
+
+            // 상태 적용
+            item.SetHighlight(isSelected);
+        }
     }
 }

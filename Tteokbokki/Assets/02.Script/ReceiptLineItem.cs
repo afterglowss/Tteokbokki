@@ -29,6 +29,26 @@ public class ReceiptLineItem : MonoBehaviour
 
     private bool isTweening = false;
 
+    [Header("Highlight")]
+    public Outline selectionOutline;
+
+    [Header("Time Visuals")]
+    // ✨ [NEW] 색상이 변할 배경 이미지 (Inspector에서 연결)
+    public Image targetGraphic;
+
+    // ✨ [NEW] 시작할 때 색상 (평화로움)
+    public Color safeColor = Color.white;
+
+    // ✨ [NEW] 시간이 다 됐을 때 색상 (위험!)
+    public Color dangerColor = new Color(1f, 0.4f, 0.4f); // 연한 빨강
+
+    // ✨ [NEW] 흔들림 효과 설정
+    [Header("Shake Effect")]
+    public float shakeThreshold = 15f; // 이 시간(초)부터 흔들리기 시작
+    public float shakeStrength = 3f;   // 흔들림 강도
+    private bool isShaking = false;    // 현재 흔들리고 있는지 체크
+    private Tween shakeTween;          // 트윈 제어용
+
     public void CachePosition()
     {
         originalPosition = GetComponent<RectTransform>().anchoredPosition;
@@ -76,15 +96,73 @@ public class ReceiptLineItem : MonoBehaviour
         CachePosition();    // 드래그 이전 자리 기억
 
         receiptButton.onClick.AddListener(OnClick);
+        // ✨ [NEW] 시작 시 색상 초기화
+        if (targetGraphic != null) targetGraphic.color = safeColor;
+
+        // ✨ Setup 시 초기화
+        isShaking = false;
+        if (targetGraphic != null)
+        {
+            targetGraphic.transform.localPosition = Vector3.zero; // 위치 정렬
+            targetGraphic.color = safeColor;
+        }
     }
 
     private void Update()
     {
+        // ** 여기 영수증 시간이 안흘러서 테스트 불가. 일단 주석 처리 해둘테니 필요할때 바꾸는 걸로
+        //if (TutorialManager.IsFreeze) return;
         DateTime now = GameClock.gameTime;
 
         TimeSpan elapsed = now - orderStartTime;
 
         //Debug.Log($"[영수증 {receipt.OrderID}] 경과 시간: {elapsed.TotalMinutes:F2}분 / 제한: {cookTimeSeconds / 60f}분");
+        float elapsedSeconds = (float)elapsed.TotalSeconds;
+        float remainingSeconds = cookTimeSeconds - elapsedSeconds; // 남은 시간 계산
+
+        // ✨ [수정] 15분 남았을 때부터 색상 변경 로직
+        if (targetGraphic != null && cookTimeSeconds > 0)
+        {
+            // 경고 시작 시간 (15분 = 900초)
+            // 만약 전체 제한시간이 15분보다 짧다면, 시작하자마자 붉어지기 시작합니다.
+            float warningThreshold = 15f * 60f;
+
+            if (remainingSeconds > warningThreshold)
+            {
+                // 1. 아직 15분 넘게 남음 -> 안전 색상 유지
+                targetGraphic.color = safeColor;
+            }
+            else
+            {
+                // 2. 15분 이하로 남음 -> 붉게 변하기 시작
+                // 남은 시간이 15분일 때 ratio = 0 (Safe)
+                // 남은 시간이 0분일 때 ratio = 1 (Danger)
+                float ratio = 1f - (remainingSeconds / warningThreshold);
+                ratio = Mathf.Clamp01(ratio); // 0~1 사이로 제한
+
+                targetGraphic.color = Color.Lerp(safeColor, dangerColor, ratio);
+            }
+        }
+
+        // --- 2. ✨ [NEW] 긴박한 흔들림 효과 (마감 임박!) ---
+        // targetGraphic(배경 이미지)만 흔들어야 전체 UI 좌표가 안 꼬입니다.
+        if (targetGraphic != null)
+        {
+            if (remainingSeconds <= shakeThreshold && remainingSeconds > 0)
+            {
+                if (!isShaking)
+                {
+                    StartShaking();
+                }
+            }
+            else
+            {
+                if (isShaking)
+                {
+                    StopShaking();
+                }
+            }
+        }
 
         if (elapsed.TotalMinutes >= cookTimeSeconds / 60f)
         {
@@ -92,13 +170,38 @@ public class ReceiptLineItem : MonoBehaviour
             if (PhoneCallManager.Instance != null)
                 PhoneCallManager.Instance.TriggerCall(FailReason.Timeout);
 
+            AudioManager.Instance.PlaySFX(118);
+
             ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
             manager.RemoveReceipt(this);
             return;
         }
     }
+    private void StartShaking()
+    {
+        isShaking = true;
+        // targetGraphic만 흔들어야 영수증 슬롯 자체의 정렬(Grid)이 안 망가집니다.
+        // LoopType.Yoyo를 써서 계속 흔듭니다.
+        shakeTween = targetGraphic.transform.DOShakePosition(1f, shakeStrength, 10, 90, false, true)
+            .SetLoops(-1, LoopType.Restart);
+    }
 
-    
+    // ✨ 흔들기 멈춤
+    private void StopShaking()
+    {
+        isShaking = false;
+        if (shakeTween != null) shakeTween.Kill();
+
+        // 위치 원상복구 (중요)
+        if (targetGraphic != null)
+            targetGraphic.transform.localPosition = Vector3.zero;
+    }
+
+    private void OnDestroy()
+    {
+        if (shakeTween != null) shakeTween.Kill();
+    }
+
     private void OnClick()
     {
         if (receiptPopup == null || combinedIngredientManager == null)
@@ -150,7 +253,18 @@ public class ReceiptLineItem : MonoBehaviour
         orderStartTime = GameClock.gameTime.AddSeconds(-(cookTimeSeconds - clampedRemaining));
 
         // 4. 디버깅 로그 (선택)
-        // Debug.Log($"제한시간: {cookTimeSeconds}, 남은시간: {clampedRemaining}, 역산된 시작시간: {orderStartTime}");
+        //Debug.Log($"제한시간: {cookTimeSeconds}, 남은시간: {clampedRemaining}, 역산된 시작시간: {orderStartTime}");
+    }
+
+    public void SetHighlight(bool isActive)
+    {
+        if (selectionOutline != null)
+        {
+            selectionOutline.enabled = isActive;
+
+            // (선택 사항) 색상도 코드에서 제어하고 싶다면:
+            // if (isActive) selectionOutline.effectColor = Color.yellow;
+        }
     }
 
 }

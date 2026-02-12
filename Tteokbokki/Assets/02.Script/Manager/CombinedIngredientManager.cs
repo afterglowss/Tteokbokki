@@ -53,7 +53,16 @@ public class CombinedIngredientManager : MonoBehaviour
         string result = "";
         foreach (var pair in combinedIngredients)
         {
-            result += $"{pair.Key} x{pair.Value}\n";
+            string line = $"{pair.Key} x{pair.Value}";
+
+            // ✨ [NEW] 보너스 재료라면 색상 강조!
+            if (DailyBonusManager.Instance != null && DailyBonusManager.Instance.IsBonusIngredient(pair.Key))
+            {
+                // 진한 주황색(#D95400)으로 감싸고, (보너스) 텍스트 추가
+                line = $"<color=#D95400><font=\"KimjungchulMyungjo-Bold SDF\">{pair.Key} x{pair.Value}</font> (보너스)</color>";
+            }
+
+            result += line + "\n";
         }
         return result;
     }
@@ -69,12 +78,18 @@ public class CombinedIngredientManager : MonoBehaviour
             StartCoroutine(ResetScrollCoroutine());
         }
 
-        string result = $"주문번호 {receipt.OrderID}의 메뉴별 재료 목록\n\n";
+        // 1. 시간 포맷팅 (HH:mm -> 14:30 형식)
+        // 🚨 만약 Receipt 스크립트의 시간 변수명이 OrderTime이 아니라면, 해당 변수명으로 바꿔주세요.
+        string timeStr = receipt.OrderDateTime.ToString("HH:mm");
+
+        // 2. 제목에 시간 추가
+        // 예: "[14:30] 주문번호 1의 메뉴별 재료"
+        string result = $"[{timeStr}] 주문번호 {receipt.OrderID}\n\n";
 
         foreach (var order in receipt.GetOrders())
         {
             var combined = GetCombinedIngredients(order.Menu, order.GetExtras());
-            result += $"[{order.ItemID}] {order.Menu.Name} 전체 재료 목록\n";
+            result += $"[{order.ItemID}] {order.Menu.Name}\n";
             result += GetIngredientsText(combined);
             result += "\n";
         }
