@@ -75,7 +75,7 @@ title: Tutorial
 뱁새: 마침 주문이 들어왔네요!
 뱁새: 한 번 만들어 볼까요?
 뱁새: 영수증을 누르면 어떤 재료를 넣어야 하는지 알 수 있어요.
-<<highlight TutorialReceipt>>
+<<highlight ReceiptLineManager>>
 <<waitForReceiptClick>>
 
 //튜토리얼 영수증 선택 완료
