@@ -21,8 +21,17 @@ public class StartSceneUI : MonoBehaviour
     [SerializeField] private Button settingButton;
     [SerializeField] private Button exitButton;
 
+    // ✨ [NEW] 디버그용 세이브 삭제 버튼
+    [Header("디버그")]
+    [SerializeField] private Button deleteSaveButton;
+
     [Header("이어하기 정보")]
     [SerializeField] private TextMeshProUGUI continueDateText;
+
+    // ✨ [NEW] 텍스트 색상 설정 추가
+    [Header("텍스트 색상 설정")]
+    [SerializeField] private Color enableTextColor = Color.white;       // 활성화 (흰색 등)
+    [SerializeField] private Color disableTextColor = new Color(0.5f, 0.5f, 0.5f, 1f); // 비활성화 (회색)
 
     [Header("팝업 & 설정창")]
     [SerializeField] private PauseMenuUI pauseMenuUI;
@@ -68,6 +77,9 @@ public class StartSceneUI : MonoBehaviour
     private string saveFilePath;
     private Coroutine typingCoroutine;
 
+    private enum PopupAction { None, NewGame, DeleteSave }
+    private PopupAction currentPopupAction = PopupAction.None;
+
     private void Awake()
     {
         saveFilePath = Path.Combine(Application.persistentDataPath, "SaveData.json");
@@ -82,8 +94,12 @@ public class StartSceneUI : MonoBehaviour
         settingButton.onClick.AddListener(OnSettingButtonClicked);
         exitButton.onClick.AddListener(OnExitButtonClicked);
 
-        if (warningConfirmButton != null) warningConfirmButton.onClick.AddListener(OnConfirmNewGame);
-        if (warningCancelButton != null) warningCancelButton.onClick.AddListener(OnCancelNewGame);
+        if (deleteSaveButton != null)
+            deleteSaveButton.onClick.AddListener(OnDeleteSaveButtonClicked);
+
+        // 팝업 버튼은 이제 상황에 따라 다르게 동작함
+        if (warningConfirmButton != null) warningConfirmButton.onClick.AddListener(OnConfirmPopup);
+        if (warningCancelButton != null) warningCancelButton.onClick.AddListener(OnCancelPopup);
 
         UpdateContinueDateLabel();
     }
@@ -104,18 +120,42 @@ public class StartSceneUI : MonoBehaviour
                 {
                     continueDateText.text = "이어하기";
                 }
+                // ✨ [수정] 활성화 상태 색상 적용
                 continueButton.interactable = true;
+                if (continueDateText != null) 
+                { 
+                    continueDateText.color = enableTextColor; 
+                    continueButton.GetComponentInChildren<TextMeshProUGUI>().color = enableTextColor;
+                }
+
+                // 파일이 있으면 삭제 버튼도 활성화
+                if (deleteSaveButton != null) deleteSaveButton.interactable = true;
             }
             catch
             {
                 continueDateText.text = "데이터 손상됨";
+                // ✨ [수정] 비활성화 상태 색상 적용
                 continueButton.interactable = false;
+                if (continueDateText != null)
+                {
+                    continueDateText.color = disableTextColor;
+                    continueButton.GetComponentInChildren<TextMeshProUGUI>().color = disableTextColor;
+                }
+
+                // 파일 없으면 삭제 버튼 비활성화
+                if (deleteSaveButton != null) deleteSaveButton.interactable = false;
             }
         }
         else
         {
             continueDateText.text = "기록이 없습니다";
+            // ✨ [수정] 비활성화 상태 색상 적용
             continueButton.interactable = false;
+            if (continueDateText != null)
+            {
+                continueDateText.color = disableTextColor;
+                continueButton.GetComponentInChildren<TextMeshProUGUI>().color = disableTextColor;
+            }
         }
     }
 
@@ -131,12 +171,14 @@ public class StartSceneUI : MonoBehaviour
     {
         if (File.Exists(saveFilePath))
         {
+            // 새 게임인데 파일이 있음 -> 팝업 띄우고 목적 설정
+            currentPopupAction = PopupAction.NewGame;
             if (newGameWarningPanel != null) newGameWarningPanel.SetActive(true);
-            else OnConfirmNewGame();
+            else StartNewGameRoutine(); // 팝업 없으면 바로 시작
         }
         else
         {
-            OnConfirmNewGame();
+            StartNewGameRoutine();
         }
     }
 
@@ -154,6 +196,63 @@ public class StartSceneUI : MonoBehaviour
         GameLoadFlags.shouldLoadFromSave = true;
         // ✨ 로딩창 코루틴 시작
         StartCoroutine(LoadSceneWithLoadingScreen());
+    }
+
+    // ✨ [NEW] 삭제 버튼 클릭 시
+    private void OnDeleteSaveButtonClicked()
+    {
+        if (File.Exists(saveFilePath))
+        {
+            // 삭제 의도 -> 팝업 띄우고 목적 설정
+            currentPopupAction = PopupAction.DeleteSave;
+            if (newGameWarningPanel != null) newGameWarningPanel.SetActive(true);
+        }
+    }
+
+    // ✨ [수정] 팝업 확인 버튼 (통합됨)
+    private void OnConfirmPopup()
+    {
+        if (newGameWarningPanel != null) newGameWarningPanel.SetActive(false);
+
+        switch (currentPopupAction)
+        {
+            case PopupAction.NewGame:
+                StartNewGameRoutine();
+                break;
+
+            case PopupAction.DeleteSave:
+                DeleteSaveData();
+                break;
+        }
+
+        currentPopupAction = PopupAction.None; // 초기화
+    }
+
+    // ✨ [수정] 팝업 취소 버튼
+    private void OnCancelPopup()
+    {
+        if (newGameWarningPanel != null) newGameWarningPanel.SetActive(false);
+        currentPopupAction = PopupAction.None;
+    }
+
+    // (기능 분리) 새 게임 시작 로직
+    private void StartNewGameRoutine()
+    {
+        GameLoadFlags.shouldLoadFromSave = false;
+        StartCoroutine(LoadSceneWithLoadingScreen());
+    }
+
+    // ✨ [NEW] 실제 파일 삭제 로직
+    private void DeleteSaveData()
+    {
+        if (File.Exists(saveFilePath))
+        {
+            File.Delete(saveFilePath);
+            Debug.Log("[System] 세이브 파일이 삭제되었습니다.");
+        }
+
+        // UI 즉시 갱신 (이어하기 버튼 비활성화됨)
+        UpdateContinueDateLabel();
     }
 
     private void OnCancelNewGame()
