@@ -85,7 +85,7 @@ public class DailyBonusManager : MonoBehaviour
     {
         if (tomorrowBonusCandidates.Count == 0)
             return "예정된 보너스 재료 없음";
-
+        if (bonusText != null)
         bonusText.text = "내일의 보너스 재료: " + string.Join(", ", tomorrowBonusCandidates);
 
         return "내일의 보너스 재료: " + string.Join(", ", tomorrowBonusCandidates);
