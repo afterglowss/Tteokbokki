@@ -53,6 +53,13 @@ public class RandomReceiptGenerator : MonoBehaviour
     "카레 소스",
     "짜장 소스",
 };
+    // ✨ [NEW] 메뉴별 금지 재료 리스트 (여기 정의된 조합은 절대 나오지 않음)
+    private readonly Dictionary<string, List<string>> menuSpecificForbiddenExtras = new Dictionary<string, List<string>>
+    {
+        { "크림 군자 떡볶이", new List<string> { "군자 소스" } },
+        { "간장 군자 떡볶이", new List<string> { "군자 소스" } }
+    };
+
     public TextMeshProUGUI receiptText;
     public TMP_InputField orderIDInput;
     public TMP_InputField dateInput;
@@ -146,9 +153,23 @@ public class RandomReceiptGenerator : MonoBehaviour
             Dictionary<string, int> extras = new();
             if (hasExtras)
             {
-                var extrasStock = GetAvailableExtras(); // 현재 가능한 추가재료
-                int extraCount = GetRandomWeightedValue(new int[] { 20, 20, 20, 20, 10, 10 }) + 1;
-                extras = GetRandomExtras(extraCount, extrasStock);
+                HashSet<string> currentExclusions = new HashSet<string>(excludedExtras); // 기본 제외 목록 복사
+
+                if (menuSpecificForbiddenExtras.TryGetValue(menuName, out var forbiddenList))
+                {
+                    foreach (var forbidden in forbiddenList)
+                    {
+                        currentExclusions.Add(forbidden);
+                    }
+                }
+
+                var extrasStock = GetAvailableExtras(currentExclusions); // 현재 가능한 추가재료
+                // 가능한 재료가 있을 때만 뽑기
+                if (extrasStock.Count > 0)
+                {
+                    int extraCount = GetRandomWeightedValue(new int[] { 20, 20, 20, 20, 10, 10 }) + 1;
+                    extras = GetRandomExtras(extraCount, extrasStock);
+                }
             }
 
             var totalIngredients = CombinedIngredientManager.GetCombinedIngredients(MenuDatabase.Menus[menuName], extras);
@@ -348,13 +369,13 @@ public class RandomReceiptGenerator : MonoBehaviour
         return true;
     }
     // 현재 재고 수량이 1개 이상인 추가재료만 추출
-    private Dictionary<string, int> GetAvailableExtras()
+    private Dictionary<string, int> GetAvailableExtras(HashSet<string> currentExclusions)
     {
         return IngredientDatabase.Ingredients.Keys
             .Where(name =>
                 IngredientStockManager.Instance.HasPurchasedBefore(name) &&   // 최소 1회 구매
-                IngredientStockManager.Instance.GetStock(name) > 0 &&        // 재고도 있음
-                !excludedExtras.Contains(name))                              // 제외 재료도 필터
+                IngredientStockManager.Instance.GetStock(name) > 0 &&        // 재고 있음
+                !currentExclusions.Contains(name))                           // ✨ 전달받은 금지 목록 체크
             .ToDictionary(name => name, name => IngredientStockManager.Instance.GetStock(name));
     }
 }

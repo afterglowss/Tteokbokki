@@ -36,9 +36,10 @@ public class StoveManager : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
 
-        foreach (var slot in stoves)
+        // ✨ [핵심 수정] 초기화 시 인덱스(i)를 넘겨줍니다.
+        for (int i = 0; i < stoves.Length; i++)
         {
-            slot.Initialize(this);
+            stoves[i].Initialize(this, i);
         }
     }
 

@@ -13,6 +13,9 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     [Header("UI References")]
     public TextMeshProUGUI timerText;
 
+    // ✨ [NEW] 선택되었을 때 켜질 테두리 이미지 오브젝트
+    public GameObject selectionOutline;
+
     // ✨ [NEW] 조리 진행도 표시용 슬라이더
     public Slider cookProgressSlider;
 
@@ -30,6 +33,8 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     [Header("Spawn Settings")]
     public Transform cookedFoodSpawnPoint;
     public GameObject cookedFoodPrefab;
+    // ✨ [NEW] 내 화구 번호 (1번부터 시작)
+    public int SlotIndex { get; private set; }
 
     // --- 내부 상태 변수 ---
     private float cookTimeSeconds;
@@ -59,25 +64,29 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     public bool IsCooked => isCooked;
     public bool HasPendingIngredients => pendingIngredients.Count > 0 && !isCooking && !isCooked;
 
-    public void Initialize(StoveManager manager)
+    // ✨ [수정] 초기화 시 인덱스(번호)를 받습니다.
+    public void Initialize(StoveManager manager, int index)
     {
         stoveManager = manager;
+        SlotIndex = index + 1; // 0번 인덱스 -> "1번 화구"
+
         var foundCanvas = GetComponentInParent<Canvas>();
         canvas = foundCanvas != null ? foundCanvas.rootCanvas : null;
 
         if (wokImage != null)
         {
             wokRectTransform = wokImage.GetComponent<RectTransform>();
-
             iconCanvasGroup = wokImage.GetComponent<CanvasGroup>();
             if (iconCanvasGroup == null) iconCanvasGroup = wokImage.gameObject.AddComponent<CanvasGroup>();
 
-            // 초기 상태: 웍 숨김
             if (!isCooking && !isCooked)
             {
                 wokImage.gameObject.SetActive(false);
             }
         }
+
+        // ✨ 시작할 때 테두리는 끕니다.
+        if (selectionOutline != null) selectionOutline.SetActive(false);
 
         if (cookButton != null)
         {
@@ -109,7 +118,10 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
     public void SetSelected(bool selected)
     {
-
+        if (selectionOutline != null)
+        {
+            selectionOutline.SetActive(selected);
+        }
         if (selected)
         {
             // 선택됨: 아무것도 없는 상태라면 '빈 웍' 보여주기
@@ -134,17 +146,21 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     {
         if (!stoveManager.IsSelected(this)) return;
 
+        string prefix = $"[{SlotIndex}번 화구]\n";
+
         if (isCooking)
         {
-            PlayerWokManager.Instance.UpdateUI(currentIngredients, "조리 중...");
+            PlayerWokManager.Instance.UpdateUI(currentIngredients, $"{prefix}조리 중...");
         }
         else if (isCooked)
         {
-            PlayerWokManager.Instance.UpdateUI(currentIngredients, "조리 완료!");
+            PlayerWokManager.Instance.UpdateUI(currentIngredients, $"{prefix}조리 완료!");
         }
         else
         {
-            PlayerWokManager.Instance.UpdateUI(pendingIngredients, "준비 중");
+            // 준비 중일 때도 재료가 없으면 "대기 중"이라고 표시
+            string status = pendingIngredients.Count > 0 ? "재료 담는 중" : "대기 중";
+            PlayerWokManager.Instance.UpdateUI(pendingIngredients, $"{prefix}{status}");
         }
     }
 

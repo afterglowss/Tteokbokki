@@ -61,6 +61,10 @@ public class EndOfDayUIHandler : MonoBehaviour
     // ✨ 현재 활성화된 패널 추적용
     private GameObject currentActivePanel;
 
+    private bool hasShownBonusDialogue = false;
+
+    public bool IsShutterAnimating { get; private set; } = false;
+
     private void Awake()
     {
         if (blackCurtainImage != null) blackCurtainImage.gameObject.SetActive(false);
@@ -108,6 +112,8 @@ public class EndOfDayUIHandler : MonoBehaviour
     private void OnEnable()
     {
         InitializeSettlementData(animate: true);
+
+        hasShownBonusDialogue = false;
 
         // ✨ [핵심 수정] 켜지자마자 크기를 0으로 만듭니다!
         // 딜레이(0.1초) 동안 원본 크기로 보이는 것을 방지합니다.
@@ -402,6 +408,8 @@ public class EndOfDayUIHandler : MonoBehaviour
 
         PunchButton(buttonFinalClose); // 눌림 효과
 
+        IsShutterAnimating = true;
+
         Debug.Log("[마감] 영업 종료. 셔터 연출 시작");
         buttonFinalClose.interactable = false;
 
@@ -465,6 +473,9 @@ public class EndOfDayUIHandler : MonoBehaviour
         {
             if (blackCurtainImage != null) blackCurtainImage.gameObject.SetActive(false);
             if (shutterRect != null) shutterRect.gameObject.SetActive(false);
+
+            IsShutterAnimating = false;
+
             gameObject.SetActive(false);
             GameManager.Instance.StartDayGameplay();
         });
@@ -473,12 +484,11 @@ public class EndOfDayUIHandler : MonoBehaviour
     // ✨ [수정] 세금 납부 및 다음 단계
     private void OnPayTaxAndNextClicked()
     {
-        PunchButton(buttonPayTaxAndNext); // 버튼 효과
+        PunchButton(buttonPayTaxAndNext);
 
         if (isTaxPaid)
         {
-            IngredientShop.OpenShop();
-            SwitchPanel(panelShop); // ✨ 슬라이드 전환
+            GoToShopStep(); // 중복 코드 방지를 위해 함수로 분리하거나, 아래 로직 수행
             return;
         }
 
@@ -486,13 +496,33 @@ public class EndOfDayUIHandler : MonoBehaviour
         {
             Debug.Log($"[세금 납부] {currentTaxAmount:N0}원 납부 완료");
             isTaxPaid = true;
-            IngredientShop.OpenShop();
-            SwitchPanel(panelShop); // ✨ 슬라이드 전환
+            GoToShopStep(); // 상점 진입
         }
         else
         {
             Debug.LogWarning("[세금 납부 실패] 잔액이 부족합니다.");
             TooltipManager.ShowFollowMouse(TooltipType.UI, "잔액이 부족하여 세금을 낼 수 없습니다!", 2f);
+        }
+    }
+
+    // ✨ [NEW] 상점 진입 처리 및 대화 시작
+    private void GoToShopStep()
+    {
+        IngredientShop.OpenShop();
+        SwitchPanel(panelShop); // 패널 전환
+
+        // ✨ 여기서 대화 시작! (상점 화면이 보일 때)
+        if (!hasShownBonusDialogue)
+        {
+            hasShownBonusDialogue = true; // 한번만 실행되게 잠금
+
+            // 튜토리얼 중이 아닐 때만 실행
+            // (GameManager가 싱글톤이므로 바로 접근 가능)
+            if (TutorialManager.Instance == null && GameManager.Instance.dialogueRunner != null)
+            {
+                // Yarn 대화 시작 ("내일의 보너스는...")
+                GameManager.Instance.dialogueRunner.StartDialogue("TomorrowBonusLine");
+            }
         }
     }
 

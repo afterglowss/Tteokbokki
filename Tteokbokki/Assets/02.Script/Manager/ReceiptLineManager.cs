@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class ReceiptLineManager : MonoBehaviour
 {
@@ -37,10 +38,125 @@ public class ReceiptLineManager : MonoBehaviour
     public List<ReceiptLineItem> GetReceiptSlots() => new(receiptSlots); // 슬롯 리스트 반환
 
     [Header("Grid Layout Settings")]
-    public int gridColumns = 5;      // 한 줄에 몇 개의 영수증을 둘 것인가?
-    public float slotSpacingX = 160f; // 가로 간격 (기존 slotSpacing 대체)
-    public float slotSpacingY = 200f; // 세로 간격
-    public Vector2 startOffset = new Vector2(50f, -50f); // 시작 위치 (왼쪽 위 여백)
+    public int gridColumns = 3;      // ✨ 사용자가 말한 대로 3으로 설정 (Inspector 확인 필수)
+    public float slotSpacingX = 160f;
+    public float slotSpacingY = 200f;
+    public Vector2 startOffset = new Vector2(50f, -50f);
+
+    private void Update()
+    {
+        // 키보드가 연결되어 있는지 확인 (안전장치)
+        if (Keyboard.current == null) return;
+
+        if (GameClock.isPaused) return;
+
+        if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
+            NavigateReceipts(1, 0);
+        else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
+            NavigateReceipts(-1, 0);
+        else if (Keyboard.current.upArrowKey.wasPressedThisFrame)
+            NavigateReceipts(0, 1);   // 위로 (행 감소)
+        else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
+            NavigateReceipts(0, -1);  // 아래로 (행 증가)
+
+        // (선택사항) 엔터키로 선택하기 기능 추가
+        // if (Keyboard.current.enterKey.wasPressedThisFrame) SelectCurrentHovered(); 
+    }
+
+    private void NavigateReceipts(int xDir, int yDir)
+    {
+        // 1. 현재 선택된 영수증이 있는지 확인
+        var activeReceipt = ReceiptStateManager.Instance.ActiveReceipt;
+        int currentIndex = -1;
+
+        // 현재 활성화된 영수증의 슬롯 인덱스 찾기
+        if (activeReceipt != null)
+        {
+            for (int i = 0; i < receiptSlots.Count; i++)
+            {
+                if (receiptSlots[i] != null && receiptSlots[i].GetReceipt() == activeReceipt)
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // 2. 만약 선택된 게 없다면? -> 방향키 누르면 0번(첫 번째) 자동 선택
+        if (currentIndex == -1)
+        {
+            if (receiptSlots.Count > 0 && receiptSlots[0] != null)
+            {
+                SelectReceiptAtIndex(0);
+            }
+            return;
+        }
+
+        // 3. 다음 인덱스 계산 (그리드 논리 적용)
+        int targetIndex = currentIndex;
+
+        // 좌우 이동 (행을 넘어가지 않도록 막음)
+        if (xDir != 0)
+        {
+            int currentRow = currentIndex / gridColumns;
+            int targetColIndex = targetIndex + xDir;
+
+            // 같은 행 안에서만 이동 가능하게 체크
+            if (targetColIndex >= 0 && targetColIndex < receiptSlots.Count &&
+                (targetColIndex / gridColumns) == currentRow)
+            {
+                targetIndex = targetColIndex;
+            }
+        }
+
+        // 상하 이동 (열을 유지한 채 인덱스만 +/- Col)
+        // yDir: 1이면 위(인덱스 감소), -1이면 아래(인덱스 증가) 
+        // (보통 UI 좌표계와 리스트 인덱스는 반대라 헷갈릴 수 있음. 여기선 '위'가 0번 인덱스 쪽이라고 가정)
+        if (yDir != 0)
+        {
+            // 위쪽 화살표(1) -> 인덱스 감소 (-3)
+            // 아래쪽 화살표(-1) -> 인덱스 증가 (+3)
+            int indexStep = (yDir > 0) ? -gridColumns : gridColumns;
+            int tempIndex = currentIndex + indexStep;
+
+            if (tempIndex >= 0 && tempIndex < receiptSlots.Count)
+            {
+                targetIndex = tempIndex;
+            }
+        }
+
+        // 4. 유효한 슬롯이면 선택 실행
+        if (targetIndex != currentIndex && receiptSlots[targetIndex] != null)
+        {
+            SelectReceiptAtIndex(targetIndex);
+        }
+    }
+
+    // ✨ [NEW] 인덱스로 영수증 선택 (마우스 클릭과 동일한 효과)
+    public void SelectReceiptAtIndex(int index)
+    {
+        if (index < 0 || index >= receiptSlots.Count) return;
+        var item = receiptSlots[index];
+        if (item == null) return;
+
+        // 아이템 내부의 OnClick 로직을 그대로 수행하거나, 직접 매니저를 부름
+        // 여기서는 ReceiptLineItem의 OnClick 내용을 모방해서 직접 실행
+        var receipt = item.GetReceipt();
+
+        // 1. 상태 매니저 업데이트 (아웃라인 등)
+        ReceiptStateManager.Instance.SetActiveReceipt(receipt);
+
+        // 2. 재료 합산창 표시
+        if (combinedIngredientManager != null)
+            combinedIngredientManager.DisplayAllCombinedIngredients(receipt);
+
+        // 3. 팝업 표시
+        if (receiptPopup != null)
+            receiptPopup.Show(receipt);
+
+        // (선택사항) 효과음 재생
+        if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107); // 틱 소리
+    }
 
     public void ClearAllReceipts()
     {

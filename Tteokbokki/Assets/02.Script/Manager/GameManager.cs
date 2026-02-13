@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Yarn.Unity;
 
 public class GameManager : MonoBehaviour
@@ -16,6 +17,26 @@ public class GameManager : MonoBehaviour
     public DialogueRunner dialogueRunner;
 
     private bool isEmergencyClosing = false;
+
+    public int TotalSuccessCount { get; private set; } = 0;
+    public int TotalMissedCount { get; private set; } = 0;
+    public int ConsecutiveZeroSuccessDays { get; private set; } = 0;
+
+    public int endingCount = 14;
+
+    // 엔딩 씬 이름 (빌드 세팅에 등록되어 있어야 함)
+    [Header("Endings")]
+    public string badEnding1Scene = "BadEnding1Scene"; // 조기 폐업
+    public string badEnding2Scene = "BadEnding3Scene"; // 30% 이하
+    public string normalEndingScene = "NormalEndingScene"; // 31~70% or 재료 부족
+    public string happyEndingScene = "HappyEndingScene";   // 71% 이상 + 재료 충분
+
+    public void RestoreSessionData(int success, int missed, int zeroDays)
+    {
+        TotalSuccessCount = success;
+        TotalMissedCount = missed;
+        ConsecutiveZeroSuccessDays = zeroDays;
+    }
 
     void Awake()
     {
@@ -48,9 +69,18 @@ public class GameManager : MonoBehaviour
 
     public void StartOfDay()
     {
+        if (CheckPrematureBankruptcy()) return;
+
         isEmergencyClosing = false; // ✨ 플래그 초기화
 
         GameClock.gameTime = GameClock.gameTime.AddDays(1);
+
+        if (GetDayCount() > endingCount)
+        {
+            CheckFinalEnding();
+            return; // 더 이상 영업 준비를 하지 않음
+        }
+
         GameClock.Instance.SetToStartOfDay();
         GameClock.Instance.UpdateTimeAndDateDisplay();
 
@@ -94,6 +124,13 @@ public class GameManager : MonoBehaviour
         Debug.Log("[시작] 셔터가 열리고 영업이 시작되었습니다!");
     }
 
+    // 현재 며칠째인지 계산 (시작일로부터 경과일 + 1)
+    private int GetDayCount()
+    {
+        TimeSpan span = GameClock.gameTime.Date - new DateTime(2025, 7, 4).Date; // GameClock.startYear 등 사용 추천
+        return (int)span.TotalDays + 1;
+    }
+
     public void EndOfDay()
     {
         GameClock.Pause();
@@ -109,6 +146,28 @@ public class GameManager : MonoBehaviour
         if (ReceiptLineManager.Instance != null)
         {
             ReceiptLineManager.Instance.FailAllActiveReceipts();
+        }
+
+        // 1. 오늘 성적 가져오기
+        var todaySuccess = ReceiptLineManager.Instance.GetSuccessfulReceipts();
+        var todayMissed = ReceiptLineManager.Instance.GetMissedReceipts();
+
+        int successCount = todaySuccess.Count;
+        int missedCount = todayMissed.Count;
+
+        // 2. 누적 데이터 업데이트
+        TotalSuccessCount += successCount;
+        TotalMissedCount += missedCount;
+
+        // 3. 배드엔딩 1 (조기 폐업) 체크 조건 업데이트
+        if (successCount == 0)
+        {
+            ConsecutiveZeroSuccessDays++;
+            Debug.Log($"[주의] 오늘 성공한 주문 0건. 연속 {ConsecutiveZeroSuccessDays}일째.");
+        }
+        else
+        {
+            ConsecutiveZeroSuccessDays = 0; // 성공한 게 있으면 초기화
         }
 
         GameSaveManager.Instance.SaveGame();
@@ -165,13 +224,21 @@ public class GameManager : MonoBehaviour
 
         // Yarn 변수에 저장
         var bonusList = DailyBonusManager.Instance.GetTomorrowBonusIngredients().ToList();
+        // 3. ✨ [핵심 수정] Yarn 변수 설정
+        // $hasBonus: 보너스가 있는지 여부 (true / false)
+        bool hasBonus = bonusList.Count > 0;
+        dialogueRunner.VariableStorage.SetValue("$hasBonus", hasBonus);
+
+        // $bonus1, $bonus2: 재료 이름 (없으면 빈 문자열)
         dialogueRunner.VariableStorage.SetValue("$bonus1", bonusList.Count > 0 ? bonusList[0] : "");
         dialogueRunner.VariableStorage.SetValue("$bonus2", bonusList.Count > 1 ? bonusList[1] : "");
 
-        // Yarn 대화 시작
-        if(TutorialManager.Instance ==  null) {
-            //dialogueRunner.StartDialogue("TomorrowBonusLine");
-        };
+        // (디버깅용 로그)
+        if (hasBonus)
+            Debug.Log($"[Yarn 설정] 보너스 있음: {bonusList[0]}, {(bonusList.Count > 1 ? bonusList[1] : "")}");
+        else
+            Debug.Log("[Yarn 설정] 내일은 보너스 없음 (쉬는 날)");
+
         GameClock.SaveLastPlayedDate(today);
     }
 
@@ -241,5 +308,70 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(5.0f); // 5초 대기 (플레이어가 툴팁 읽을 시간)
 
         EndOfDay(); // 마감 정산 시작
+    }
+
+    private void CheckFinalEnding()
+    {
+        Debug.Log("=== 대망의 엔딩 분기 시작 ===");
+
+        // 0. 총 주문 수
+        int totalOrders = TotalSuccessCount + TotalMissedCount;
+        float successRate = 0f;
+
+        if (totalOrders > 0)
+            successRate = (float)TotalSuccessCount / totalOrders * 100f;
+
+        // 1. 재료 해금 개수 확인 (기본 재료 포함)
+        int unlockedIngredientsCount = IngredientStockManager.Instance.GetPurchasedIngredientCount();
+
+        Debug.Log($"최종 성적 - 성공률: {successRate:F1}% ({TotalSuccessCount}/{totalOrders}), 해금 재료: {unlockedIngredientsCount}개");
+
+        // 2. 엔딩 분기
+        if (successRate <= 30f)
+        {
+            // 배드 엔딩 2
+            LoadEndingScene(badEnding2Scene);
+        }
+        else if (successRate <= 70f)
+        {
+            // 노멀 엔딩 (성공률이 애매함)
+            LoadEndingScene(normalEndingScene);
+        }
+        else // 71% 이상
+        {
+            if (unlockedIngredientsCount >= 15)
+            {
+                // 해피 엔딩 (성공률도 높고, 재료도 많이 모음)
+                LoadEndingScene(happyEndingScene);
+            }
+            else
+            {
+                // 노멀 엔딩 (성공률은 높지만, 재료가 부족함 = 쫄보 플레이)
+                Debug.Log("성공률은 높으나 재료 해금 부족으로 노멀 엔딩 진입");
+                LoadEndingScene(normalEndingScene);
+            }
+        }
+    }
+
+    // ✨ [NEW] 배드엔딩 1 (조기 폐업) 전용 체크
+    // StartOfDay의 맨 앞부분에 추가하면 됩니다.
+    private bool CheckPrematureBankruptcy()
+    {
+        if (ConsecutiveZeroSuccessDays >= 2)
+        {
+            // 뱁새 대사 출력 후 엔딩 이동 로직 필요
+            // 여기서는 씬 이동만 구현
+            Debug.Log("2일 연속 매출 0... 가게를 접습니다.");
+            LoadEndingScene(badEnding1Scene);
+            return true;
+        }
+        return false;
+    }
+
+    private void LoadEndingScene(string sceneName)
+    {
+        // UI 정리 및 씬 이동
+        GameClock.Pause();
+        SceneManager.LoadScene(sceneName);
     }
 }

@@ -270,13 +270,17 @@ public class PauseMenuUI : MonoBehaviour
 
     private void Update()
     {
+
+        if (Keyboard.current == null) return;
+
         if (GameManager.Instance != null &&
-            GameManager.Instance.endOfDayPanel != null &&
-            GameManager.Instance.endOfDayPanel.activeSelf)
+            GameManager.Instance.endOfDayUIHandler != null &&
+            GameManager.Instance.endOfDayUIHandler.IsShutterAnimating)
         {
             return;
         }
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (quitWarningPanel != null && quitWarningPanel.activeSelf)
                 OnCancelQuit();
@@ -331,6 +335,8 @@ public class PauseMenuUI : MonoBehaviour
             ResetAllScrollViews();
             Time.timeScale = 0f;
 
+            GameClock.Pause();
+
             panelPause.DOKill();
             panelPause.DOAnchorPosX(0, fadeDuration).SetEase(Ease.OutCubic).SetUpdate(true);
 
@@ -349,6 +355,8 @@ public class PauseMenuUI : MonoBehaviour
         else
         {
             Time.timeScale = 1f;
+            GameClock.Resume();
+
             if (quitWarningPanel != null) quitWarningPanel.SetActive(false);
 
             panelPause.DOKill();
