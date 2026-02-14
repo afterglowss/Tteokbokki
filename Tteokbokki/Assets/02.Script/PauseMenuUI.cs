@@ -480,6 +480,9 @@ public class PauseMenuUI : MonoBehaviour
     public void MoveStartScene()
     {
         Time.timeScale = 1f;
+
+        GameClock.Resume();
+
         DOTween.KillAll();
 
         // ✨ [핵심 해결] 씬을 나갈 때 좀비 사운드(부글부글)를 모조리 죽입니다.

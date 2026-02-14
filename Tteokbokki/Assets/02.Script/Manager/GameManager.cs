@@ -75,6 +75,62 @@ public class GameManager : MonoBehaviour
         //    IngredientStockManager.Instance.OrderBasicIngredients(); // 기존 함수 public으로 변경 필요
         //}
 
+        // ✨ [핵심 수정] 게임 시작 시 로드 및 시간 체크 로직 추가
+        if (GameLoadFlags.shouldLoadFromSave)
+        {
+            // 1. 데이터 로드
+            GameSaveManager.Instance.LoadGame();
+
+            Debug.Log($"[디버그] 로드된 시간: {GameClock.gameTime.Hour}시, 마감시간: {GameClock.closingHour}시");
+
+            // 2. 상태 분기 체크
+            if (GameSaveManager.Instance.IsSettlementPhase)
+            {
+                // [경우 A] 마감 창이 떠있는 상태에서 저장했음 -> 정산 창 복구
+                Debug.Log("[시스템] 마감 정산 단계에서 저장된 데이터입니다.");
+                ResumeEndOfDay();
+            }
+            else if (GameClock.gameTime.Hour >= GameClock.closingHour)
+            {
+                // [경우 B] 21시는 넘었지만 마감 창은 안 떴음 -> 잔여 영수증 처리 중이었음
+                Debug.Log("[시스템] 마감 시간은 지났으나 잔여 주문 처리 중입니다.");
+
+                // 주문 생성은 멈추되, 게임은 계속 진행 (영수증 처리해야 함)
+                OrderSpawner.Instance.StopSpawning();
+                GameClock.Resume(); // 시간은 흐르게 둠 (영수증 타이머 등을 위해) or Pause? 
+                                    // 기획에 따라 여기서 GameClock.Pause()를 할 수도 있지만, 
+                                    // 보통 잔여 영수증 타이머는 가야 하므로 Resume이 맞습니다.
+                                    // 단, 'ClosingTimeReached' 이벤트는 이미 지나갔으므로 감시 코루틴을 수동 시작해야 함.
+
+                StartCoroutine(WaitForReceiptClearAndEnd());
+            }
+            else
+            {
+                Debug.Log("[시스템] 정상 영업 시간이므로 영수증을 생성합니다.");
+                OrderSpawner.Instance.RestartSpawning();
+            }
+        }
+        else
+        {
+            // ✨ [핵심 수정] 새 게임 시작 시 주문 번호 초기화!
+            ReceiptSystem.CurrentReceiptID = 1;
+            ReceiptSystem.CurrentOrderItemID = 1;
+
+            // 새 게임 로직
+            if (TutorialManager.Instance != null /*&& TutorialManager.Instance.IsTutorialJustFinished*/)
+            {
+                IngredientStockManager.Instance.ApplyTutorialAftermath();
+                // TutorialManager.Instance.IsTutorialJustFinished = false;
+            }
+            else
+            {
+                // 이거 나중에 튜토리얼 연결 후에 풀어둬야 함. 지금은 그대로 두면 나갔다 올때마다 추가되네;
+                //IngredientStockManager.Instance.OrderBasicIngredients();
+            }
+            // 새 게임은 영업 시작
+            OrderSpawner.Instance.RestartSpawning();
+        }
+
         // ✨ Yarn 커맨드 등록 (대화 끝날 때 호출됨)
         if (dialogueRunner != null)
         {
@@ -83,6 +139,44 @@ public class GameManager : MonoBehaviour
 
         // 초기화: 엔딩 패널은 꺼둠
         if (panelBadEnding1 != null) panelBadEnding1.SetActive(false);
+    }
+
+    // ✨ [NEW] 마감 상태 이어하기 전용 함수
+    // EndOfDay()를 그대로 부르면 매출이 두 번 더해지는 참사가 발생하므로, UI와 상태만 복구합니다.
+    private void ResumeEndOfDay()
+    {
+        // 1. 게임 상태 정지
+        GameClock.Pause();
+        OrderSpawner.Instance.StopSpawning(); // 주문 생성 차단
+
+        // 2. 전화기 및 기타 요소 정리
+        if (PhoneCallManager.Instance != null) PhoneCallManager.Instance.ForceStopAllCalls();
+        if (StoveManager.Instance != null) StoveManager.Instance.DeselectCurrentSlot();
+        if (ReceiptLineManager.Instance != null && ReceiptLineManager.Instance.combinedIngredientManager != null)
+            ReceiptLineManager.Instance.combinedIngredientManager.ClearIngredientsText();
+
+        // 3. 화면 정리 (포장된 음식 등)
+        PackagingAreaManager.Instance.ClearAllFoods();
+
+        // 4. 마감 UI 띄우기 (데이터는 LoadGame에서 복구된 ReceiptLineManager 데이터를 기반으로 UI가 알아서 계산함)
+        ShowEndOfDayPanel();
+
+        // 5. 상점 재고 경고 업데이트
+        IngredientStockManager.Instance.UpdateLowStockList();
+
+        // 6. 보너스 및 Yarn 변수 재설정 (휘발성 데이터 복구)
+        // DailyBonusManager.Instance.SetTomorrowBonusIngredients();
+
+        var bonusList = DailyBonusManager.Instance.GetTomorrowBonusIngredients().ToList();
+        bool hasBonus = bonusList.Count > 0;
+        if (dialogueRunner != null)
+        {
+            dialogueRunner.VariableStorage.SetValue("$hasBonus", hasBonus);
+            dialogueRunner.VariableStorage.SetValue("$bonus1", bonusList.Count > 0 ? bonusList[0] : "");
+            dialogueRunner.VariableStorage.SetValue("$bonus2", bonusList.Count > 1 ? bonusList[1] : "");
+        }
+
+        Debug.Log("[이어하기] 마감 정산 화면으로 복귀했습니다.");
     }
 
     // ✨ [NEW] 배드엔딩 1 연출 함수 (Yarn에서 호출)
@@ -268,8 +362,6 @@ public class GameManager : MonoBehaviour
             ConsecutiveZeroSuccessDays = 0; // 성공한 게 있으면 초기화
         }
 
-        GameSaveManager.Instance.SaveGame();
-
         PackagingAreaManager.Instance.ClearAllFoods();
 
         var missed = ReceiptLineManager.Instance.GetMissedReceipts();
@@ -338,6 +430,8 @@ public class GameManager : MonoBehaviour
             Debug.Log("[Yarn 설정] 내일은 보너스 없음 (쉬는 날)");
 
         GameClock.SaveLastPlayedDate(today);
+
+        GameSaveManager.Instance.SaveGame();
     }
 
     public void OnClosingTimeReached()

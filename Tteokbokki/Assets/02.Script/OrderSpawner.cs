@@ -38,6 +38,14 @@ public class OrderSpawner : MonoBehaviour
 
     private void Start()
     {
+        // 마감 시간 이후라면 (정산 중이든, 잔여 처리 중이든) 자동 생성은 무조건 막아야 함
+        if (GameClock.gameTime.Hour >= GameClock.closingHour)
+        {
+            Debug.Log("[OrderSpawner] 이미 마감 시간이므로 자동 주문 생성을 시작하지 않습니다.");
+            this.enabled = false;
+            return;
+        } 
+
         // 랜덤 생성 시도 루틴 시작
         StartCoroutine(RandomSpawnRoutine());
     }

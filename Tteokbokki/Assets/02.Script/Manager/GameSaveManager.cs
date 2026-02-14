@@ -24,6 +24,8 @@ public class GameSaveData
     public List<string> tomorrowBonusCandidates;
     public int bonusCycleIndex;
 
+    public bool isEndOfDayPanelActive;
+
     public int totalSuccessCount; // 2주간 총 성공 횟수
     public int totalMissedCount;  // 2주간 총 실패 횟수
     public int consecutiveZeroSuccessDays; // 연속 0건 성공 일수 (배드엔딩1 용)
@@ -55,6 +57,8 @@ public class GameSaveManager : MonoBehaviour
         Instance = this;
     }
 
+    public bool IsSettlementPhase { get; private set; }
+
     public void SaveGame()
     {
         GameSaveData data = new GameSaveData
@@ -68,6 +72,8 @@ public class GameSaveManager : MonoBehaviour
             isTutorialCompleted = this.IsTutorialCompleted,
             tomorrowBonusCandidates = DailyBonusManager.Instance.GetTomorrowBonusForSave(),
             bonusCycleIndex = DailyBonusManager.Instance.CurrentBonusCycleIndex,
+
+            isEndOfDayPanelActive = GameManager.Instance.endOfDayPanel.activeSelf,
 
             totalSuccessCount = GameManager.Instance.TotalSuccessCount,
             totalMissedCount = GameManager.Instance.TotalMissedCount,
@@ -146,6 +152,10 @@ public class GameSaveManager : MonoBehaviour
             data.totalMissedCount,
             data.consecutiveZeroSuccessDays
         );
+
+        IsSettlementPhase = data.isEndOfDayPanelActive;
+
+        Debug.Log($"[로드] 마감 패널 상태 복원: {IsSettlementPhase}");
 
         Debug.Log("게임 불러오기 완료!");
     }
