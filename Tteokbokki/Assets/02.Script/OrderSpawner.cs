@@ -173,4 +173,11 @@ public class OrderSpawner : MonoBehaviour
         StopAllCoroutines();
         StartCoroutine(RandomSpawnRoutine());
     }
+
+    public void SetSilenceMode()
+    {
+        StopSpawning(); // 코루틴 정지
+        this.enabled = false; // 업데이트 정지
+        Debug.Log("🚫 [OrderSpawner] 배드엔딩 모드: 주문 생성이 0%로 고정됩니다.");
+    }
 }

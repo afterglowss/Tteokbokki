@@ -1,9 +1,11 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Yarn.Unity;
 
 public class GameManager : MonoBehaviour
@@ -18,11 +20,18 @@ public class GameManager : MonoBehaviour
 
     private bool isEmergencyClosing = false;
 
+    private bool isBadEndingDay = false;
+
     public int TotalSuccessCount { get; private set; } = 0;
     public int TotalMissedCount { get; private set; } = 0;
     public int ConsecutiveZeroSuccessDays { get; private set; } = 0;
 
     public int endingCount = 14;
+
+    [Header("Bad Ending 1 UI (Main Scene)")]
+    public GameObject panelBadEnding1;       // 검은 배경 패널
+    public CanvasGroup cgBadEnding1;         // 투명도 조절용
+    public Button btnBackToTitle1;           // 타이틀로 돌아가는 버튼
 
     // 엔딩 씬 이름 (빌드 세팅에 등록되어 있어야 함)
     [Header("Endings")]
@@ -65,11 +74,71 @@ public class GameManager : MonoBehaviour
         //    // C. 튜토리얼 스킵하고 바로 새 게임 (그냥 기본 재료만 지급)
         //    IngredientStockManager.Instance.OrderBasicIngredients(); // 기존 함수 public으로 변경 필요
         //}
+
+        // ✨ Yarn 커맨드 등록 (대화 끝날 때 호출됨)
+        if (dialogueRunner != null)
+        {
+            dialogueRunner.AddCommandHandler("trigger_bad_ending_1", TriggerBadEnding1Sequence);
+        }
+
+        // 초기화: 엔딩 패널은 꺼둠
+        if (panelBadEnding1 != null) panelBadEnding1.SetActive(false);
+    }
+
+    // ✨ [NEW] 배드엔딩 1 연출 함수 (Yarn에서 호출)
+    public void TriggerBadEnding1Sequence()
+    {
+        Debug.Log("💀 [BadEnding1] 연출 시작");
+
+        // 1. 게임 시간 정지 (키보드 입력 차단)
+        GameClock.Pause();
+
+        // 2. 패널 활성화 및 초기화
+        if (panelBadEnding1 != null && cgBadEnding1 != null)
+        {
+            panelBadEnding1.SetActive(true);
+            cgBadEnding1.alpha = 0f;
+            cgBadEnding1.blocksRaycasts = true; // 클릭 방지
+
+            if (btnBackToTitle1 != null)
+            {
+                btnBackToTitle1.gameObject.SetActive(false); // 버튼은 아직 숨김
+                btnBackToTitle1.onClick.RemoveAllListeners();
+                btnBackToTitle1.onClick.AddListener(GoToStartScene);
+            }
+
+            // 3. 페이드 인 연출 (2초 동안)
+            // Time.timeScale = 0이므로 .SetUpdate(true) 필수!
+            cgBadEnding1.DOFade(1f, 2.0f).SetUpdate(true).OnComplete(() =>
+            {
+                // 4. 페이드인 끝난 후 3초 대기 -> 버튼 등장
+                DOVirtual.DelayedCall(3.0f, () =>
+                {
+                    if (btnBackToTitle1 != null)
+                    {
+                        btnBackToTitle1.gameObject.SetActive(true);
+                        // 버튼도 살짝 페이드인 하면 예쁨
+                        CanvasGroup btnCg = btnBackToTitle1.GetComponent<CanvasGroup>();
+                        if (btnCg == null) btnCg = btnBackToTitle1.gameObject.AddComponent<CanvasGroup>();
+                        btnCg.alpha = 0f;
+                        btnCg.DOFade(1f, 1f).SetUpdate(true);
+                    }
+                }).SetUpdate(true);
+            });
+        }
+    }
+
+    // ✨ 타이틀로 돌아가는 함수
+    public void GoToStartScene()
+    {
+        Time.timeScale = 1f; // 중요: 시간 다시 정상화
+        DOTween.KillAll();   // 실행 중인 트윈 정리
+        SceneManager.LoadScene("StartScene"); // 시작 화면 씬 이름 확인 필요
     }
 
     public void StartOfDay()
     {
-        if (CheckPrematureBankruptcy()) return;
+        //if (CheckPrematureBankruptcy()) return;
 
         isEmergencyClosing = false; // ✨ 플래그 초기화
 
@@ -79,6 +148,16 @@ public class GameManager : MonoBehaviour
         {
             CheckFinalEnding();
             return; // 더 이상 영업 준비를 하지 않음
+        }
+
+        if (ConsecutiveZeroSuccessDays >= 2)
+        {
+            isBadEndingDay = true;
+            Debug.Log("💀 [BadEnding1] 조건 달성! 내일은 손님이 오지 않습니다...");
+        }
+        else
+        {
+            isBadEndingDay = false;
         }
 
         GameClock.Instance.SetToStartOfDay();
@@ -119,9 +198,28 @@ public class GameManager : MonoBehaviour
     public void StartDayGameplay()
     {
         GameClock.Resume(); // 시간 흐르기 시작
-        OrderSpawner.Instance.RestartSpawning(); // 주문 생성 시작
+        if (isBadEndingDay)
+        {
+            // 💀 [배드엔딩 1 루트]
+            // 1. 주문 생성기 침묵시키기 (확률 0)
+            OrderSpawner.Instance.SetSilenceMode();
 
-        Debug.Log("[시작] 셔터가 열리고 영업이 시작되었습니다!");
+            // 2. 뱁새 독백 시작 ("아무도 주문을 하지 않아...")
+            // Yarn Node 이름은 "BadEnding1_Monologue" 등으로 가정
+            if (dialogueRunner != null)
+            {
+                dialogueRunner.StartDialogue("BadEnding1_Monologue");
+            }
+
+            // 3. 대화가 끝난 후의 처리는 Yarn Command나
+            // DialogueRunner의 OnDialogueComplete 이벤트에서 '타이틀로 이동' 등을 연결해야 함
+        }
+        else
+        {
+            // ✅ [정상 영업 루트]
+            OrderSpawner.Instance.RestartSpawning(); // 주문 시작
+            Debug.Log("[시작] 셔터가 열리고 영업이 시작되었습니다!");
+        }
     }
 
     // 현재 며칠째인지 계산 (시작일로부터 경과일 + 1)
