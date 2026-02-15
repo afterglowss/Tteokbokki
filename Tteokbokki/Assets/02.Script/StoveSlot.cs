@@ -186,6 +186,12 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         pendingIngredients[name]++;
 
+        // ✨ [NEW] 재료 사용 로그 기록
+        if (GameDataLogger.Instance != null)
+        {
+            GameDataLogger.Instance.LogIngredientUsed(name);
+        }
+
         // 재료가 들어갔으므로 '재료 담긴 웍' 이미지로 변경
         SetWokState(wokIngredientsSprite);
 

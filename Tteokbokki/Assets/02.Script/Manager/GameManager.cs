@@ -83,6 +83,32 @@ public class GameManager : MonoBehaviour
 
             Debug.Log($"[디버그] 로드된 시간: {GameClock.gameTime.Hour}시, 마감시간: {GameClock.closingHour}시");
 
+            // ✨ [핵심 수정] 로드했는데 이미 엔딩 날짜(14일)를 넘겼다면? -> 바로 엔딩으로 납치!
+            if (GetDayCount() > endingCount)
+            {
+                Debug.Log("[시스템] 엔딩 이후의 세이브 파일입니다. 엔딩 분기를 재실행합니다.");
+                CheckFinalEnding(); // 다시 점수 계산해서 해당 엔딩 씬으로 이동
+                return;
+            }
+
+            // ✨ [NEW] 2. 배드엔딩 1(조기 폐업) 조건인지 체크
+            // (로드했는데 이미 '망한 상태'라면, 정상 영업 대신 배드엔딩 시퀀스를 다시 가동해야 함)
+            if (ConsecutiveZeroSuccessDays >= 2)
+            {
+                Debug.Log("[시스템] 조기 폐업 조건이 충족된 세이브입니다. 배드엔딩 1을 진행합니다.");
+
+                // 주문 생성 차단
+                OrderSpawner.Instance.SetSilenceMode();
+
+                // 바로 대화 시작 (혹은 바로 UI 띄우기)
+                if (dialogueRunner != null)
+                {
+                    // 대화가 끝나면 TriggerBadEnding1Sequence가 호출되면서 세이브가 삭제됨
+                    dialogueRunner.StartDialogue("BadEnding1_Monologue");
+                }
+                return; // 아래 정상 영업 로직 실행 안 함
+            }
+
             // 2. 상태 분기 체크
             if (GameSaveManager.Instance.IsSettlementPhase)
             {
@@ -184,6 +210,14 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("💀 [BadEnding1] 연출 시작");
 
+        // 🗑️ [핵심] 가게가 망했으므로 세이브 파일을 영구 삭제합니다.
+        // 이제 메인 화면으로 돌아가도 '이어하기'가 불가능해집니다.
+        if (GameSaveManager.Instance != null)
+        {
+            GameSaveManager.Instance.DeleteSaveFile();
+            Debug.Log("💀 배드엔딩 1 달성: 세이브 데이터가 삭제되었습니다.");
+        }
+
         // 1. 게임 시간 정지 (키보드 입력 차단)
         GameClock.Pause();
 
@@ -255,6 +289,13 @@ public class GameManager : MonoBehaviour
         }
 
         GameClock.Instance.SetToStartOfDay();
+
+        // ✨ [NEW] 1. 로거 초기화 (오늘의 시작 자산 기록)
+        if (GameDataLogger.Instance != null)
+        {
+            GameDataLogger.Instance.StartNewDayLog(PlayerWalletManager.Instance.CurrentBalance);
+        }
+
         GameClock.Instance.UpdateTimeAndDateDisplay();
 
         IngredientStockManager.Instance.ResetDailyOrderFlags();
@@ -319,7 +360,7 @@ public class GameManager : MonoBehaviour
     // 현재 며칠째인지 계산 (시작일로부터 경과일 + 1)
     private int GetDayCount()
     {
-        TimeSpan span = GameClock.gameTime.Date - new DateTime(2025, 7, 4).Date; // GameClock.startYear 등 사용 추천
+        TimeSpan span = GameClock.gameTime.Date - new DateTime(GameClock.Instance.startYear, GameClock.Instance.startMonth, GameClock.Instance.startDay).Date; // GameClock.startYear 등 사용 추천
         return (int)span.TotalDays + 1;
     }
 
@@ -402,6 +443,35 @@ public class GameManager : MonoBehaviour
             ReceiptLineManager.Instance.combinedIngredientManager.ClearIngredientsText();
         }
 
+        // ✨ [NEW] 밸런싱 데이터 수집 및 CSV 저장
+        if (GameDataLogger.Instance != null)
+        {
+            // 1. 판매된 재료 카운팅 (성공 영수증 분석)
+            foreach (var r in successful)
+            {
+                foreach (var order in r.GetOrders())
+                {
+                    // 기본 재료 + 추가 재료 모두 'Sold'로 기록
+                    // (주의: 레시피 DB 접근이 필요하지만, 일단 Extras라도 확실히 기록)
+                    // 만약 MenuItem에 DefaultIngredients가 있다면 그것도 순회해야 완벽함
+                    foreach (var ing in order.Menu.DefaultIngredients)
+                        GameDataLogger.Instance.LogIngredientSold(ing.Key, ing.Value);
+
+                    foreach (var extra in order.GetExtras())
+                        GameDataLogger.Instance.LogIngredientSold(extra.Key, extra.Value);
+                }
+            }
+
+            // 2. 보너스 수익 기록
+            if (DailyBonusManager.Instance != null)
+            {
+                GameDataLogger.Instance.AddBonusIncome(DailyBonusManager.Instance.TodayAccumulatedBonus);
+            }
+
+            // 3. 파일 저장
+            GameDataLogger.Instance.SaveDailyLog();
+        }
+
         // 마감 UI 출력
         ShowEndOfDayPanel();
 
@@ -436,6 +506,8 @@ public class GameManager : MonoBehaviour
 
     public void OnClosingTimeReached()
     {
+        if (isBadEndingDay) return;
+
         OrderSpawner.Instance.StopSpawning(); // 주문 생성 중단
 
         // 남은 영수증이 없다면 바로 마감

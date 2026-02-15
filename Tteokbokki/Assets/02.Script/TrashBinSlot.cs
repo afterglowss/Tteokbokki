@@ -32,8 +32,11 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
         if (receiptItem != null)
         {
             if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114);
-
-            // ... (기존 영수증 버리기 코드 유지) ...
+            // ✨ [NEW] 영수증 거절 로그 기록
+            if (GameDataLogger.Instance != null)
+            {
+                GameDataLogger.Instance.CountFail("Trash");
+            }
             ReceiptLineManager.Instance.RecordFailedReceipt(receiptItem.GetReceipt());
             ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
             return;

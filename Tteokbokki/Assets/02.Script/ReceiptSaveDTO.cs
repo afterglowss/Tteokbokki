@@ -25,6 +25,8 @@ namespace SaveData
         public string MenuName;
         public int BasePrice;
         public List<KeyValueStringInt> Extras = new List<KeyValueStringInt>();
+
+        public int ItemID;
     }
     [Serializable]
     public class ReceiptSlotSaveData

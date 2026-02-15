@@ -495,6 +495,12 @@ public class EndOfDayUIHandler : MonoBehaviour
         if (PlayerWalletManager.Instance.Spend(currentTaxAmount))
         {
             Debug.Log($"[세금 납부] {currentTaxAmount:N0}원 납부 완료");
+
+            // ✨ [NEW] 세금 납부 기록
+            if (GameDataLogger.Instance != null)
+            {
+                GameDataLogger.Instance.AddTaxExpense(currentTaxAmount);
+            }
             isTaxPaid = true;
             GoToShopStep(); // 상점 진입
         }
