@@ -75,46 +75,50 @@ title: Tutorial
 뱁새: 마침 주문이 들어왔네요!
 뱁새: 한 번 만들어 볼까요?
 뱁새: 영수증을 누르면 어떤 재료를 넣어야 하는지 알 수 있어요.
-<<highlight ReceiptLineManager>>
+<<highlight TutorialReceipt>>
 <<waitForReceiptClick>>
 
 //튜토리얼 영수증 선택 완료
 <<spawnWok>>
-뱁새: 앞에 있는 웍에 재료를 담고 끓이면 돼요. 간단하죠?
-<<highlight GridLayerGroup_IngredientButton>>
+
+뱁새:그리고 재료를 담고 끓이면 돼요. 간단하죠?
+//<<highlight GridLayerGroup_IngredientButton>>
+<<highlight 떡_Button>>
+<<highlight 오뎅_Button>>
+<<highlight 파_Button>>
+<<highlight 양배추_Button>>
 뱁새: 우선 <b>떡과 오뎅</b>은 두 번, <b>파, 양배추</b>는 한 번씩 담아보실래요?
 <<waitIngredients>>
 
 //떡볶이 재료 선택 완료
-뱁새: 그리고 <b>군자 소스</b>를 담아주세요. 
+뱁새: 그리고 <b>군자 소스</b>를 담아주세요. 
 뱁새: 제가 만든 특별한 소스랍니다.
-<<highlight GridLayerGroup_SauceButton>>
+//<<highlight GridLayerGroup_SauceButton>>
 <<waitSauce>>
 
 //군자 소스 선택 완료
-<<startBoiling>>
+뱁새: 재료를 다 담았으면 불을 올리면 돼요!
+뱁새: 불을 켜보시겠어요?
+<<waitStartBoiling>>
+
+//점화 버튼 선택 완료
 뱁새: 이렇게 요리를 하시면 돼요.
 <<waitForBoiled>>
 
-<<highlight Button_StoveSlot>>
-//<<highlight TooltipManager_UI>>
-뱁새: 조리가 완료되면 위에 몇 번 조리가 완료되었는지 표시돼요.
+//조리 완료
 뱁새: 조리가 완료된 음식은 <b>포장대</b> 위에 놓으면 제가 포장할 거예요.
-<<highlight Button_StoveSlot>>
-<<highlight PackagingSlot>>
 <<waitForPacking>>
 
+//포장 완료
 뱁새: 포장된 음식에는 배달 기사님이 배달할 수 있도록 <b>영수증</b>을 붙여야 해요. 
 뱁새: 붙여볼까요?
-<<highlight TutorialReceipt>>
-<<highlight PackagingSlot>>
 <<waitForReceiptAttached>>
 
 //영수증 붙임 완료
 <<set $Junk = setFace("smile")>>
 뱁새: 잘하시네요! 
 
-<<highlight Balance>>
+<<highlight Text_Balance>>
 뱁새: 배달이 출발하면 <b>잔고</b>에 바로 수익이 표시돼요.
 
 <<set $Junk = setFace("idle")>>
@@ -131,7 +135,6 @@ title: Tutorial
 
 //하루 마치기 버튼 클릭 완료
 <<unhighlight>>
-<<wait 3.0>>
 뱁새: 마감은 컴퓨터로 처리할 거예요!
 뱁새: '정산'에서 오늘 받은 영수증과 <b>주문 성공, 실패</b>를 확인할 수 있어요. 
 <<highlight Image_MissedTitle>>
@@ -152,24 +155,21 @@ title: Tutorial
 <<wait 1.0>>
 뱁새: 그리고 오늘 번 돈으로 재료를 구매할 수 있어요.
 뱁새: 주문한 재료는 내일 바로 받아볼 수 있답니다.
+
 뱁새: 떡볶이에 기본으로 들어가는 재료 외에 추가 재료를 구매할 수 있어요.
 뱁새: 소스를 구매해서 새로운 떡볶이를 추가할 수도 있고요.
-뱁새: 새로운 재료와 소스가 추가되면 손님이 더 많아지겠죠?
+<<highlight "마라 소스">>
 <<set $Junk = setFace("smile")>>
-뱁새: 우선 새로운 <b>소스</b>를 구매해 볼까요?
-
-<<highlightSources>>
-<<waitForAnySourceClick>>
+뱁새: 새로운 재료와 소스가 추가되면 손님이 더 많아지겠죠?
+<<unhighlight>>
+뱁새: 우선 새로운 <b>마라 소스</b>를 구매해 볼까요?
+//<<highlightSources>>
+<<waitForMaraPlusClick>>
 
 //소스 선택 완료
-뱁새: <b>{$SelectedSource}</b>를 선택하셨군요!
-
-<<if $SelectedSource == "마라 소스" || $SelectedSource == "로제 소스">>
-    뱁새: {$SelectedSource}는 인기가 많죠! 좋은 선택이에요.
-<<else>>
-    뱁새: {$SelectedSource}는 특별하죠! 좋은 선택이에요.
-<<endif>>
-뱁새: 사기 위해 선택한 재료는 빨간색 체크로 표시돼요. 
+뱁새: 마라소스는 인기가 많죠!
+<<set $Junk = setFace("idle")>>
+뱁새: 사기 위해 선택한 재료는 갈색 테두리로 표시돼요. 
 
 뱁새: 그리고 장사가 잘되어 재고가 부족해지면 상점에 빨간색으로 표시될 예정이에요.
 뱁새: 잘 확인해서 미리미리 재고를 구비해 두시는 걸 추천드려요!
