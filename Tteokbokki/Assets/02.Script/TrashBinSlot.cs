@@ -32,8 +32,11 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
         if (receiptItem != null)
         {
             if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114);
-
-            // ... (기존 영수증 버리기 코드 유지) ...
+            // ✨ [NEW] 영수증 거절 로그 기록
+            if (GameDataLogger.Instance != null)
+            {
+                GameDataLogger.Instance.CountFail("Trash");
+            }
             ReceiptLineManager.Instance.RecordFailedReceipt(receiptItem.GetReceipt());
             ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
             return;
@@ -46,11 +49,29 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
 
         if (stoveSlot != null)
         {
-            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114);
+            if (stoveSlot.IsCooking)
+            {
+                return; // 조리 중에는 못 버림
+            }
+            // A. 조리 완료된 상태라면? -> 화구 초기화 (음식 버리기)
+            if (stoveSlot.IsCooked)
+            {
+                if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114); // 버리는 소리
+                Debug.Log($"[휴지통] {stoveSlot.name}의 완성된 요리를 버립니다.");
 
-            Debug.Log($"[휴지통] {stoveSlot.name}의 재료를 비웁니다.");
-            stoveSlot.ClearPending(); // 재료 비우기
-            return;
+                stoveSlot.ResetSlot(); // ✨ 화구 초기화!
+                return;
+            }
+
+            // B. 준비 중(재료 담는 중) 상태라면? -> 재료 비우기
+            if (stoveSlot.HasPendingIngredients)
+            {
+                if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(114);
+                Debug.Log($"[휴지통] {stoveSlot.name}의 재료를 비웁니다.");
+
+                stoveSlot.ClearPending(); // ✨ 재료만 비우기
+                return;
+            }
         }
     }
 

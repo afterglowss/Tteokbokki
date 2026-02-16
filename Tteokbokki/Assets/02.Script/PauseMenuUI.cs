@@ -270,13 +270,17 @@ public class PauseMenuUI : MonoBehaviour
 
     private void Update()
     {
+
+        if (Keyboard.current == null) return;
+
         if (GameManager.Instance != null &&
-            GameManager.Instance.endOfDayPanel != null &&
-            GameManager.Instance.endOfDayPanel.activeSelf)
+            GameManager.Instance.endOfDayUIHandler != null &&
+            GameManager.Instance.endOfDayUIHandler.IsShutterAnimating)
         {
             return;
         }
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (quitWarningPanel != null && quitWarningPanel.activeSelf)
                 OnCancelQuit();
@@ -331,6 +335,8 @@ public class PauseMenuUI : MonoBehaviour
             ResetAllScrollViews();
             Time.timeScale = 0f;
 
+            GameClock.Pause();
+
             panelPause.DOKill();
             panelPause.DOAnchorPosX(0, fadeDuration).SetEase(Ease.OutCubic).SetUpdate(true);
 
@@ -342,10 +348,15 @@ public class PauseMenuUI : MonoBehaviour
                 blackCurtainImage.color = new Color(c.r, c.g, c.b, 0f);
                 blackCurtainImage.DOFade(curtainMaxAlpha, fadeDuration).SetEase(Ease.OutQuad).SetUpdate(true);
             }
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PauseAllLoopSFX(true);
         }
         else
         {
             Time.timeScale = 1f;
+            GameClock.Resume();
+
             if (quitWarningPanel != null) quitWarningPanel.SetActive(false);
 
             panelPause.DOKill();
@@ -357,6 +368,9 @@ public class PauseMenuUI : MonoBehaviour
                 blackCurtainImage.DOFade(0f, fadeDuration).SetEase(Ease.InQuad).SetUpdate(true)
                     .OnComplete(() => { blackCurtainImage.gameObject.SetActive(false); });
             }
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PauseAllLoopSFX(false);
         }
     }
 
@@ -466,7 +480,18 @@ public class PauseMenuUI : MonoBehaviour
     public void MoveStartScene()
     {
         Time.timeScale = 1f;
+
+        GameClock.Resume();
+
         DOTween.KillAll();
+
+        // ✨ [핵심 해결] 씬을 나갈 때 좀비 사운드(부글부글)를 모조리 죽입니다.
+        // 이걸 해야 StartScene에서 소리가 안 들리고, 다시 들어왔을 때 중첩되지 않습니다.
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopAllLoopSFX();
+        }
+
         SceneManager.LoadScene("StartScene");
     }
 

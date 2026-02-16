@@ -20,14 +20,21 @@ public class ReceiptStateManager : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);  // 씬 전환에도 유지 가능
+        //DontDestroyOnLoad(gameObject);  // 씬 전환에도 유지 가능
     }
 
     private void Start()
     {
-        receiptPopup.OnPopupClosed += () => {
-            ClearActiveReceipt();
-        };
+        if (receiptPopup != null)
+        {
+            receiptPopup.OnPopupClosed -= OnPopupClosedHandler; // 중복 방지
+            receiptPopup.OnPopupClosed += OnPopupClosedHandler;
+        }
+    }
+
+    private void OnPopupClosedHandler()
+    {
+        ClearActiveReceipt();
     }
 
     public void SetActiveReceipt(Receipt receipt)

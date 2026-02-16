@@ -55,8 +55,18 @@ public class ReceiptDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
                 if (slot != null && slot.HasAnyFood())
                 {
                     var receiptItem = GetComponent<ReceiptLineItem>();
-                    slot.HandleReceiptDrop(receiptItem);  // 내부에서 manager.RemoveReceipt() 호출
-                    return;
+                    bool isHandled = slot.HandleReceiptDrop(receiptItem);
+
+                    if (isHandled)
+                    {
+                        // ✨ 슬롯이 영수증을 가져갔으므로, 
+                        // 드래그 핸들러는 더 이상 아무것도 하지 말고 손을 떼야 합니다.
+                        // (부모 복귀나 OnEndDrag 로직 수행 금지)
+                        return;
+                    }
+
+                    // 실패했다면(false) 아래로 내려가서 원래 위치로 복귀 로직 수행
+                    break;
                 }
             }
         }

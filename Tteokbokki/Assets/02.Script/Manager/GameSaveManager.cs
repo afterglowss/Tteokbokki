@@ -22,6 +22,13 @@ public class GameSaveData
     public List<ReceiptData> pendingReceipts;
     public bool isTutorialCompleted;
     public List<string> tomorrowBonusCandidates;
+    public int bonusCycleIndex;
+
+    public bool isEndOfDayPanelActive;
+
+    public int totalSuccessCount; // 2주간 총 성공 횟수
+    public int totalMissedCount;  // 2주간 총 실패 횟수
+    public int consecutiveZeroSuccessDays; // 연속 0건 성공 일수 (배드엔딩1 용)
 }
 
 [Serializable]
@@ -50,6 +57,8 @@ public class GameSaveManager : MonoBehaviour
         Instance = this;
     }
 
+    public bool IsSettlementPhase { get; private set; }
+
     public void SaveGame()
     {
         GameSaveData data = new GameSaveData
@@ -61,7 +70,14 @@ public class GameSaveManager : MonoBehaviour
             packagingArea = PackagingAreaManager.Instance.GetSlotWiseCookedFoods(),
             stoveStates = new List<StoveSlotSaveData>(),
             isTutorialCompleted = this.IsTutorialCompleted,
-            tomorrowBonusCandidates = DailyBonusManager.Instance.GetTomorrowBonusForSave()
+            tomorrowBonusCandidates = DailyBonusManager.Instance.GetTomorrowBonusForSave(),
+            bonusCycleIndex = DailyBonusManager.Instance.CurrentBonusCycleIndex,
+
+            isEndOfDayPanelActive = GameManager.Instance.endOfDayPanel.activeSelf,
+
+            totalSuccessCount = GameManager.Instance.TotalSuccessCount,
+            totalMissedCount = GameManager.Instance.TotalMissedCount,
+            consecutiveZeroSuccessDays = GameManager.Instance.ConsecutiveZeroSuccessDays
         };
 
         // 화구 상태 저장 (Pending 포함)
@@ -114,7 +130,8 @@ public class GameSaveManager : MonoBehaviour
 
         if (DailyBonusManager.Instance != null)
         {
-            DailyBonusManager.Instance.RestoreBonusData(data.tomorrowBonusCandidates);
+            // ✨ [NEW] 보너스 후보 + 순서(Cycle) 복원
+            DailyBonusManager.Instance.RestoreBonusData(data.tomorrowBonusCandidates, data.bonusCycleIndex);
         }
 
         // 화구 복원
@@ -129,6 +146,16 @@ public class GameSaveManager : MonoBehaviour
         ReceiptSystem.CurrentOrderItemID = data.lastOrderItemID;
         ReceiptSystem.RestoreReceipts(data.missedReceipts, data.successfulReceipts);
         ReceiptLineManager.Instance.RestorePendingReceipts(data.pendingReceipts);
+
+        GameManager.Instance.RestoreSessionData(
+            data.totalSuccessCount,
+            data.totalMissedCount,
+            data.consecutiveZeroSuccessDays
+        );
+
+        IsSettlementPhase = data.isEndOfDayPanelActive;
+
+        Debug.Log($"[로드] 마감 패널 상태 복원: {IsSettlementPhase}");
 
         Debug.Log("게임 불러오기 완료!");
     }

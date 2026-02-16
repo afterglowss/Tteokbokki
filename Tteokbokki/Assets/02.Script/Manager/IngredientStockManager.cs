@@ -38,6 +38,7 @@ public class IngredientStockManager : MonoBehaviour
     [Header("Debug / Settings")]
     public bool startWithBasicIngredients = true;
     public bool debugUnlockAllIngredients = false;
+    public string[] basicIngredients;
 
     // 현재 재고 데이터
     private Dictionary<string, List<StockEntry>> stock = new();
@@ -613,7 +614,6 @@ public class IngredientStockManager : MonoBehaviour
 
     public void OrderBasicIngredients()
     {
-        string[] basicIngredients = { "떡", "오뎅", "파", "양배추", "군자 소스" };
         foreach (string ingredientName in basicIngredients)
         {
             if (!IngredientEconomyDatabase.Data.TryGetValue(ingredientName, out var meta)) continue;

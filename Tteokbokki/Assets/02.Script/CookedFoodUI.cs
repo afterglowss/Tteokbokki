@@ -64,7 +64,7 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     }
 
     // ✨ 포장 완료 상태로 전환하는 함수
-    public void SwitchToPackedState()
+    public void SwitchToPackedState(bool isSilent = false)
     {
         // 1. 현재 웍(냄비) 상태인지 먼저 확인합니다.
         // (wokStateObject가 켜져 있다는 건 아직 포장되지 않았다는 뜻)
@@ -74,7 +74,7 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         if (packageStateObject != null) packageStateObject.SetActive(true);
 
         // 2. 웍 상태에서 -> 포장 상태로 '변신하는 순간'에만 소리 재생
-        if (isTransforming)
+        if (isTransforming && !isSilent)
         {
             if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(112);
         }
