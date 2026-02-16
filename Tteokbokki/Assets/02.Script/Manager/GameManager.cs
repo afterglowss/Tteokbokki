@@ -75,11 +75,20 @@ public class GameManager : MonoBehaviour
         //    IngredientStockManager.Instance.OrderBasicIngredients(); // 기존 함수 public으로 변경 필요
         //}
 
+        // ✨ Yarn 커맨드 등록 (대화 끝날 때 호출됨)
+        if (dialogueRunner != null)
+        {
+            dialogueRunner.AddCommandHandler("trigger_bad_ending_1", TriggerBadEnding1Sequence);
+        }
+
+
         // ✨ [핵심 수정] 게임 시작 시 로드 및 시간 체크 로직 추가
         if (GameLoadFlags.shouldLoadFromSave)
         {
             // 1. 데이터 로드
             GameSaveManager.Instance.LoadGame();
+
+            if (endOfDayUIHandler != null) endOfDayUIHandler.ForceOpenShutterImmediately();
 
             Debug.Log($"[디버그] 로드된 시간: {GameClock.gameTime.Hour}시, 마감시간: {GameClock.closingHour}시");
 
@@ -96,6 +105,13 @@ public class GameManager : MonoBehaviour
             if (ConsecutiveZeroSuccessDays >= 2)
             {
                 Debug.Log("[시스템] 조기 폐업 조건이 충족된 세이브입니다. 배드엔딩 1을 진행합니다.");
+
+                // ✨ [NEW] 여기서도 BGM 끄고 시계 소리 재생
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.StopBGM();
+                    AudioManager.Instance.PlayLoopSFX(501);
+                }
 
                 // 주문 생성 차단
                 OrderSpawner.Instance.SetSilenceMode();
@@ -142,27 +158,42 @@ public class GameManager : MonoBehaviour
             ReceiptSystem.CurrentReceiptID = 1;
             ReceiptSystem.CurrentOrderItemID = 1;
 
-            // 새 게임 로직
-            if (TutorialManager.Instance != null /*&& TutorialManager.Instance.IsTutorialJustFinished*/)
+            if (GameLoadFlags.isTutorialJustFinished)
             {
+                // [Case 1] 튜토리얼 직접 깨고 옴
+                Debug.Log("[GameManager] 튜토리얼 완료 진입: 하드코딩 데이터 적용 & 셔터 ON");
+
+                // 1. 튜토리얼 결과 적용
                 IngredientStockManager.Instance.ApplyTutorialAftermath();
-                // TutorialManager.Instance.IsTutorialJustFinished = false;
+
+                PlayerWalletManager.Instance.SetBalance(225200);
+                Debug.Log("[GameManager] 튜토리얼 정산 완료: 잔고 225,200원으로 설정");
+
+                // 2. 셔터 애니메이션 재생 (게임 시작 느낌)
+                if (endOfDayUIHandler != null)
+                {
+                    endOfDayUIHandler.PlayOpenShutterAnimation();
+                }
             }
             else
             {
-                // 이거 나중에 튜토리얼 연결 후에 풀어둬야 함. 지금은 그대로 두면 나갔다 올때마다 추가되네;
-                //IngredientStockManager.Instance.OrderBasicIngredients();
+                // [Case 2] 튜토리얼 스킵 (완전 초기 상태)
+                Debug.Log("[GameManager] 튜토리얼 스킵 진입: 기본 데이터 & 셔터 OFF");
+
+                // 1. 기본 재료만 지급 (마라소스 X)
+                IngredientStockManager.Instance.OrderBasicIngredients();
+
+                // 2. 셔터 애니메이션 없음 (바로 가게 내부)
+                if (endOfDayUIHandler != null)
+                {
+                    endOfDayUIHandler.ForceOpenShutterImmediately();
+                }
             }
             // 새 게임은 영업 시작
             OrderSpawner.Instance.RestartSpawning();
         }
 
-        // ✨ Yarn 커맨드 등록 (대화 끝날 때 호출됨)
-        if (dialogueRunner != null)
-        {
-            dialogueRunner.AddCommandHandler("trigger_bad_ending_1", TriggerBadEnding1Sequence);
-        }
-
+        
         // 초기화: 엔딩 패널은 꺼둠
         if (panelBadEnding1 != null) panelBadEnding1.SetActive(false);
     }
@@ -259,6 +290,11 @@ public class GameManager : MonoBehaviour
     // ✨ 타이틀로 돌아가는 함수
     public void GoToStartScene()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopLoopSFX(501);
+            //AudioManager.Instance.PlayBGM(201, AudioManager.Instance.GetBGMVolume());
+        }
         Time.timeScale = 1f; // 중요: 시간 다시 정상화
         DOTween.KillAll();   // 실행 중인 트윈 정리
         SceneManager.LoadScene("StartScene"); // 시작 화면 씬 이름 확인 필요
@@ -335,6 +371,13 @@ public class GameManager : MonoBehaviour
         GameClock.Resume(); // 시간 흐르기 시작
         if (isBadEndingDay)
         {
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.StopBGM();       // 배경음악 정지
+                AudioManager.Instance.PlayLoopSFX(501); // 째깍째깍 소리 반복 재생
+            }
+
             // 💀 [배드엔딩 1 루트]
             // 1. 주문 생성기 침묵시키기 (확률 0)
             OrderSpawner.Instance.SetSilenceMode();
@@ -501,6 +544,10 @@ public class GameManager : MonoBehaviour
 
         GameClock.SaveLastPlayedDate(today);
 
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial)
+        {
+            return;
+        }
         GameSaveManager.Instance.SaveGame();
     }
 

@@ -112,6 +112,12 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         transform.SetParent(canvas.transform); // 최상위 이동
 
         isPlacedInSlot = false;
+
+        // ✨ [추가] 화구 위에 있던 음식이라면, 드래그 시작 시 화구 테두리 끄기
+        if (originStoveSlot != null)
+        {
+            originStoveSlot.SetOutlineVisibility(false);
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -137,7 +143,14 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
                 if (slot.foodStackParent.childCount >= slot.maxStackSize)
                 {
                     //TooltipManager.ShowFollowMouse(TooltipType.UI, "포장 슬롯은 가득 찼습니다!");
-                    ReturnToOriginal(); // 실패 시 복귀
+                    ReturnToOriginal(() =>
+                    {
+                        // 이 코드는 0.25초 뒤, 음식이 화구에 딱 도착했을 때 실행됩니다.
+                        if (originStoveSlot != null)
+                        {
+                            originStoveSlot.SetOutlineVisibility(true);
+                        }
+                    });
                     return;
                 }
 
@@ -149,7 +162,14 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
         if (!isPlacedInSlot)
         {
-            ReturnToOriginal(); // 허공에 놓으면 복귀
+            ReturnToOriginal(() =>
+            {
+                // 이 코드는 음식이 화구 위로 복귀한 뒤에 실행됩니다.
+                if (originStoveSlot != null)
+                {
+                    originStoveSlot.SetOutlineVisibility(true);
+                }
+            }); // 허공에 놓으면 복귀
         }
         else
         {
@@ -157,34 +177,45 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             transform.SetParent(currentSlot.foodStackParent);
             Vector2 target = new Vector2(0, currentSlot.GetStackIndex(this) * currentSlot.stackYOffset);
             DoTweenMove(target);
+
+            //// ✨ [중요] 화구에서 떠났으므로 화구를 비워줌 (화구 초기화)
+            //// 이 로직이 PackagingSlot.OnDrop에 없다면 여기서 호출해줘야 합니다.
+            //if (originStoveSlot != null)
+            //{
+            //    originStoveSlot.NotifyFoodPickedUp();
+            //}
         }
     }
 
-    private void ReturnToOriginal()
+    private void ReturnToOriginal(System.Action onComplete = null)
     {
         if (currentSlot != null) // 이미 포장된 상태였다면
         {
             transform.SetParent(currentSlot.foodStackParent);
             int index = currentSlot.GetStackIndex(this);
             Vector2 target = new Vector2(0, index * currentSlot.stackYOffset);
-            DoTweenMove(target);
+            DoTweenMove(target, onComplete);
         }
         else if (originStoveSlot != null) // 화구에서 막 꺼낸 상태였다면
         {
             transform.SetParent(originalParent);
-            DoTweenMove(originalLocalPosition);
+            DoTweenMove(originalLocalPosition, onComplete);
         }
         else // 안전장치
         {
             transform.SetParent(originalParent);
-            DoTweenMove(originalLocalPosition);
+            DoTweenMove(originalLocalPosition, onComplete);
         }
     }
 
-    private void DoTweenMove(Vector2 targetPos)
+    private void DoTweenMove(Vector2 targetPos, System.Action onComplete = null)
     {
         isTweening = true;
         rectTransform.DOAnchorPos(targetPos, 0.25f).SetEase(Ease.OutCubic)
-            .OnComplete(() => isTweening = false);
+            .OnComplete(() =>
+            {
+                isTweening = false;
+                onComplete?.Invoke(); // ✨ 여기서 전달받은 행동 실행!
+            });
     }
 }

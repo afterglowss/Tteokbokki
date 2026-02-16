@@ -79,7 +79,7 @@ public class IngredientStockManager : MonoBehaviour
     void Start()
     {
         if (debugUnlockAllIngredients) UnlockAllIngredientsHistory();
-        if (startWithBasicIngredients) OrderBasicIngredients();
+        // if (startWithBasicIngredients) OrderBasicIngredients();
 
         // (예시: 세이브 매니저가 로드할 데이터가 없다면 기본 재료 지급)
         // if (!GameSaveManager.Instance.HasSaveData) 
@@ -636,6 +636,8 @@ public class IngredientStockManager : MonoBehaviour
             }
             UpdateStockText(ingredientName);
         }
+
+        GenerateIngredientButtons();
     }
     private void UnlockAllIngredientsHistory()
     {
@@ -649,29 +651,23 @@ public class IngredientStockManager : MonoBehaviour
     // ✨ [NEW] 튜토리얼 종료 후 메인 씬 진입 시 딱 한 번 호출할 함수
     public void ApplyTutorialAftermath()
     {
-        Debug.Log("[시스템] 튜토리얼 종료 상태를 적용합니다.");
-
-        // 1. 재고 초기화 (중복 방지)
-        stock.Clear();
-        purchasedAtLeastOnce.Clear();
-
-        // 2. 기본 재료 지급 (떡, 오뎅, 파, 양배추, 군자소스)
+        // 1. 일단 기본 재료 꽉 채우기 (베이스)
         OrderBasicIngredients();
 
-        // 3. 마라 소스 지급 (무료 해금 + 1세트 재고 추가)
+        // 2. 마라 소스 강제 해금 & 지급 (튜토리얼 보상)
         AddStockDirectly("마라 소스");
 
-        // 4. 튜토리얼에서 사용한 만큼 차감
-        // 사용량: 떡 2, 오뎅 2, 파 1, 양배추 1, 군자 소스 1
+        // 3. [하드코딩] 튜토리얼에서 쓴 만큼 차감
+        // (튜토리얼 진행 중 실제로 쓴 게 아니라, 메인 씬 오면서 '쓴 척' 하는 것)
         DecreaseStockDirectly("떡", 2);
         DecreaseStockDirectly("오뎅", 2);
         DecreaseStockDirectly("파", 1);
         DecreaseStockDirectly("양배추", 1);
         DecreaseStockDirectly("군자 소스", 1);
 
-        // 5. UI 및 버튼 갱신
-        if (autoGenerateButtons) GenerateIngredientButtons();
-        UpdateAllStockTexts();
+        GenerateIngredientButtons();
+
+        Debug.Log("[System] 튜토리얼 결과 적용 완료 (마라소스 획득, 재료 차감)");
     }
 
     // 헬퍼: 돈 차감 없이 재고와 해금 목록에 추가 (마라 소스 보상용)

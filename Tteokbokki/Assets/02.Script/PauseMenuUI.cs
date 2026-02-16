@@ -121,6 +121,16 @@ public class PauseMenuUI : MonoBehaviour
 
         // 초기 화면 = 소리 탭
         ShowPanel(0);
+
+        // 튜토리얼 모드라면 저장 버튼 비활성화 (저장 못하게 막음)
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial)
+        {
+            if (saveButtonObj != null) saveButtonObj.SetActive(false);
+        }
+        else
+        {
+            if (saveButtonObj != null) saveButtonObj.SetActive(true);
+        }
     }
 
     private void InitializeMenuButtons()
@@ -276,6 +286,11 @@ public class PauseMenuUI : MonoBehaviour
         if (GameManager.Instance != null &&
             GameManager.Instance.endOfDayUIHandler != null &&
             GameManager.Instance.endOfDayUIHandler.IsShutterAnimating)
+        {
+            return;
+        }
+
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial)
         {
             return;
         }

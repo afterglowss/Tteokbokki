@@ -123,7 +123,7 @@ public class GameClock : MonoBehaviour
     public void SetToEightFiftyNine()
     {
         DateTime dateOnly = gameTime.Date;
-        gameTime = dateOnly.AddHours(20).AddMinutes(59);
+        gameTime = dateOnly.AddHours(20).AddMinutes(59).AddSeconds(59);
         Debug.Log($"[DEBUG] 게임 시간이 오후 8시 59분으로 설정됨: {gameTime:yyyy-MM-dd HH:mm}");
         UpdateTimeAndDateDisplay();
     }

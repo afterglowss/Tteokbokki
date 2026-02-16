@@ -158,6 +158,27 @@ public class AudioManager : MonoBehaviour
         activeLoopingSources.Clear();
     }
 
+    public void StopLoopSFX(int soundID)
+    {
+        // 1. 해당 ID의 클립을 찾음
+        if (!soundDict.ContainsKey(soundID)) return;
+        AudioClip targetClip = soundDict[soundID];
+
+        // 2. 현재 재생 중인 루프 소스들 중에서 해당 클립을 재생 중인 녀석을 찾아서 끔
+        for (int i = activeLoopingSources.Count - 1; i >= 0; i--)
+        {
+            AudioSource source = activeLoopingSources[i];
+            if (source != null && source.clip == targetClip)
+            {
+                source.Stop();
+                source.clip = null;
+                // 리스트에서 제거하거나, 풀링 방식에 따라 처리 (여기서는 단순 정지)
+                activeLoopingSources.RemoveAt(i);
+                Destroy(source.gameObject); // 동적 생성된 소스라면 파괴
+            }
+        }
+    }
+
     // --- 3. BGM ---
 
     // 기존 함수
@@ -171,7 +192,7 @@ public class AudioManager : MonoBehaviour
     {
         if (soundDict.TryGetValue(id, out AudioClip clip))
         {
-            if (bgmSource.clip == clip) return;
+            if (bgmSource.clip == clip && bgmSource.isPlaying) return;
             bgmSource.clip = clip;
             // BGM은 소스가 하나이므로 Source 자체의 볼륨을 조절하면 
             // 나중에 슬라이더 조절 시 꼬일 수 있습니다.
@@ -180,6 +201,22 @@ public class AudioManager : MonoBehaviour
             currentBgmScale = volumeScale;
             bgmSource.volume = bgmVol * masterVol * currentBgmScale;
             bgmSource.Play();
+        }
+    }
+
+    public void StopBGM()
+    {
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
+    }
+
+    public void ResumeBGM()
+    {
+        if (bgmSource != null && !bgmSource.isPlaying)
+        {
+            bgmSource.UnPause();
         }
     }
 

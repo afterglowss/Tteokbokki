@@ -57,7 +57,7 @@ public class GameSaveManager : MonoBehaviour
         Instance = this;
     }
 
-    public bool IsSettlementPhase { get; private set; }
+    public bool IsSettlementPhase { get; set; }
 
     public void SaveGame()
     {
@@ -174,5 +174,11 @@ public class GameSaveManager : MonoBehaviour
         // 2. 변경된 상태를 JSON 파일에 즉시 물리적으로 기록
         SaveGame();
         Debug.Log("<color=green>[시스템] 튜토리얼 완료 상태가 세이브 데이터에 기록되었습니다.</color>");
+    }
+
+    public bool HasSaveFile()
+    {
+        string fullPath = Path.Combine(Application.persistentDataPath, "SaveData.json");
+        return File.Exists(fullPath);
     }
 }

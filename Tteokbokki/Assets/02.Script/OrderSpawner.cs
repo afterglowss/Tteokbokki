@@ -44,7 +44,14 @@ public class OrderSpawner : MonoBehaviour
             Debug.Log("[OrderSpawner] 이미 마감 시간이므로 자동 주문 생성을 시작하지 않습니다.");
             this.enabled = false;
             return;
-        } 
+        }
+
+        // ✨ [핵심 수정] 튜토리얼 중이라면 주문을 생성하지 않고 그냥 나갑니다!
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial)
+        {
+            Debug.Log("[OrderSpawner] 튜토리얼 모드이므로 자동 주문 생성을 하지 않습니다.");
+            return;
+        }
 
         // 랜덤 생성 시도 루틴 시작
         StartCoroutine(RandomSpawnRoutine());
@@ -53,14 +60,22 @@ public class OrderSpawner : MonoBehaviour
     private void Update()
     {
         // ✨ [NEW] 영수증이 하나도 없는지 감시하는 로직
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial) return; // 튜토리얼 중에는 감시하지 않음
         CheckEmptyLineStatus();
     }
 
     // InvokeRepeating 대신 코루틴 사용 (제어가 더 쉬움)
     private IEnumerator RandomSpawnRoutine()
     {
+        yield return new WaitForSeconds(1.0f);
+
         while (true)
         {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial)
+            {
+                yield break;
+            }
+
             yield return new WaitForSeconds(attemptInterval);
             TryRandomOrder();
         }

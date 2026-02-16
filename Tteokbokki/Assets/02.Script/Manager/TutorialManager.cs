@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Yarn.Unity;
@@ -46,7 +47,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private GameObject closingPanel;
 
     [Header("UI 및 배경 전용")]
-    [SerializeField] private RawImage backgroundDisplay;
+    [SerializeField] private Image backgroundDisplay;
     [SerializeField] private Texture2D desktopTexture;
     public CanvasGroup gameplayUI;
 
@@ -69,6 +70,21 @@ public class TutorialManager : MonoBehaviour
         else { Destroy(gameObject); return; }
 
         InitializeTutorial();
+        IsTutorial = true;
+    }
+
+    private void Start()
+    {
+        // 시계 UI 숨기기
+        if (GameClock.Instance != null && GameClock.Instance.dateTimeText != null)
+        {
+            GameClock.Instance.dateTimeText.gameObject.SetActive(false);
+        }
+
+        if (OrderSpawner.Instance != null)
+        {
+            OrderSpawner.Instance.StopSpawning();
+        }
     }
 
     private void OnDisable()
@@ -87,7 +103,7 @@ public class TutorialManager : MonoBehaviour
     private void InitializeTutorial()
     {
         // 1. 얀 함수 등록 (GameSaveManager와 연결)
-        dialogueRunner?.AddFunction("getSawTutorial", () => GameSaveManager.Instance.IsTutorialCompleted);
+        //dialogueRunner?.AddFunction("getSawTutorial", () => GameSaveManager.Instance.IsTutorialCompleted);
 
         OrderSpawner.Instance?.StopSpawning();
         darkOverlay?.SetActive(false);
@@ -96,11 +112,7 @@ public class TutorialManager : MonoBehaviour
         GameClock.Pause();
         SetSystemFreeze(true);
 
-        // 시계 UI 숨기기
-        if (GameClock.Instance != null && GameClock.Instance.dateTimeText != null)
-        {
-            GameClock.Instance.dateTimeText.gameObject.SetActive(false);
-        }
+        InitKeyboardForTutorial();
 
         if (dialogueRunner != null && !dialogueRunner.IsDialogueRunning)
         {
@@ -136,7 +148,7 @@ public class TutorialManager : MonoBehaviour
         Debug.Log($"[튜토리얼] {sceneName} 씬으로 이동합니다.");
 
         if (Instance != null) Instance.IsTutorial = false;
-        GameSaveManager.Instance.SetTutorialComplete();
+        // GameSaveManager.Instance.SetTutorialComplete();
 
         // 다음 씬이 멈추지 않도록 시간 설정을 완전히 초기화합니다.
         GameClock.Resume();
@@ -379,6 +391,11 @@ public class TutorialManager : MonoBehaviour
         var inst = Instance;
         if (inst == null) yield break;
 
+        AllowIngredientKey("떡");
+        AllowIngredientKey("오뎅");
+        AllowIngredientKey("파");
+        AllowIngredientKey("양배추");
+
         // 🚨 여기서 해동하지 않습니다! 
         // highlight된 버튼들만 자기 자신의 GraphicRaycaster 덕분에 클릭이 되는 상태입니다.
 
@@ -393,23 +410,27 @@ public class TutorialManager : MonoBehaviour
             {
                 RemoveHighlightComps("떡_Button");
                 tteokDone = true;
+                ConstrainIngredientKey("떡");
             }
             // 오뎅 2개 완료 체크
             if (!odengDone && wok.GetValueOrDefault("오뎅", 0) >= 2)
             {
                 RemoveHighlightComps("오뎅_Button");
                 odengDone = true;
+                ConstrainIngredientKey("오뎅");
             }
             // 파, 양배추도 같은 방식으로 처리
             if (!onionDone && wok.GetValueOrDefault("파", 0) >= 1)
             {
                 RemoveHighlightComps("파_Button");
                 onionDone = true;
+                ConstrainIngredientKey("파");
             }
             if (!cabbageDone && wok.GetValueOrDefault("양배추", 0) >= 1)
             {
                 RemoveHighlightComps("양배추_Button");
                 cabbageDone = true;
+                ConstrainIngredientKey("양배추");
             }
 
             if (inst.CheckRecipeCondition(wok)) break;
@@ -426,6 +447,8 @@ public class TutorialManager : MonoBehaviour
         var inst = Instance;
         // inst.targetStoveSlot이 인스펙터에서 제대로 할당되어 있는지 확인
         if (inst == null || inst.targetStoveSlot == null) yield break;
+
+        AllowIngredientKey("군자 소스");
 
         // 1. [해동] 키보드 단축키가 먹히려면 시스템 잠금이 풀려있어야 합니다.
         inst.SetSystemFreeze(false);
@@ -445,6 +468,7 @@ public class TutorialManager : MonoBehaviour
 
         // 4. [동결 및 정리] 다음 대화를 위해 다시 잠그고 하이라이트를 끕니다.
         inst.SetSystemFreeze(true);
+        ConstrainIngredientKey("군자 소스");
         Unhighlight();
 
         yield return new WaitForEndOfFrame();
@@ -455,6 +479,9 @@ public class TutorialManager : MonoBehaviour
     public static IEnumerator WaitStartBoiling()
     {
         var inst = Instance;
+
+        KeyboardInputManager.Instance.AllowKey(Key.Space);
+
         if (inst == null || inst.targetStoveSlot == null) yield break;
 
         Highlight("CookButton");
@@ -465,6 +492,7 @@ public class TutorialManager : MonoBehaviour
         Debug.Log("[튜토리얼] 조리 시작 감지 완료!");
 
         inst.SetSystemFreeze(true);
+        KeyboardInputManager.Instance.ConstrainKey(Key.Space);
         Unhighlight();
 
         yield return new WaitForEndOfFrame();
@@ -476,7 +504,7 @@ public class TutorialManager : MonoBehaviour
         if (Instance?.targetStoveSlot == null) yield break;
 
         // 조리가 진행되려면 시간이 흘러야 하므로 시간 및 클럭 해제
-        GameClock.Resume();
+        // GameClock.Resume();
 
         // 1. 요리가 '시작'될 때까지 대기
         yield return new WaitUntil(() => Instance.targetStoveSlot.IsCooking);
@@ -485,7 +513,7 @@ public class TutorialManager : MonoBehaviour
         while (Instance.targetStoveSlot.IsCooking) yield return null;
         
         // 조리 완료 후 다시 시간 정지
-        GameClock.Pause();
+        // GameClock.Pause();
 
         Unhighlight();
         yield return new WaitForEndOfFrame();
@@ -608,7 +636,6 @@ public class TutorialManager : MonoBehaviour
     [YarnCommand("waitForEndDay")]
     public static IEnumerator WaitForEndDay()
     {
-
         var inst = Instance;
         if (inst == null || inst.endDayButton == null) yield break;
 
@@ -617,6 +644,7 @@ public class TutorialManager : MonoBehaviour
 
         //활성화
         inst.endDayButton.gameObject.SetActive(true);
+        Highlight(inst.endDayButton.gameObject);
 
         // 기존 기능을 방해하지 않고 튜토리얼 신호만 추가
         inst.endDayButton.onClick.AddListener(tutorialAction);
@@ -624,7 +652,12 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitUntil(() => isClicked);
         //시간 on
-        GameClock.Resume();
+        // GameClock.Resume();
+
+        if (GameClock.Instance != null && GameClock.Instance.dateTimeText != null)
+        {
+            GameClock.Instance.dateTimeText.gameObject.SetActive(true);
+        }
 
         // 리스너 제거 및 정리
         inst.endDayButton.onClick.RemoveListener(tutorialAction);
@@ -645,6 +678,8 @@ public class TutorialManager : MonoBehaviour
             GameClock.Pause();
             Debug.Log("[튜토리얼] 마감 패널 감지 완료. 시간을 다시 멈춥니다.");
         }
+
+        inst.endDayButton.gameObject.SetActive(false);
         yield return new WaitForEndOfFrame();
     }
 
@@ -837,5 +872,94 @@ public class TutorialManager : MonoBehaviour
             }
             yield return new WaitForSecondsRealtime(0.3f);
         }
+    }
+
+    [YarnCommand("complete_tutorial")]
+    public void CompleteTutorialAndLoadMain()
+    {
+        if (KeyboardInputManager.Instance != null)
+            KeyboardInputManager.Instance.AllowAllKeys();
+
+        // 1.봤음 도장 찍기
+        PlayerPrefs.SetInt("SawTutorial", 1);
+        PlayerPrefs.Save();
+
+        // 2. 직접 깼다고 플래그 세우기
+        GameLoadFlags.isTutorialJustFinished = true; // 이게 true여야 셔터 애니메이션 나옴
+        GameLoadFlags.shouldLoadFromSave = false;
+
+        SceneManager.LoadScene("MainScene");
+    }
+
+    [YarnFunction("getSawTutorial")]
+    public static bool GetSawTutorial()
+    {
+        return PlayerPrefs.HasKey("SawTutorial") && PlayerPrefs.GetInt("SawTutorial") == 1;
+    }
+
+    // ✨ [NEW] Yarn에서 호출: 튜토리얼 스킵하고 메인으로 가기
+    [YarnCommand("skip_tutorial")]
+    public void SkipTutorial()
+    {
+        Debug.Log("[Tutorial] 유저 선택으로 튜토리얼 스킵 -> 메인으로 이동");
+
+        if (KeyboardInputManager.Instance != null)
+            KeyboardInputManager.Instance.AllowAllKeys();
+
+        // 플래그 설정: 스킵했으므로 '직접 깬 것' 아님
+        GameLoadFlags.isTutorialJustFinished = false;
+        GameLoadFlags.shouldLoadFromSave = false;
+
+        // 메인 씬 로드 -> GameManager가 "스킵했네?" 하고 기본 세팅+셔터OFF로 시작함
+        SceneManager.LoadScene("MainScene");
+    }
+
+    [YarnCommand("time_stop")]
+    public void TimeStop()
+    {
+        GameClock.Pause();
+        Debug.Log("[튜토리얼] 시간 정지 명령 실행");
+        //SetSystemFreeze(true);
+    }
+    [YarnCommand("time_resume")]
+    public void TimeResume()
+    {
+        GameClock.Resume();
+        Debug.Log("[튜토리얼] 시간 재개 명령 실행");
+        //SetSystemFreeze(true);
+    }
+
+    // 🛠️ 헬퍼 함수: 재료 이름으로 키를 찾아 허용 목록에 추가
+    private static void AllowIngredientKey(string ingredientName)
+    {
+        // IngredientStockManager가 관리하는 키 매핑을 뒤져서 찾음
+        var keys = IngredientStockManager.Instance.GetAllRegisteredKeys();
+        foreach (var key in keys)
+        {
+            if (IngredientStockManager.Instance.GetIngredientByKey(key) == ingredientName)
+            {
+                KeyboardInputManager.Instance.AllowKey(key);
+                break;
+            }
+        }
+    }
+
+    private static void ConstrainIngredientKey(string ingredientName)
+    {
+        var keys = IngredientStockManager.Instance.GetAllRegisteredKeys();
+        foreach (var key in keys)
+        {
+            if (IngredientStockManager.Instance.GetIngredientByKey(key) == ingredientName)
+            {
+                KeyboardInputManager.Instance.ConstrainKey(key);
+                break;
+            }
+        }
+    }
+
+    // 🛠️ 헬퍼 함수: 튜토리얼 입력 모드 초기화
+    private static void InitKeyboardForTutorial()
+    {
+        KeyboardInputManager.Instance.SetTutorialMode(true);
     }
 }

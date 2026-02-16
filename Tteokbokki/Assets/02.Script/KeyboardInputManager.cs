@@ -4,13 +4,51 @@ using UnityEngine.InputSystem; // ✨ [필수] New Input System 사용
 
 public class KeyboardInputManager : MonoBehaviour
 {
+    public static KeyboardInputManager Instance { get; private set; } // 싱글톤 추가 (TutorialManager에서 접근용)
+
+    // ✨ [NEW] 튜토리얼용 키 제한 시스템
+    private HashSet<Key> allowedKeys = new HashSet<Key>();
+    private bool isTutorialMode = false;
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+    }
+    // ✨ 튜토리얼 모드 켜기/끄기
+    public void SetTutorialMode(bool active)
+    {
+        isTutorialMode = active;
+        allowedKeys.Clear(); // 켜거나 끌 때 일단 초기화
+    }
+
+    // ✨ 특정 키 허용하기 (튜토리얼 단계별로 호출)
+    public void AllowKey(Key key)
+    {
+        if (!allowedKeys.Contains(key)) allowedKeys.Add(key);
+    }
+
+    public void ConstrainKey(Key key)
+    {
+        if (allowedKeys.Contains(key)) allowedKeys.Remove(key);
+    }
+
+    // ✨ 모든 키 허용 (튜토리얼 끝날 때)
+    public void AllowAllKeys()
+    {
+        allowedKeys.Clear();
+        isTutorialMode = false;
+    }
     void Update()
     {
         // 0. 키보드가 연결되어 있는지 확인 (안전장치)
         if (Keyboard.current == null) return;
 
-        // UI 입력 중이거나 일시정지면 무시
-        if (GameClock.isPaused) return;
+        // ✨ [핵심 수정] 튜토리얼 중이면 시간 정지 여부와 상관없이 작동해야 함
+        if (!isTutorialMode)
+        {
+            // 평소에는 일시정지면 입력 차단
+            if (GameClock.isPaused) return;
+        }
 
         // 1. 화구 선택 (1 ~ 5)
         HandleStoveSelection();
@@ -22,11 +60,15 @@ public class KeyboardInputManager : MonoBehaviour
         // ✨ Input.GetKeyDown(KeyCode.Space) -> Keyboard.current.spaceKey.wasPressedThisFrame
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            PlayerWokManager.Instance.OnCookButtonPressed();
+            // 튜토리얼 모드라면 Space 키가 허용되었는지 확인
+            if (!isTutorialMode || allowedKeys.Contains(Key.Space))
+            {
+                PlayerWokManager.Instance.OnCookButtonPressed();
+            }
         }
 
-        // 4. (선택사항) ESC로 선택 해제
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        // 4. ESC (튜토리얼 중엔 보통 막음)
+        if (!isTutorialMode && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (StoveManager.Instance.HasSelectedSlot())
                 StoveManager.Instance.DeselectCurrentSlot();
@@ -35,14 +77,27 @@ public class KeyboardInputManager : MonoBehaviour
 
     private void HandleStoveSelection()
     {
-        // ✨ Input.GetKeyDown(KeyCode.Alpha1) -> Keyboard.current.digit1Key.wasPressedThisFrame
-        // ✨ KeyCode.Keypad1 -> Keyboard.current.numpad1Key.wasPressedThisFrame
+        // 튜토리얼 중에는 화구 선택 키(1~5)도 허용된 경우만 작동
+        CheckAndSelect(Key.Digit1, Key.Numpad1, 0);
+        CheckAndSelect(Key.Digit2, Key.Numpad2, 1);
+        CheckAndSelect(Key.Digit3, Key.Numpad3, 2);
+        CheckAndSelect(Key.Digit4, Key.Numpad4, 3);
+        CheckAndSelect(Key.Digit5, Key.Numpad5, 4);
+    }
 
-        if (Keyboard.current.digit1Key.wasPressedThisFrame || Keyboard.current.numpad1Key.wasPressedThisFrame) SelectStove(0);
-        if (Keyboard.current.digit2Key.wasPressedThisFrame || Keyboard.current.numpad2Key.wasPressedThisFrame) SelectStove(1);
-        if (Keyboard.current.digit3Key.wasPressedThisFrame || Keyboard.current.numpad3Key.wasPressedThisFrame) SelectStove(2);
-        if (Keyboard.current.digit4Key.wasPressedThisFrame || Keyboard.current.numpad4Key.wasPressedThisFrame) SelectStove(3);
-        if (Keyboard.current.digit5Key.wasPressedThisFrame || Keyboard.current.numpad5Key.wasPressedThisFrame) SelectStove(4);
+    private void CheckAndSelect(Key digit, Key numpad, int index)
+    {
+        bool isPressed = Keyboard.current[digit].wasPressedThisFrame || Keyboard.current[numpad].wasPressedThisFrame;
+
+        if (isPressed)
+        {
+            // 튜토리얼 모드일 땐 허용 목록에 있어야만 통과
+            if (isTutorialMode)
+            {
+                if (!allowedKeys.Contains(digit) && !allowedKeys.Contains(numpad)) return;
+            }
+            SelectStove(index);
+        }
     }
 
     private void SelectStove(int index)
@@ -65,6 +120,8 @@ public class KeyboardInputManager : MonoBehaviour
             // ✨ New Input System 방식의 키 입력 감지
             if (Keyboard.current[key].wasPressedThisFrame)
             {
+                if (isTutorialMode && !allowedKeys.Contains(key)) continue;
+
                 string ingredientName = IngredientStockManager.Instance.GetIngredientByKey(key);
 
                 if (!string.IsNullOrEmpty(ingredientName))

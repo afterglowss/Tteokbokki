@@ -12925,7 +12925,8 @@ MonoBehaviour:
   clearCartButton: {fileID: 4135167643951306520}
   clearCartButtonText: {fileID: 1829250310442129204}
   isTutorialMode: 0
-  tutorialItems: []
+  tutorialItems:
+  - "\uB9C8\uB77C \uC18C\uC2A4"
   OnShopProcessFinished:
     m_PersistentCalls:
       m_Calls: []

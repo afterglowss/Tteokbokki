@@ -812,7 +812,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8226997892994676991, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8760647335611653344, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
       propertyPath: m_Interactable
@@ -825,60 +825,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8226997892994676991, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1262979461}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
 --- !u!224 &1262979457 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6614250709009362606, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
   m_PrefabInstance: {fileID: 1262979456}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1262979458 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 467071543420657227, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
-  m_PrefabInstance: {fileID: 1262979456}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!1 &1262979459 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8226997892994676991, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
-  m_PrefabInstance: {fileID: 1262979456}
-  m_PrefabAsset: {fileID: 0}
---- !u!225 &1262979460 stripped
-CanvasGroup:
-  m_CorrespondingSourceObject: {fileID: 8760647335611653344, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
-  m_PrefabInstance: {fileID: 1262979456}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1262979461
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1262979459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de130ae2919af2e40aac83a46746519a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  endingPanelGroup: {fileID: 1262979460}
-  btnBackToTitle: {fileID: 1262979458}
-  dialogueRunner: {fileID: 0}
-  shutterRect: {fileID: 0}
-  shutterDuration: 1
-  startDelay: 0.5
-  startNodeName: EndingStart
-  creditsGroup: {fileID: 0}
-  bgFadeDuration: 2
-  creditsFadeDuration: 2
-  waitBeforeButton: 3
 --- !u!223 &716559270974300446
 Canvas:
   m_ObjectHideFlags: 0

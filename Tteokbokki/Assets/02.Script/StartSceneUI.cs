@@ -11,6 +11,10 @@ using DG.Tweening; // DOTween (선택사항, 여기선 코루틴으로 처리함
 public static class GameLoadFlags
 {
     public static bool shouldLoadFromSave = false;
+    // ✨ [NEW] 방금 튜토리얼을 "직접 플레이하고" 왔는지 여부
+    // true면: 마라소스 지급 + 재료 차감 + 셔터 애니메이션 재생
+    // false면: 셔터 없이 바로 시작 (스킵했거나, 이어하기거나)
+    public static bool isTutorialJustFinished = false;
 }
 
 public class StartSceneUI : MonoBehaviour
@@ -43,14 +47,17 @@ public class StartSceneUI : MonoBehaviour
     [SerializeField] private GameObject loadingPanel;    // 로딩 패널 전체
     [SerializeField] private Slider loadingSlider;       // 진행률 게이지
     [SerializeField] private TextMeshProUGUI loadingText; // "재료 손질 중..." 텍스트
-    [SerializeField] private string mainSceneName = "SampleScene";
 
     [Header("✨ 타이핑 효과 설정")]
     [SerializeField] private float typingSpeed = 0.05f; // 글자당 0.05초
     [SerializeField] private float textStayDelay = 1.0f; // 다 쓰고 나서 1초 대기
 
     [Header("✨ 로딩 연출 설정")]
-    [SerializeField] private float minLoadingTime = 2.0f;
+    //[SerializeField] private float minLoadingTime = 2.0f;
+
+    [Header("Scene Settings")]
+    [SerializeField] private string mainSceneName = "MainScene";       // 이어하기 -> 바로 게임
+    [SerializeField] private string tutorialSceneName = "TutorialScene"; // 새 게임 -> 튜토리얼(얀 스크립트)
 
     // ✨ [핵심] 로딩 속도 그래프 (인스펙터에서 설정)
     // X축: 시간 (0~1), Y축: 진행률 (0~1)
@@ -102,6 +109,15 @@ public class StartSceneUI : MonoBehaviour
         if (warningCancelButton != null) warningCancelButton.onClick.AddListener(OnCancelPopup);
 
         UpdateContinueDateLabel();
+
+        if (AudioManager.Instance != null)
+        {
+            // 혹시 켜져있을지 모를 루프 SFX 끄기 (안전장치)
+            AudioManager.Instance.StopLoopSFX(501);
+
+            // 배경음악 재생 (볼륨은 매니저가 알아서 처리하므로 ID만 넘겨도 됨)
+            AudioManager.Instance.PlayBGM(201, AudioManager.Instance.GetBGMVolume());
+        }
     }
 
     // ... (UpdateContinueDateLabel, LoadSaveMetaOnly는 기존과 동일) ...
@@ -188,14 +204,14 @@ public class StartSceneUI : MonoBehaviour
         GameLoadFlags.shouldLoadFromSave = false;
 
         // ✨ 로딩창 코루틴 시작
-        StartCoroutine(LoadSceneWithLoadingScreen());
+        StartCoroutine(LoadSceneWithLoadingScreen(tutorialSceneName));
     }
 
     private void OnContinueButtonClicked()
     {
         GameLoadFlags.shouldLoadFromSave = true;
         // ✨ 로딩창 코루틴 시작
-        StartCoroutine(LoadSceneWithLoadingScreen());
+        StartCoroutine(LoadSceneWithLoadingScreen(mainSceneName));
     }
 
     // ✨ [NEW] 삭제 버튼 클릭 시
@@ -239,7 +255,8 @@ public class StartSceneUI : MonoBehaviour
     private void StartNewGameRoutine()
     {
         GameLoadFlags.shouldLoadFromSave = false;
-        StartCoroutine(LoadSceneWithLoadingScreen());
+        GameLoadFlags.isTutorialJustFinished = false;
+        StartCoroutine(LoadSceneWithLoadingScreen(tutorialSceneName));
     }
 
     // ✨ [NEW] 실제 파일 삭제 로직
@@ -262,7 +279,7 @@ public class StartSceneUI : MonoBehaviour
 
     // ✨ [핵심] 로딩 스크린 연출 코루틴
     // ✨ [수정] 로딩 스크린 연출 코루틴
-    private IEnumerator LoadSceneWithLoadingScreen()
+    private IEnumerator LoadSceneWithLoadingScreen(string targetSceneName)
     {
         // 1. 로딩창 활성화
         if (loadingPanel != null)
@@ -280,7 +297,7 @@ public class StartSceneUI : MonoBehaviour
         }
 
         // 2. 비동기 로딩 시작
-        AsyncOperation op = SceneManager.LoadSceneAsync(mainSceneName);
+        AsyncOperation op = SceneManager.LoadSceneAsync(targetSceneName);
         op.allowSceneActivation = false;
 
         float timer = 0.0f;

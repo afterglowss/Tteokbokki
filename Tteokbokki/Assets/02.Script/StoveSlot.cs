@@ -13,6 +13,9 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     [Header("UI References")]
     public TextMeshProUGUI timerText;
 
+    [Header("Cooking Settings")]
+    public float defaultCookTimeMinutes = 5f;
+
     // ✨ [NEW] 선택되었을 때 켜질 테두리 이미지 오브젝트
     public GameObject selectionOutline;
 
@@ -240,7 +243,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         }
 
         // 조리 시작 (메뉴 이름을 넘겨줌)
-        StartCooking(pendingIngredients, 5 * 60f, menuResult);
+        StartCooking(pendingIngredients, defaultCookTimeMinutes * 60f, menuResult);
 
         pendingIngredients.Clear();
         if (cookButton != null) cookButton.gameObject.SetActive(false);
@@ -312,6 +315,12 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         isDraggingWok = true;
 
+        // ✨ [추가] 드래그 시작 시 테두리(선택 표시) 숨기기
+        if (selectionOutline != null && selectionOutline.activeSelf)
+        {
+            selectionOutline.SetActive(false);
+        }
+
         originalIconPos = wokImage.transform.localPosition;
         originalIconParent = wokImage.transform.parent;
 
@@ -365,6 +374,17 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
                 SetWokState(wokEmptySprite);
             else
                 wokImage.gameObject.SetActive(false);
+        }
+
+        // ✨ [추가] 드래그가 끝났는데 아직도 이 화구가 선택된 상태라면 테두리 다시 켜기
+        // (주의: 드롭으로 인해 ResetSlot()이 호출되었다면 stoveManager.IsSelected(this)가 false일 수 있음)
+        if (stoveManager != null && stoveManager.IsSelected(this))
+        {
+            // 웍이 아직 유효한 상태(재료가 있거나 조리 완료됨)라면 테두리 복구
+            if (selectionOutline != null)
+            {
+                selectionOutline.SetActive(true);
+            }
         }
     }
 
@@ -675,7 +695,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         // --- 수정된 부분 ---
         float speedMultiplier = (60f / 3f); // 현재 웍의 배속 (20)
-        float targetRealTime = 5f;         // 현실 시간 (10초 아님 -5초)
+        float targetRealTime = 3f;         // 현실 시간 (10초 아님 -5초)
 
         // 인게임 타이머 기준으로는 200초를 넣어줘야 현실에서 10초 동안 흐릅니다.
         cookTimeSeconds = targetRealTime * speedMultiplier;
@@ -702,5 +722,16 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         if (cookButton != null) cookButton.gameObject.SetActive(false);
         UpdateInfoUI();
     }
+    public void SetOutlineVisibility(bool isVisible)
+    {
+        // 1. 테두리 오브젝트가 없으면 패스
+        if (selectionOutline == null) return;
 
+        // 2. 내가 현재 '선택된 화구'일 때만 작동해야 함
+        // (선택되지도 않은 화구인데 드래그 끝났다고 테두리가 켜지면 안 되니까요)
+        if (stoveManager != null && stoveManager.IsSelected(this))
+        {
+            selectionOutline.SetActive(isVisible);
+        }
+    }
 }

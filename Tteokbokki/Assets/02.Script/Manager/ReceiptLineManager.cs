@@ -334,7 +334,9 @@ public class ReceiptLineManager : MonoBehaviour
 
     public string GetTodaySuccessfulReceiptsText()
     {
-        DateTime today = GameClock.gameTime.Date;
+        var today = GameClock.gameTime.Date;
+        //var todays = successfulReceipts.Where(r => r.OrderDateTime.Date == today);
+
         if (successfulReceipts.Count == 0)
             return $"[{today:yyyy-MM-dd}] 성공한 영수증이 없습니다.\n";
 

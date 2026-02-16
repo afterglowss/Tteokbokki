@@ -1091,10 +1091,10 @@ MonoBehaviour:
   loadingPanel: {fileID: 829256088}
   loadingSlider: {fileID: 9402227}
   loadingText: {fileID: 51520274}
-  mainSceneName: MainScene
   typingSpeed: 0.05
   textStayDelay: 1
-  minLoadingTime: 2
+  mainSceneName: MainScene
+  tutorialSceneName: TutorialScene
   loadingCurve:
     serializedVersion: 2
     m_Curve:
@@ -1108,8 +1108,8 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.56666565
-      value: 0.62617797
+      time: 0.5
+      value: 0.7
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1117,8 +1117,8 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.8291748
-      value: 0.87381136
+      time: 0.8
+      value: 0.85
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -2272,6 +2272,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1227114880}
   m_CullTransparentMesh: 1
+--- !u!1 &1333590357
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1333590359}
+  - component: {fileID: 1333590358}
+  m_Layer: 0
+  m_Name: GameSaveManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1333590358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1333590357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee32028e5720a95479793ab0198b7b39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1333590359
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1333590357}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.05967, y: -2.22781, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1404849190 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 972428259310127882, guid: 8ddd79b12afdbc741be1eac50d6a9bfc, type: 3}
@@ -3480,3 +3524,4 @@ SceneRoots:
   - {fileID: 438352304}
   - {fileID: 531636862}
   - {fileID: 1794678708}
+  - {fileID: 1333590359}
