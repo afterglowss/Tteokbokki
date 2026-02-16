@@ -460,8 +460,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4491912808612745192, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
       propertyPath: m_text
-      value: "\uB2F9\uC2E0\uC740 \uC0AC\uB791 \uBC1B\uB294 \uC815\uC9C1\uC6D0\uC774
-        \uB418\uC5C8\uC2B5\uB2C8\uB2E4.\n\n\n\n\n\n\n\n<size=50%>- Happy Ending -</size>"
+      value: "\uCD95\uD558\uD569\uB2C8\uB2E4. \uB2F9\uC2E0\uC740 \uC815\uC9C1\uC6D0\uC774\uC790
+        \uBBF8\uB798\uC758 \uACBD\uC601\uC790\uAC00 \uB418\uC5C8\uC2B5\uB2C8\uB2E4.\n\n\n\n\n\n\n\n<size=50%>-
+        Happy Ending -</size>"
       objectReference: {fileID: 0}
     - target: {fileID: 4491912808612745192, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
       propertyPath: m_fontColor.b

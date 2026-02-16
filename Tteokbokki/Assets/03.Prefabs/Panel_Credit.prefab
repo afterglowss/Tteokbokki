@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -220, y: 573.9416}
+  m_SizeDelta: {x: -220, y: 712.65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6377711001294263239
 CanvasRenderer:
@@ -65,9 +65,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Team \uAD70\uC790 \uB5A1\uBCF6\uC774\n\nPM \t\t\uC2E0\uD61C\uC6D0\n\uAE30\uD68D
-    \t\t\uC724\uD558\uACBD, \uC2E0\uD61C\uC6D0\n\uD504\uB85C\uADF8\uB798\uBC0D \t\uC2E0\uD61C\uC6D0,
-    \uCD5C\uC601\uC9C4\n\uC544\uD2B8\t\t\uC2E0\uD61C\uC6D0, \uC724\uD558\uACBD, \uCD5C\uC601\uC9C4\n\uC81C\uACF5\t\tPandoraCube\n\n<size=60%>\uCD9C\uCC98
+  m_text: "\uD50C\uB808\uC774 \uD574\uC8FC\uC154\uC11C \uAC10\uC0AC\uD569\uB2C8\uB2E4!\n\nTeam
+    \uAD70\uC790 \uB5A1\uBCF6\uC774\n\nPM \t\t\uC2E0\uD61C\uC6D0\n\uAE30\uD68D \t\t\uC724\uD558\uACBD,
+    \uC2E0\uD61C\uC6D0\n\uD504\uB85C\uADF8\uB798\uBC0D \t\uC2E0\uD61C\uC6D0, \uCD5C\uC601\uC9C4\n\uC544\uD2B8\t\t\uC2E0\uD61C\uC6D0,
+    \uC724\uD558\uACBD, \uCD5C\uC601\uC9C4\n\uC81C\uACF5\t\tPandoraCube\n\n<size=60%>\uCD9C\uCC98
     \t\tTrack : \uB6B1\uB545\uB6B1\uB545 (Music provided by \uBE0C\uAE08\uB300\uD1B5\uB839)\n\t\t\uC774
     \uCF58\uD150\uCE20\uB294 \uC778\uACF5\uC9C0\uB2A5 \uAC00\uC0C1 \uC5F0\uAE30\uC790
     \uC11C\uBE44\uC2A4, \uD0C0\uC785\uCE90\uC2A4\uD2B8\uB97C \uD65C\uC6A9\uD558\uC5EC
@@ -177,7 +178,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 8.32}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -559.1, y: 265.3}
+  m_AnchoredPosition: {x: -551, y: 225}
   m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3847555701475969563
