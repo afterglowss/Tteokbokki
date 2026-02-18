@@ -22,6 +22,7 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private GameObject quitWarningPanel;
     [SerializeField] private Button btnConfirmQuit;
     [SerializeField] private Button btnCancelQuit;
+    [SerializeField] private RectTransform quitWarningWindow;
 
     [Header("Black Curtain")]
     [SerializeField] private Image blackCurtainImage;
@@ -103,6 +104,7 @@ public class PauseMenuUI : MonoBehaviour
         // 2. 팝업 및 닫기 버튼 연결
         if (btnConfirmQuit != null) btnConfirmQuit.onClick.AddListener(OnConfirmQuit);
         if (btnCancelQuit != null) btnCancelQuit.onClick.AddListener(OnCancelQuit);
+        if (quitWarningPanel != null) quitWarningPanel.SetActive(false);
 
         if (btnResetAudio != null) btnResetAudio.onClick.AddListener(ResetAudioSettings);
         if (btnResetDisplay != null) btnResetDisplay.onClick.AddListener(ResetDisplaySettings);
@@ -174,6 +176,21 @@ public class PauseMenuUI : MonoBehaviour
     // ✨ [핵심] 화면 설정 초기화 함수 (Start에서 호출)
     private void InitializeDisplaySettings()
     {
+        bool justForcedWindowed = false;
+        if (!PlayerPrefs.HasKey("IsFirstRun"))
+        {
+            // 1. 강제로 1920x1080 창모드 적용
+            Screen.SetResolution(1920, 1080, FullScreenMode.Windowed);
+
+            // 2. "나 이제 첫 실행 아니야"라고 도장 찍기
+            PlayerPrefs.SetInt("IsFirstRun", 1);
+            PlayerPrefs.Save();
+
+            justForcedWindowed = true;
+
+            Debug.Log("[시스템] 최초 실행 감지: 기본값을 1920x1080 창모드로 설정합니다.");
+        }
+
         // 1. 16:9 해상도만 필터링해서 리스트업
         validResolutions.Clear();
         Resolution[] allResolutions = Screen.resolutions;
@@ -227,6 +244,15 @@ public class PauseMenuUI : MonoBehaviour
 
         // 3. 토글 초기 상태 설정 (실제 화면 모드 반영)
         bool isFull = Screen.fullScreen;
+        if (justForcedWindowed)
+        {
+            isFull = false;
+        }
+        else
+        {
+            // 그게 아니라면 평소대로 유니티 설정을 가져옴
+            isFull = Screen.fullScreen;
+        }
         toggleFull.SetIsOnWithoutNotify(isFull);
         toggleWindow.SetIsOnWithoutNotify(!isFull);
 
@@ -407,7 +433,7 @@ public class PauseMenuUI : MonoBehaviour
     private void OnTitleButtonClicked()
     {
         PunchButton(btnGoToTitle);
-        if (quitWarningPanel != null) quitWarningPanel.SetActive(true);
+        if (quitWarningPanel != null) OpenQuitPopup();
         else MoveStartScene();
     }
 
@@ -419,7 +445,7 @@ public class PauseMenuUI : MonoBehaviour
 
     private void OnCancelQuit()
     {
-        if (quitWarningPanel != null) quitWarningPanel.SetActive(false);
+        CloseQuitPopup();
 
         PunchButton(btnCancelQuit);
     }
@@ -441,9 +467,9 @@ public class PauseMenuUI : MonoBehaviour
     // ✨ [NEW] 화면 설정 초기화 (FHD & 전체화면)
     public void ResetDisplaySettings()
     {
-        // 1. 전체화면으로 변경
-        if (toggleFull != null) toggleFull.isOn = true;
-        // (토글 리스너에 의해 toggleWindow는 자동으로 꺼짐)
+        // 1. 창모드로 변경
+        if (toggleWindow != null) toggleWindow.isOn = true;
+        if (toggleFull != null) toggleFull.isOn = false;
 
         // 2. 1920x1080 해상도 찾기
         int defaultIndex = -1;
@@ -478,7 +504,7 @@ public class PauseMenuUI : MonoBehaviour
 
         // (선택사항) 버튼 펀치 효과
         PunchButton(btnResetDisplay);
-        Debug.Log("[설정] 화면 설정을 권장 기본값(1920x1080, Full)으로 초기화했습니다.");
+        Debug.Log("[설정] 화면 설정을 권장 기본값(1920x1080, 창모드)으로 초기화했습니다.");
     }
 
     // (유틸) 버튼 클릭 효과
@@ -517,6 +543,41 @@ public class PauseMenuUI : MonoBehaviour
             if (panel == null) continue;
             var scrolls = panel.GetComponentsInChildren<ScrollRect>(true);
             foreach (var scroll in scrolls) scroll.verticalNormalizedPosition = 1f;
+        }
+    }
+    private void OpenQuitPopup()
+    {
+        if (quitWarningPanel != null)
+        {
+            quitWarningPanel.SetActive(true);
+
+            // 팝업 뿅! (시간이 멈춰있어도 작동하도록 SetUpdate(true) 필수)
+            if (quitWarningWindow != null)
+            {
+                quitWarningWindow.localScale = Vector3.zero;
+                quitWarningWindow.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetUpdate(true);
+            }
+        }
+    }
+
+    // ✨ [NEW] 팝업 닫기 애니메이션
+    private void CloseQuitPopup()
+    {
+        if (quitWarningPanel != null)
+        {
+            if (quitWarningWindow != null)
+            {
+                // 팝업 쏙! 사라짐
+                quitWarningWindow.DOScale(0f, 0.2f).SetEase(Ease.InBack).SetUpdate(true).OnComplete(() =>
+                {
+                    quitWarningPanel.SetActive(false);
+                });
+            }
+            else
+            {
+                // Window 연결 안 되어 있으면 그냥 끔
+                quitWarningPanel.SetActive(false);
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ title: TutorialSkip
     -> 예
         <<time_resume TutorialManager>>
         <<skip_tutorial TutorialManager>>
+        //Day1
     -> 아니오
         //<<jump DeliveryStep>>
         <<jump Tutorial>>
@@ -59,7 +60,8 @@ title: Tutorial
 
 뱁새: 아주 좋아요! 
 뱁새: 그러면 바로 어떤 일을 하면 되는지 설명해 드릴게요. 
-뱁새: 그리고 이미 보셨겠지만 2주 동안 가게를 잘 보시면 정직원이 되시는 거 알고 있으시죠?
+뱁새: 그리고 2주 동안 가게를 잘 보시면 정직원이 되시는 거 알고 있으시죠?
+뱁새: '가게를 잘 본다.'의 기준은 2주 동안의 매출로 결정될 거예요.
 뱁새: 좋은 분이신 것 같은데 저와 함께 가게를 잘 운영했으면 좋겠어요!
 
 나: 네. 열심히 해 보겠습니다!
@@ -140,7 +142,6 @@ title: Tutorial
 
 <<highlight Text_IncomeAndTax>>
 뱁새: 그리고 세금이 얼마나 나갔는지도 확인 할 수 있어요.
-뱁새: 돈이 부족해서 <b>세금</b>을 내지 못하면 장사를 할 수 없으니 잘 확인해 주세요.
 
 <<unhighlight>>
 뱁새: 이제 세금을 내고 재료를 사러 가볼까요? '세금 납부' 버튼을 눌러주세요.
@@ -163,7 +164,7 @@ title: Tutorial
 <<waitForMaraPlusClick>>
 
 //소스 선택 완료
-뱁새: 마라소스는 인기가 많죠!
+뱁새: 마라 소스는 인기가 많죠!
 <<set $Junk = setFace("idle")>>
 뱁새: 사기 위해 선택한 재료는 갈색 테두리로 표시돼요. 
 
@@ -224,6 +225,9 @@ title: TutorialEndOK
 ---
 <<set $Junk = setFace("smile")>>
 뱁새: 좋아요! 그러면 장사를 시작해 봐요!
+뱁새: 목표는 250만 원이에요.
+뱁새: 화이팅!
 <<time_resume TutorialManager>>
 <<complete_tutorial TutorialManager>>
+<<loadScene MainScene>>
 ===
