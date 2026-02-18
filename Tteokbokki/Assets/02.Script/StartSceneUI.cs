@@ -294,10 +294,19 @@ public class StartSceneUI : MonoBehaviour
     private void OnConfirmNewGame()
     {
         if (newGameWarningPanel != null) newGameWarningPanel.SetActive(false);
-        GameLoadFlags.shouldLoadFromSave = false;
+        switch (currentPopupAction)
+        {
+            case PopupAction.NewGame:
+                GameLoadFlags.shouldLoadFromSave = false;
+                DeleteSaveData();
+                // ✨ 로딩창 코루틴 시작
+                StartCoroutine(LoadSceneWithLoadingScreen(tutorialSceneName));
+                break;
 
-        // ✨ 로딩창 코루틴 시작
-        StartCoroutine(LoadSceneWithLoadingScreen(tutorialSceneName));
+            case PopupAction.DeleteSave:
+                DeleteSaveData();
+                break;
+        }
     }
 
     private void OnContinueButtonClicked()

@@ -13486,6 +13486,10 @@ PrefabInstance:
       propertyPath: blackCurtainImage
       value: 
       objectReference: {fileID: 1288627296}
+    - target: {fileID: 6200414214534396828, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
+      propertyPath: quitWarningWindow
+      value: 
+      objectReference: {fileID: 1289675521}
     - target: {fileID: 6282656122971609148, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -4.5

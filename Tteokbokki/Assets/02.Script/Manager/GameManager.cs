@@ -158,6 +158,11 @@ public class GameManager : MonoBehaviour
             ReceiptSystem.CurrentReceiptID = 1;
             //ReceiptSystem.CurrentOrderItemID = 1;
 
+            TotalSuccessCount = 0;
+            TotalMissedCount = 0;
+            ConsecutiveZeroSuccessDays = 0;
+            isBadEndingDay = false;
+
             if (GameLoadFlags.isTutorialJustFinished)
             {
                 // [Case 1] 튜토리얼 직접 깨고 옴
