@@ -42,6 +42,13 @@ public class StartSceneUI : MonoBehaviour
     [SerializeField] private GameObject newGameWarningPanel;
     [SerializeField] private Button warningConfirmButton;
     [SerializeField] private Button warningCancelButton;
+    [SerializeField] private RectTransform newGameWindow;
+
+    [Header("제작진(Credit) 팝업")]
+    [SerializeField] private Button btnShowCredits;      // 메인 화면의 '제작진/출처' 버튼
+    [SerializeField] private GameObject panelCredits;    // 팝업 패널 전체 (검은 배경 포함)
+    [SerializeField] private Button btnCloseCredits;     // 팝업 안의 'X' 닫기 버튼
+    [SerializeField] private RectTransform creditWindow; // (선택) 팝업 창 본체 (애니메이션용)
 
     [Header("✨ 로딩창 UI")]
     [SerializeField] private GameObject loadingPanel;    // 로딩 패널 전체
@@ -105,8 +112,19 @@ public class StartSceneUI : MonoBehaviour
             deleteSaveButton.onClick.AddListener(OnDeleteSaveButtonClicked);
 
         // 팝업 버튼은 이제 상황에 따라 다르게 동작함
-        if (warningConfirmButton != null) warningConfirmButton.onClick.AddListener(OnConfirmPopup);
-        if (warningCancelButton != null) warningCancelButton.onClick.AddListener(OnCancelPopup);
+        if (warningConfirmButton != null) warningConfirmButton.onClick.AddListener(OnConfirmNewGame);
+        if (warningCancelButton != null) warningCancelButton.onClick.AddListener(OnCancelNewGame);
+
+        // ✨ [NEW] 제작진 팝업 버튼 연결
+        if (btnShowCredits != null)
+            btnShowCredits.onClick.AddListener(OnShowCreditsClicked);
+
+        if (btnCloseCredits != null)
+            btnCloseCredits.onClick.AddListener(OnCloseCreditsClicked);
+
+        // 시작할 땐 꺼두기
+        if (panelCredits != null) panelCredits.SetActive(false);
+        if (newGameWarningPanel != null) newGameWarningPanel.SetActive(false);
 
         UpdateContinueDateLabel();
 
@@ -117,6 +135,46 @@ public class StartSceneUI : MonoBehaviour
 
             // 배경음악 재생 (볼륨은 매니저가 알아서 처리하므로 ID만 넘겨도 됨)
             AudioManager.Instance.PlayBGM(201, AudioManager.Instance.GetBGMVolume());
+        }
+    }
+
+    // ✨ [NEW] 팝업 열기
+    private void OnShowCreditsClicked()
+    {
+        if (panelCredits != null&& !panelCredits.activeSelf)
+        {
+            panelCredits.SetActive(true);
+
+            // (연출) 팝업 창이 '뿅' 하고 튀어나오는 효과
+            if (creditWindow != null)
+            {
+                creditWindow.localScale = Vector3.zero;
+                creditWindow.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+            }
+        }
+        else if (panelCredits != null && panelCredits.activeSelf)
+        {
+            OnCloseCreditsClicked();
+        }
+    }
+
+    // ✨ [NEW] 팝업 닫기
+    private void OnCloseCreditsClicked()
+    {
+        if (panelCredits != null)
+        {
+            // (연출) 팝업 창이 작아지면서 사라짐
+            if (creditWindow != null)
+            {
+                creditWindow.DOScale(0f, 0.2f).SetEase(Ease.InBack).OnComplete(() =>
+                {
+                    panelCredits.SetActive(false);
+                });
+            }
+            else
+            {
+                panelCredits.SetActive(false);
+            }
         }
     }
 
@@ -189,12 +247,47 @@ public class StartSceneUI : MonoBehaviour
         {
             // 새 게임인데 파일이 있음 -> 팝업 띄우고 목적 설정
             currentPopupAction = PopupAction.NewGame;
-            if (newGameWarningPanel != null) newGameWarningPanel.SetActive(true);
-            else StartNewGameRoutine(); // 팝업 없으면 바로 시작
+            OpenNewGamePopup();
         }
         else
         {
             StartNewGameRoutine();
+        }
+    }
+
+    // ✨ [NEW] 팝업 여는 함수 (애니메이션 추가)
+    private void OpenNewGamePopup()
+    {
+        if (newGameWarningPanel != null)
+        {
+            newGameWarningPanel.SetActive(true);
+
+            // 팝업 뿅! 등장
+            if (newGameWindow != null)
+            {
+                newGameWindow.localScale = Vector3.zero;
+                newGameWindow.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+            }
+        }
+    }
+
+    // ✨ [NEW] 취소 버튼 (애니메이션 닫기)
+    private void OnCancelNewGame()
+    {
+        if (newGameWarningPanel != null)
+        {
+            // 팝업 쏙! 사라짐
+            if (newGameWindow != null)
+            {
+                newGameWindow.DOScale(0f, 0.2f).SetEase(Ease.InBack).OnComplete(() =>
+                {
+                    newGameWarningPanel.SetActive(false);
+                });
+            }
+            else
+            {
+                newGameWarningPanel.SetActive(false);
+            }
         }
     }
 
@@ -270,11 +363,6 @@ public class StartSceneUI : MonoBehaviour
 
         // UI 즉시 갱신 (이어하기 버튼 비활성화됨)
         UpdateContinueDateLabel();
-    }
-
-    private void OnCancelNewGame()
-    {
-        if (newGameWarningPanel != null) newGameWarningPanel.SetActive(false);
     }
 
     // ✨ [핵심] 로딩 스크린 연출 코루틴

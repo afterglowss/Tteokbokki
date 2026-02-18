@@ -138,6 +138,11 @@ public class RandomReceiptGenerator : MonoBehaviour
         if (availableMenus.Count == 0)
         {
             Debug.LogWarning("재고로 조리 가능한 메뉴가 없습니다.");
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.TriggerEmergencyClose("재고로 조리 가능한 메뉴가 없습니다!");
+            }
             return;
         }
 

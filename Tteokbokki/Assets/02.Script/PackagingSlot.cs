@@ -139,6 +139,7 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
             PlayerWalletManager.Instance.AddIncome(totalIncome);
             if (bonus > 0)
                 Debug.Log($"[보너스] {bonus:N0}원 보너스 지급 (보너스 재료 포함)");
+            EffectManager.Instance.ShowMoneyPopup(gameObject.transform.position, totalIncome);
         }
 
         TooltipManager.Hide(TooltipType.Info); // 툴팁 숨기기

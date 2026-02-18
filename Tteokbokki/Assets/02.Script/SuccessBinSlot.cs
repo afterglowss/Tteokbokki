@@ -24,6 +24,7 @@ public class SuccessBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler,
             if (PlayerWalletManager.Instance != null)
             {
                 PlayerWalletManager.Instance.AddIncome(receipt.GetTotalPrice());
+                EffectManager.Instance.ShowMoneyPopup(gameObject.transform.position, receipt.GetTotalPrice());
             }
 
             // 3. 영수증 목록에서 제거 및 UI 파괴

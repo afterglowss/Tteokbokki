@@ -10,7 +10,7 @@ public class DailyBonusManager : MonoBehaviour
     private HashSet<string> todayBonusIngredients = new();    // 오늘 적용 중인 보너스 재료
     private HashSet<string> tomorrowBonusCandidates = new();  // 마감 시 보여줄 내일 보너스 재료
 
-    private const int bonusPerIngredient = 5000; // 1개 포함당 보너스 금액
+    public const int bonusPerIngredient = 5000; // 1개 포함당 보너스 금액
 
     public TextMeshProUGUI bonusText;
 
@@ -151,7 +151,7 @@ public class DailyBonusManager : MonoBehaviour
     }
 
     // ✨ [NEW] 로드용: 저장된 리스트 복원
-    public void RestoreBonusData(List<string> savedBonuses, int savedIndex)
+    public void RestoreBonusData(List<string> savedBonuses, int savedIndex, int savedAccumulatedBonus)
     {
         tomorrowBonusCandidates.Clear();
         if (savedBonuses != null)
@@ -162,8 +162,18 @@ public class DailyBonusManager : MonoBehaviour
             }
         }
 
-        CurrentBonusCycleIndex = savedIndex; // 순서 복원
+        CurrentBonusCycleIndex = savedIndex;
 
-        GetTomorrowBonusText(); // 텍스트 갱신
+        // 🚨 [핵심 수정] 로드 시점에는 StartOfDay가 안 돌기 때문에,
+        // 복구된 '내일 후보'를 '오늘 적용' 리스트에도 강제로 넣어줘야 합니다!
+        // (게임플레이 도중 저장/로드 시 today와 tomorrow는 동일하므로 안전합니다)
+        todayBonusIngredients = new HashSet<string>(tomorrowBonusCandidates);
+
+        // ✨ 누적 금액 복구
+        TodayAccumulatedBonus = savedAccumulatedBonus;
+
+        GetTomorrowBonusText();
+
+        Debug.Log($"[로드] 보너스 데이터 복구 완료. 오늘 재료: {string.Join(", ", todayBonusIngredients)}");
     }
 }

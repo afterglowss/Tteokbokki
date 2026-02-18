@@ -191,7 +191,9 @@ public class Receipt
     {
         if (MenuDatabase.Menus.ContainsKey(menuName))
         {
-            orders.Add(new OrderItem(MenuDatabase.Menus[menuName], extras));
+            int localID = orders.Count + 1;
+
+            orders.Add(new OrderItem(localID, MenuDatabase.Menus[menuName], extras));
         }
     }
 
@@ -239,7 +241,7 @@ public class Receipt
 
 public class OrderItem
 {
-    public static int OrderItemCounter = 1;
+    // public static int OrderItemCounter = 1;
     public int ItemID { get; }
     public MenuItem Menu { get; }
     private Dictionary<string, int> Extras { get; }  // 추가 재료 이름과 개수 저장
@@ -258,22 +260,22 @@ public class OrderItem
         }
     }
 
-    public OrderItem(MenuItem menu, Dictionary<string, int> extraCounts)
+    public OrderItem(int id, MenuItem menu, Dictionary<string, int> extraCounts)
     {
-        ItemID = OrderItemCounter++;
+        ItemID = id;
         Menu = menu;
         Extras = new Dictionary<string, int>(extraCounts);  // 추가 재료 저장
         IsCompleted = false;  // 초기엔 조리 전 상태
     }
 
     // ✨ [2] [NEW] 로드 전용 생성자 (번호표 안 뽑고 저장된 ID 사용)
-    public OrderItem(int loadedID, MenuItem menu, Dictionary<string, int> extraCounts)
-    {
-        ItemID = loadedID; // ✨ 저장된 ID를 그대로 사용 (카운터 증가 X)
-        Menu = menu;
-        Extras = new Dictionary<string, int>(extraCounts);
-        IsCompleted = false;
-    }
+    //public OrderItem(int loadedID, MenuItem menu, Dictionary<string, int> extraCounts)
+    //{
+    //    ItemID = loadedID; // ✨ 저장된 ID를 그대로 사용 (카운터 증가 X)
+    //    Menu = menu;
+    //    Extras = new Dictionary<string, int>(extraCounts);
+    //    IsCompleted = false;
+    //}
     public void MarkAsCompleted()
     {
         IsCompleted = true;
@@ -643,11 +645,11 @@ public class ReceiptSystem : MonoBehaviour
         set => Receipt.OrderCounter = value;
     }
 
-    public static int CurrentOrderItemID
-    {
-        get => OrderItem.OrderItemCounter;
-        set => OrderItem.OrderItemCounter = value;
-    }
+    //public static int CurrentOrderItemID
+    //{
+    //    get => OrderItem.OrderItemCounter;
+    //    set => OrderItem.OrderItemCounter = value;
+    //}
     public static ReceiptData ToData(Receipt receipt)
     {
         var data = new ReceiptData

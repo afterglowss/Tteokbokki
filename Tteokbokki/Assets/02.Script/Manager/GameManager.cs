@@ -156,7 +156,7 @@ public class GameManager : MonoBehaviour
         {
             // ✨ [핵심 수정] 새 게임 시작 시 주문 번호 초기화!
             ReceiptSystem.CurrentReceiptID = 1;
-            ReceiptSystem.CurrentOrderItemID = 1;
+            //ReceiptSystem.CurrentOrderItemID = 1;
 
             if (GameLoadFlags.isTutorialJustFinished)
             {
@@ -351,7 +351,7 @@ public class GameManager : MonoBehaviour
         ReceiptLineManager.Instance.ClearSuccessfulReceipts(); // 성공 영수증 리스트 초기화
 
         ReceiptSystem.CurrentReceiptID = 1; // 주문 번호 초기화
-        ReceiptSystem.CurrentOrderItemID = 1; // 메뉴 번호 초기화
+        //ReceiptSystem.CurrentOrderItemID = 1; // 메뉴 번호 초기화
 
         DailyBonusManager.Instance.ApplyNewDayBonus();
 
@@ -478,6 +478,7 @@ public class GameManager : MonoBehaviour
         if (StoveManager.Instance != null)
         {
             StoveManager.Instance.DeselectCurrentSlot();
+            StoveManager.Instance.ClearAllStoves();
         }
 
         // 2. 영수증 재료 정보창 끄기 (CombinedIngredientManager 스크롤뷰 꺼짐)
@@ -596,29 +597,55 @@ public class GameManager : MonoBehaviour
         EndOfDay();
     }
 
-    // ✨ [NEW] 재료 소진 시 강제 조기 마감
+    // ✨ [수정] 재료 소진 시 강제 조기 마감
     public void TriggerEmergencyClose(string reason)
     {
         // 1. 이미 마감 절차가 진행 중이라면 무시
         if (isEmergencyClosing || GameClock.isPaused || endOfDayPanel.activeSelf) return;
 
-        isEmergencyClosing = true; // ✨ 지금부터 마감 절차 시작함을 표시
+        isEmergencyClosing = true;
 
-        Debug.Log($"[긴급 마감] {reason} - 더 이상 조리가 불가능하여 영업을 종료합니다.");
+        Debug.Log($"[긴급 마감] {reason} - 재료 소진. 잔여 주문 처리 대기 중...");
 
-        // 2. 플레이어에게 이유를 알려줌 (툴팁 등)
-        TooltipManager.ShowFollowMouse(TooltipType.UI, $"{reason}\n잠시 후 영업을 조기 종료합니다...", 5f);
-
-        // 3. 주문 생성 즉시 중단
+        // 2. 주문 생성 즉시 중단
         OrderSpawner.Instance.StopSpawning();
 
-        StartCoroutine(DelayedEmergencyCloseRoutine());
-    }
-    private IEnumerator DelayedEmergencyCloseRoutine()
-    {
-        yield return new WaitForSeconds(5.0f); // 5초 대기 (플레이어가 툴팁 읽을 시간)
+        // 3. 안내 메시지
+        TooltipManager.ShowFollowMouse(TooltipType.UI, $"{reason}\n남은 주문을 처리하거나 시간이 지나면\n영업을 종료합니다.", 5f);
 
-        EndOfDay(); // 마감 정산 시작
+        // 4. 영수증 감시 코루틴 시작
+        StartCoroutine(WaitForReceiptsAndEmergencyClose());
+    }
+
+
+    private IEnumerator WaitForReceiptsAndEmergencyClose()
+    {
+        // 메시지 읽을 시간 3초 대기
+        yield return new WaitForSeconds(3.0f);
+
+        // 영수증이 하나라도 남아있다면 대기
+        while (ReceiptLineManager.Instance.GetReceiptSlots().Count > 0)
+        {
+            // 🚨 [주도권 이양] 만약 대기 중에 9시(21시)가 되었다면?
+            if (GameClock.gameTime.Hour >= GameClock.closingHour)
+            {
+                Debug.Log("[긴급 마감] 21시가 되어 정규 마감 로직으로 전환합니다.");
+
+                // 긴급 마감 플래그 해제 (정규 마감 로직이 방해받지 않도록)
+                isEmergencyClosing = false;
+
+                // 정규 마감 로직(OnClosingTimeReached)은 GameClock에 의해 자동 호출되므로
+                // 여기서는 긴급 마감 코루틴을 그냥 종료해버리면 됩니다.
+                yield break;
+            }
+
+            yield return new WaitForSeconds(1.0f);
+        }
+
+        // 여기까지 왔다면: 9시가 되기 전에 영수증을 모두 처리한 것임
+        Debug.Log("[긴급 마감] 모든 영수증이 처리되었습니다. 정산 시작!");
+
+        EndOfDay();
     }
 
     private void CheckFinalEnding()
@@ -635,6 +662,10 @@ public class GameManager : MonoBehaviour
         // 1. 재료 해금 개수 확인 (기본 재료 포함)
         int unlockedIngredientsCount = IngredientStockManager.Instance.GetPurchasedIngredientCount();
 
+        // ✨ [NEW] 현재 자산 가져오기
+        int currentBalance = PlayerWalletManager.Instance.CurrentBalance;
+        int targetBalance = 2500000; // 목표 금액: 250만 원
+
         Debug.Log($"최종 성적 - 성공률: {successRate:F1}% ({TotalSuccessCount}/{totalOrders}), 해금 재료: {unlockedIngredientsCount}개");
 
         // 2. 엔딩 분기
@@ -643,22 +674,31 @@ public class GameManager : MonoBehaviour
             // 배드 엔딩 2
             LoadEndingScene(badEnding2Scene);
         }
+        // ✨ [NEW] 2. 자산이 250만 원 미만이면 -> 배드 엔딩 2 (성공률이 좋아도 돈이 없음)
+        else if (currentBalance < targetBalance)
+        {
+            Debug.Log($"[엔딩] 자산 부족({currentBalance:N0} < {targetBalance:N0}) -> Bad Ending 2");
+            LoadEndingScene(badEnding2Scene);
+        }
+        // 3. (여기 온 시점에서 성공률 > 30%이고 자산 >= 250만 원임)
         else if (successRate <= 70f)
         {
-            // 노멀 엔딩 (성공률이 애매함)
+            // 성공률이 평범함 (31~70%) -> 노멀 엔딩
+            Debug.Log("[엔딩] 자산 충족, 성공률 평범 -> Normal Ending");
             LoadEndingScene(normalEndingScene);
         }
-        else // 71% 이상
+        else // 4. 성공률 높음 (71% 이상) + 자산 충족
         {
             if (unlockedIngredientsCount >= 15)
             {
-                // 해피 엔딩 (성공률도 높고, 재료도 많이 모음)
+                // 재료도 많이 모음 -> 해피 엔딩! 🎉
+                Debug.Log("[엔딩] 자산/성공률/재료 모두 충족 -> Happy Ending!");
                 LoadEndingScene(happyEndingScene);
             }
             else
             {
-                // 노멀 엔딩 (성공률은 높지만, 재료가 부족함 = 쫄보 플레이)
-                Debug.Log("성공률은 높으나 재료 해금 부족으로 노멀 엔딩 진입");
+                // 실력과 돈은 있으나 쫄보 플레이(재료 해금 부족) -> 노멀 엔딩
+                Debug.Log("[엔딩] 성공률/자산은 높으나 재료 해금 부족 -> Normal Ending");
                 LoadEndingScene(normalEndingScene);
             }
         }

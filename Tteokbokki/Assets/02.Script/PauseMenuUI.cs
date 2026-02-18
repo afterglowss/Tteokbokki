@@ -129,7 +129,7 @@ public class PauseMenuUI : MonoBehaviour
         }
         else
         {
-            if (saveButtonObj != null) saveButtonObj.SetActive(true);
+            if (saveButtonObj != null && !isMainMenu) saveButtonObj.SetActive(true);
         }
     }
 

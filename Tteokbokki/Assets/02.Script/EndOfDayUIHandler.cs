@@ -447,7 +447,7 @@ public class EndOfDayUIHandler : MonoBehaviour
             if (AudioManager.Instance != null)
                 AudioManager.Instance.PlaySFX(116);
 
-            closeSeq.Append(shutterRect.DOAnchorPos(Vector2.zero, shutterMoveDuration).SetEase(Ease.OutCubic));
+            closeSeq.Append(shutterRect.DOAnchorPos(Vector2.zero, shutterMoveDuration).SetEase(Ease.OutBounce));
         }
         //Tutorial중이라면 중단
         if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial)

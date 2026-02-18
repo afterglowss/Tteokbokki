@@ -23,6 +23,7 @@ public class GameSaveData
     public bool isTutorialCompleted;
     public List<string> tomorrowBonusCandidates;
     public int bonusCycleIndex;
+    public int todayAccumulatedBonus;
 
     public bool isEndOfDayPanelActive;
 
@@ -72,6 +73,7 @@ public class GameSaveManager : MonoBehaviour
             isTutorialCompleted = this.IsTutorialCompleted,
             tomorrowBonusCandidates = DailyBonusManager.Instance.GetTomorrowBonusForSave(),
             bonusCycleIndex = DailyBonusManager.Instance.CurrentBonusCycleIndex,
+            todayAccumulatedBonus = DailyBonusManager.Instance.TodayAccumulatedBonus,
 
             isEndOfDayPanelActive = GameManager.Instance.endOfDayPanel.activeSelf,
 
@@ -95,7 +97,7 @@ public class GameSaveManager : MonoBehaviour
         }
 
         data.lastReceiptID = ReceiptSystem.CurrentReceiptID;
-        data.lastOrderItemID = ReceiptSystem.CurrentOrderItemID;
+        //data.lastOrderItemID = ReceiptSystem.CurrentOrderItemID;
         data.receiptSlots = ReceiptLineManager.Instance.GetCurrentReceiptSlots();
         data.pendingReceipts = ReceiptLineManager.Instance.GetPendingReceiptsData();
         data.missedReceipts = ReceiptSystem.GetMissedReceiptsData();
@@ -131,7 +133,12 @@ public class GameSaveManager : MonoBehaviour
         if (DailyBonusManager.Instance != null)
         {
             // ✨ [NEW] 보너스 후보 + 순서(Cycle) 복원
-            DailyBonusManager.Instance.RestoreBonusData(data.tomorrowBonusCandidates, data.bonusCycleIndex);
+            // ✨ [수정] 저장된 누적 금액(todayAccumulatedBonus)도 같이 넘겨줌
+            DailyBonusManager.Instance.RestoreBonusData(
+                data.tomorrowBonusCandidates,
+                data.bonusCycleIndex,
+                data.todayAccumulatedBonus
+            );
         }
 
         // 화구 복원
@@ -143,7 +150,7 @@ public class GameSaveManager : MonoBehaviour
         ReceiptLineManager.Instance.RestoreReceiptSlots(data.receiptSlots);
 
         ReceiptSystem.CurrentReceiptID = data.lastReceiptID;
-        ReceiptSystem.CurrentOrderItemID = data.lastOrderItemID;
+        //ReceiptSystem.CurrentOrderItemID = data.lastOrderItemID;
         ReceiptSystem.RestoreReceipts(data.missedReceipts, data.successfulReceipts);
         ReceiptLineManager.Instance.RestorePendingReceipts(data.pendingReceipts);
 

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -11,25 +11,25 @@ public class GameDataLogger : MonoBehaviour
 
     private string filePath;
 
-    // === [ÀÏÀÏ µ¥ÀÌÅÍ ÀúÀå¼Ò] ===
-    // 1. °æÁ¦
+    // === [ì¼ì¼ ë°ì´í„° ì €ì¥ì†Œ] ===
+    // 1. ê²½ì œ
     public int DayStartBalance { get; private set; }
     public int ExpenseTax { get; private set; }
     public int ExpenseShopping { get; private set; }
     public int IncomeBonus { get; private set; }
 
-    // 2. °ÔÀÓÇÃ·¹ÀÌ (ÁÖ¹® ½ÇÆĞ ¿äÀÎ Ä«¿îÆ®)
+    // 2. ê²Œì„í”Œë ˆì´ (ì£¼ë¬¸ ì‹¤íŒ¨ ìš”ì¸ ì¹´ìš´íŠ¸)
     public int FailTimeoutCount { get; private set; }
     public int FailMistakeCount { get; private set; }
-    public int FailTrashCount { get; private set; } // ¿µ¼öÁõ ÈŞÁöÅë °ÅÀı
+    public int FailTrashCount { get; private set; } // ì˜ìˆ˜ì¦ íœ´ì§€í†µ ê±°ì ˆ
 
-    // 3. Àç·á Åë°è (Key: Àç·á¸í)
+    // 3. ì¬ë£Œ í†µê³„ (Key: ì¬ë£Œëª…)
     public class IngredientDailyStat
     {
-        public int Used;   // ³¿ºñ¿¡ ³ÖÀº È½¼ö (ÃÑ »ç¿ë·®)
-        public int Sold;   // ¼º°øÇÑ ÁÖ¹®¿¡ Æ÷ÇÔµÇ¾î ³ª°£ ¾ç
-        public int Bought; // ¿À´Ã ±¸¸ÅÇÑ ¾ç
-        // Waste = Used - Sold ·Î °è»ê
+        public int Used;   // ëƒ„ë¹„ì— ë„£ì€ íšŸìˆ˜ (ì´ ì‚¬ìš©ëŸ‰)
+        public int Sold;   // ì„±ê³µí•œ ì£¼ë¬¸ì— í¬í•¨ë˜ì–´ ë‚˜ê°„ ì–‘
+        public int Bought; // ì˜¤ëŠ˜ êµ¬ë§¤í•œ ì–‘
+        // Waste = Used - Sold ë¡œ ê³„ì‚°
     }
     private Dictionary<string, IngredientDailyStat> dailyIngredientStats = new Dictionary<string, IngredientDailyStat>();
 
@@ -42,12 +42,12 @@ public class GameDataLogger : MonoBehaviour
         }
         Instance = this;
 
-        // ÆÄÀÏ °æ·Î: C:/Users/»ç¿ëÀÚ¸í/AppData/LocalLow/È¸»ç¸í/°ÔÀÓ¸í/GamePlayLog.csv
+        // íŒŒì¼ ê²½ë¡œ: C:/Users/ì‚¬ìš©ìëª…/AppData/LocalLow/íšŒì‚¬ëª…/ê²Œì„ëª…/GamePlayLog.csv
         filePath = Path.Combine(Application.persistentDataPath, "GamePlayLog.csv");
-        Debug.Log($"[Logger] ·Î±× ÆÄÀÏ °æ·Î: {filePath}");
+        Debug.Log($"[Logger] ë¡œê·¸ íŒŒì¼ ê²½ë¡œ: {filePath}");
     }
 
-    // ÇÏ·ç ½ÃÀÛ ½Ã ÃÊ±âÈ­ (GameManager.StartOfDay¿¡¼­ È£Ãâ)
+    // í•˜ë£¨ ì‹œì‘ ì‹œ ì´ˆê¸°í™” (GameManager.StartOfDayì—ì„œ í˜¸ì¶œ)
     public void StartNewDayLog(int currentBalance)
     {
         DayStartBalance = currentBalance;
@@ -62,7 +62,7 @@ public class GameDataLogger : MonoBehaviour
         dailyIngredientStats.Clear();
     }
 
-    // === [µ¥ÀÌÅÍ ¼öÁı¿ë ÇÔ¼öµé] ===
+    // === [ë°ì´í„° ìˆ˜ì§‘ìš© í•¨ìˆ˜ë“¤] ===
     public void AddTaxExpense(int amount) => ExpenseTax += amount;
     public void AddShoppingExpense(int amount) => ExpenseShopping += amount;
     public void AddBonusIncome(int amount) => IncomeBonus += amount;
@@ -77,19 +77,19 @@ public class GameDataLogger : MonoBehaviour
         }
     }
 
-    // Àç·á »ç¿ë ½Ã (³¿ºñ ÅõÀÔ)
+    // ì¬ë£Œ ì‚¬ìš© ì‹œ (ëƒ„ë¹„ íˆ¬ì…)
     public void LogIngredientUsed(string ingredientName, int count = 1)
     {
         GetStat(ingredientName).Used += count;
     }
 
-    // Àç·á ÆÇ¸Å ½Ã (ÁÖ¹® ¼º°ø ½Ã ¿µ¼öÁõ ³»¿ë ºĞ¼®ÇØ¼­ È£Ãâ)
+    // ì¬ë£Œ íŒë§¤ ì‹œ (ì£¼ë¬¸ ì„±ê³µ ì‹œ ì˜ìˆ˜ì¦ ë‚´ìš© ë¶„ì„í•´ì„œ í˜¸ì¶œ)
     public void LogIngredientSold(string ingredientName, int count = 1)
     {
         GetStat(ingredientName).Sold += count;
     }
 
-    // Àç·á ±¸¸Å ½Ã
+    // ì¬ë£Œ êµ¬ë§¤ ì‹œ
     public void LogIngredientBought(string ingredientName, int count)
     {
         GetStat(ingredientName).Bought += count;
@@ -102,45 +102,44 @@ public class GameDataLogger : MonoBehaviour
         return dailyIngredientStats[name];
     }
 
-    // === [CSV ÀúÀå ÇÙ½É ·ÎÁ÷] ===
-    // GameManager.EndOfDay ¸¶Áö¸·¿¡ È£Ãâ
+    // === [CSV ì €ì¥ í•µì‹¬ ë¡œì§] ===
+    // GameManager.EndOfDay ë§ˆì§€ë§‰ì— í˜¸ì¶œ
     public void SaveDailyLog()
     {
         StringBuilder sb = new StringBuilder();
 
-        // 1. Çì´õ(Header) ÀÛ¼º (ÆÄÀÏÀÌ ¾ø°Å³ª ºñ¾îÀÖÀ» ¶§¸¸)
+        List<string> allDbKeys = GetSortedIngredientKeys();
+
+        // 1. í—¤ë”(Header) ì‘ì„± (íŒŒì¼ì´ ì—†ê±°ë‚˜ ë¹„ì–´ìˆì„ ë•Œë§Œ)
         if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
         {
-            sb.Append("Day,Date,"); // A. ±âº»
-            sb.Append("Balance_Start,Income_Sales,Income_Bonus,Expense_Tax,Expense_Shopping,Balance_End,Opportunity_Loss,"); // B. °æÁ¦
-            sb.Append("Order_Total,Order_Success,Order_Fail_Total,Order_Fail_Timeout,Order_Fail_Mistake,Order_Fail_Trash,Success_Rate,"); // C. ÇÃ·¹ÀÌ
-            sb.Append("Cumul_Success_Rate,Unlocked_Ing_Count,Consecutive_Zero_Days,"); // D. ¿£µù
+            sb.Append("Day,Date,"); // A. ê¸°ë³¸
+            sb.Append("Balance_Start,Income_Sales,Income_Bonus,Expense_Tax,Expense_Shopping,Balance_End,Opportunity_Loss,"); // B. ê²½ì œ
+            sb.Append("Order_Total,Order_Success,Order_Fail_Total,Order_Fail_Timeout,Order_Fail_Mistake,Order_Fail_Trash,Success_Rate,"); // C. í”Œë ˆì´
+            sb.Append("Cumul_Success_Rate,Unlocked_Ing_Count,Consecutive_Zero_Days,"); // D. ì—”ë”©
 
-            // Àç·á Çì´õ´Â µ¿ÀûÀ¸·Î »ı¼ºÇÏÁö ¾Ê°í, ÀÏ´Ü Used/Sold/Waste/Bought ¹İº¹µÈ´Ù°í °¡Á¤ÇÏ°Å³ª
-            // ÁÖ¿ä Àç·áµé¸¸ °íÁ¤ÇØ¼­ ³Ö´Â °Ô ÁÁÁö¸¸, ¿©±â¼± ¼öÁıµÈ ¼ø¼­´ë·Î ±â·ÏÇÕ´Ï´Ù.
-            // (½ÇÁ¦ ºĞ¼® ½Ã¿£ DBÀÇ ¸ğµç Å°¸¦ ±âÁØÀ¸·Î Çì´õ¸¦ ¹Ì¸® ¸¸µå´Â °Ô ÁÁ½À´Ï´Ù)
-            var allKeys = GetSortedIngredientKeys();
-            foreach (var ing in allKeys)
+            // âœ¨ [ìˆ˜ì •] ìˆ˜ì§‘ëœ ì¬ë£Œê°€ ì•„ë‹ˆë¼, 'ì „ì²´ DB í‚¤'ë¥¼ ìˆœì„œëŒ€ë¡œ ìˆœíšŒí•˜ë©° í—¤ë” ìƒì„±
+            foreach (var ing in allDbKeys)
             {
                 sb.Append($"{ing}_Used,{ing}_Sold,{ing}_Waste,{ing}_Bought,");
             }
             sb.AppendLine();
         }
 
-        // 2. °ª(Value) Ã¤¿ì±â
-        // [A] ±âº» Á¤º¸
+        // 2. ê°’(Value) ì±„ìš°ê¸°
+        // [A] ê¸°ë³¸ ì •ë³´
         int day = GetDayCount();
         string date = GameClock.gameTime.ToString("yyyy-MM-dd");
         sb.Append($"{day},{date},");
 
-        // [B] °æÁ¦
+        // [B] ê²½ì œ
         int sales = ReceiptLineManager.Instance.GetTotalSuccessfulAmount();
         int balanceEnd = PlayerWalletManager.Instance.CurrentBalance;
-        int oppLoss = ReceiptLineManager.Instance.GetTotalMissedAmount(); // ±âÈ¸ ºñ¿ë
+        int oppLoss = ReceiptLineManager.Instance.GetTotalMissedAmount(); // ê¸°íšŒ ë¹„ìš©
 
         sb.Append($"{DayStartBalance},{sales},{IncomeBonus},{ExpenseTax},{ExpenseShopping},{balanceEnd},{oppLoss},");
 
-        // [C] ÇÃ·¹ÀÌ
+        // [C] í”Œë ˆì´
         int successCount = ReceiptLineManager.Instance.GetSuccessfulReceipts().Count;
         int failTotal = FailTimeoutCount + FailMistakeCount + FailTrashCount;
         int totalOrders = successCount + failTotal;
@@ -148,7 +147,7 @@ public class GameDataLogger : MonoBehaviour
 
         sb.Append($"{totalOrders},{successCount},{failTotal},{FailTimeoutCount},{FailMistakeCount},{FailTrashCount},{successRate:F1}%,");
 
-        // [D] ¿£µù
+        // [D] ì—”ë”©
         int totalSuccess = GameManager.Instance.TotalSuccessCount;
         int totalMissed = GameManager.Instance.TotalMissedCount;
         float cumulRate = (totalSuccess + totalMissed) > 0
@@ -159,32 +158,34 @@ public class GameDataLogger : MonoBehaviour
 
         sb.Append($"{cumulRate:F1}%,{unlockedCount},{zeroDays},");
 
-        // [E] Àç·á »ó¼¼
-        var sortedKeys = GetSortedIngredientKeys();
-        foreach (var key in sortedKeys)
+        // [E] ì¬ë£Œ ìƒì„¸ (ì—¬ê¸°ê°€ í•µì‹¬!)
+        // âœ¨ [ìˆ˜ì •] ìˆ˜ì§‘ëœ statsê°€ ì•„ë‹ˆë¼, ìœ„ì—ì„œ ê°€ì ¸ì˜¨ 'ì „ì²´ DB í‚¤(allDbKeys)'ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ìˆœíšŒí•©ë‹ˆë‹¤.
+        foreach (var key in allDbKeys)
         {
+            // ë§Œì•½ ì˜¤ëŠ˜ ê¸°ë¡ëœ ë°ì´í„°ê°€ ìˆë‹¤ë©´ ê·¸ ê°’ì„ ì“°ê³ ,
             if (dailyIngredientStats.ContainsKey(key))
             {
                 var s = dailyIngredientStats[key];
-                int waste = s.Used - s.Sold; // ³¶ºñ·® = »ç¿ë·® - ÆÇ¸Å·®
+                int waste = s.Used - s.Sold; // ë‚­ë¹„ëŸ‰ = ì‚¬ìš©ëŸ‰ - íŒë§¤ëŸ‰
                 sb.Append($"{s.Used},{s.Sold},{waste},{s.Bought},");
             }
+            // âœ¨ ê¸°ë¡ëœ ê²Œ ì—†ë‹¤ë©´(ì˜¤ëŠ˜ ì•ˆ ì”€/ì•ˆ ì‚¼) 0,0,0,0ì„ ì±„ì›Œ ë„£ì–´ ì¹¸ì„ ìœ ì§€í•©ë‹ˆë‹¤.
             else
             {
-                sb.Append("0,0,0,0,"); // µ¥ÀÌÅÍ ¾øÀ¸¸é 0 Ã³¸®
+                sb.Append("0,0,0,0,");
             }
         }
         sb.AppendLine();
 
-        // 3. ÆÄÀÏ ¾²±â
+        // 3. íŒŒì¼ ì“°ê¸°
         try
         {
             File.AppendAllText(filePath, sb.ToString(), Encoding.UTF8);
-            Debug.Log($"[Logger] ¹ë·±½Ì µ¥ÀÌÅÍ ÀúÀå ¿Ï·á: {filePath}");
+            Debug.Log($"[Logger] ë°¸ëŸ°ì‹± ë°ì´í„° ì €ì¥ ì™„ë£Œ: {filePath}");
         }
         catch (Exception e)
         {
-            Debug.LogError($"[Logger] µ¥ÀÌÅÍ ÀúÀå ½ÇÆĞ: {e.Message}");
+            Debug.LogError($"[Logger] ë°ì´í„° ì €ì¥ ì‹¤íŒ¨: {e.Message}");
         }
     }
 
@@ -197,7 +198,6 @@ public class GameDataLogger : MonoBehaviour
 
     private List<string> GetSortedIngredientKeys()
     {
-        // DB¿¡ ÀÖ´Â ¸ğµç Å°¸¦ °¡Á®¿Í¼­ Á¤·Ä (Ç×»ó °°Àº ÄÃ·³ ¼ø¼­ À¯Áö¸¦ À§ÇØ)
-        return IngredientEconomyDatabase.Data.Keys.OrderBy(k => k).ToList();
+        return IngredientEconomyDatabase.SortOrder;
     }
 }
