@@ -82,7 +82,7 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
         }
     }
 
-    public void HandleReceiptDrop(ReceiptLineItem receiptItem)
+    public bool HandleReceiptDrop(ReceiptLineItem receiptItem)
     {
         var receipt = receiptItem.GetReceipt();
 
@@ -93,7 +93,7 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
 
             // 복귀를 위해 원래 위치로 돌려놓기
             receiptItem.ReturnToOriginalPosition();
-            return;
+            return false;
         }
 
         // 내부 음식 재료 목록 추출
@@ -139,22 +139,27 @@ public class PackagingSlot : MonoBehaviour, IDropHandler
             PlayerWalletManager.Instance.AddIncome(totalIncome);
             if (bonus > 0)
                 Debug.Log($"[보너스] {bonus:N0}원 보너스 지급 (보너스 재료 포함)");
+            EffectManager.Instance.ShowMoneyPopup(gameObject.transform.position, totalIncome);
         }
 
         TooltipManager.Hide(TooltipType.Info); // 툴팁 숨기기
         foreach (var food in stackedFoods)
-            Destroy(food.gameObject);
+        {
+            if (food != null) Destroy(food.gameObject);
+        }
 
         stackedFoods.Clear();
 
         // 영수증 UI 제거
-        Destroy(receiptItem.gameObject);
+        // Destroy(receiptItem.gameObject);
 
-        receiptItem.OnEndDrag();
+        //receiptItem.OnEndDrag();
         ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
 
         // (선택사항: 성공/실패 피드백)
         Debug.Log(success ? $"영수증 {receipt.OrderID} 처리 성공!" : $"영수증 {receipt.OrderID} 처리 실패 - 기록됨");
+
+        return true;
     }
 
     private bool MatchAllMenusInReceipt(Receipt receipt, List<Dictionary<string, int>> cookedFoods)

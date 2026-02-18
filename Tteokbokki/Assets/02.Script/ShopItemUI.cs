@@ -91,7 +91,7 @@ public class ShopItemUI : MonoBehaviour
         onCountChanged?.Invoke();
     }
 
-    private void OnPlusClick()
+    public void OnPlusClick()
     {
         // ✨ [NEW] 3개 제한 체크
         if (CurrentCount >= MAX_QUANTITY)

@@ -172,6 +172,12 @@ public class ReceiptLineItem : MonoBehaviour
 
             AudioManager.Instance.PlaySFX(118);
 
+            // ✨ [NEW] 타임아웃 로그 기록
+            if (GameDataLogger.Instance != null)
+            {
+                GameDataLogger.Instance.CountFail("Timeout");
+            }
+
             ReceiptLineManager.Instance.RecordFailedReceipt(receipt);
             manager.RemoveReceipt(this);
             return;

@@ -111,8 +111,19 @@ public class PackagingAreaManager : MonoBehaviour
             {
                 var obj = Instantiate(foodPrefab, slot.foodStackParent);
                 var foodUI = obj.GetComponent<CookedFoodUI>();
+
+                string menuName = PlayerWokManager.Instance.IdentifyMenu(ingredients);
+                Sprite finishedSprite = null;
+                if (StoveManager.Instance != null)
+                {
+                    finishedSprite = (menuName == "Invalid" || menuName == "Ruined")
+                        ? StoveManager.Instance.ruinedFinishedSprite
+                        : StoveManager.Instance.GetFinishedSprite(menuName);
+                }
+
                 foodUI.Initialize(ingredients);
                 foodUI.currentSlot = slot;
+                foodUI.SwitchToPackedState(true);
 
                 slot.ForceAddFoodToStack(foodUI); // 자동 정렬
             }

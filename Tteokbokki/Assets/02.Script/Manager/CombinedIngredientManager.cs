@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class CombinedIngredientManager : MonoBehaviour
 {
     public TextMeshProUGUI combinedIngredientsText;  // UI 연결 (Inspector에서 할당)
+    public TextMeshProUGUI totalPriceText;
 
     // ✨ [NEW] 텍스트가 포함된 ScrollView 오브젝트 (Inspector 연결)
     public GameObject recipeScrollView;
@@ -86,15 +87,46 @@ public class CombinedIngredientManager : MonoBehaviour
         // 예: "[14:30] 주문번호 1의 메뉴별 재료"
         string result = $"[{timeStr}] 주문번호 {receipt.OrderID}\n\n";
 
+        int totalBasePrice = receipt.GetTotalPrice();
+        int totalBonusAmount = 0;
+
         foreach (var order in receipt.GetOrders())
         {
             var combined = GetCombinedIngredients(order.Menu, order.GetExtras());
             result += $"[{order.ItemID}] {order.Menu.Name}\n";
             result += GetIngredientsText(combined);
             result += "\n";
+
+            // 2. 보너스 재료 체크 및 합산
+            foreach (var kv in combined)
+            {
+                string ingredientName = kv.Key;
+                int count = kv.Value;
+
+                // 오늘 보너스 재료라면?
+                if (DailyBonusManager.Instance != null &&
+                    DailyBonusManager.Instance.IsBonusIngredient(ingredientName))
+                {
+                    totalBonusAmount += (count * DailyBonusManager.bonusPerIngredient);
+                }
+            }
         }
 
-        combinedIngredientsText.text = result;
+        combinedIngredientsText.text = result;// ✨ [UI 갱신] 총 금액 표시
+        if (totalPriceText != null)
+        {
+            int finalTotal = totalBasePrice + totalBonusAmount;
+
+            // 보너스가 있으면 괄호로 강조해서 보여줌
+            if (totalBonusAmount > 0)
+            {
+                totalPriceText.text = $"총 주문 금액: <color=#FF5555>{finalTotal:N0}원</color>\n<size=70%>(기본 {totalBasePrice:N0} + <color=#FF5555>보너스 {totalBonusAmount:N0}</color>)</size>";
+            }
+            else
+            {
+                totalPriceText.text = $"총 주문 금액: {finalTotal:N0}원";
+            }
+        }
     }
 
     private IEnumerator ResetScrollCoroutine()
@@ -114,5 +146,6 @@ public class CombinedIngredientManager : MonoBehaviour
 
         // 2. 스크롤뷰 전체 비활성화
         if (recipeScrollView != null) recipeScrollView.SetActive(false);
+        if (totalPriceText != null) totalPriceText.text = "";
     }
 }

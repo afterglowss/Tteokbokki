@@ -191,7 +191,19 @@ public class Receipt
     {
         if (MenuDatabase.Menus.ContainsKey(menuName))
         {
-            orders.Add(new OrderItem(MenuDatabase.Menus[menuName], extras));
+            int localID = orders.Count + 1;
+
+            orders.Add(new OrderItem(localID, MenuDatabase.Menus[menuName], extras));
+        }
+    }
+
+    // ✨ [2] [NEW] 로드된 주문 추가 (ID 포함)
+    public void AddLoadedOrder(int orderItemID, string menuName, Dictionary<string, int> extras)
+    {
+        if (MenuDatabase.Menus.ContainsKey(menuName))
+        {
+            // 로드 전용 생성자 호출
+            orders.Add(new OrderItem(orderItemID, MenuDatabase.Menus[menuName], extras));
         }
     }
 
@@ -229,7 +241,7 @@ public class Receipt
 
 public class OrderItem
 {
-    public static int OrderItemCounter = 1;
+    // public static int OrderItemCounter = 1;
     public int ItemID { get; }
     public MenuItem Menu { get; }
     private Dictionary<string, int> Extras { get; }  // 추가 재료 이름과 개수 저장
@@ -248,13 +260,22 @@ public class OrderItem
         }
     }
 
-    public OrderItem(MenuItem menu, Dictionary<string, int> extraCounts)
+    public OrderItem(int id, MenuItem menu, Dictionary<string, int> extraCounts)
     {
-        ItemID = OrderItemCounter++;
+        ItemID = id;
         Menu = menu;
         Extras = new Dictionary<string, int>(extraCounts);  // 추가 재료 저장
         IsCompleted = false;  // 초기엔 조리 전 상태
     }
+
+    // ✨ [2] [NEW] 로드 전용 생성자 (번호표 안 뽑고 저장된 ID 사용)
+    //public OrderItem(int loadedID, MenuItem menu, Dictionary<string, int> extraCounts)
+    //{
+    //    ItemID = loadedID; // ✨ 저장된 ID를 그대로 사용 (카운터 증가 X)
+    //    Menu = menu;
+    //    Extras = new Dictionary<string, int>(extraCounts);
+    //    IsCompleted = false;
+    //}
     public void MarkAsCompleted()
     {
         IsCompleted = true;
@@ -624,11 +645,11 @@ public class ReceiptSystem : MonoBehaviour
         set => Receipt.OrderCounter = value;
     }
 
-    public static int CurrentOrderItemID
-    {
-        get => OrderItem.OrderItemCounter;
-        set => OrderItem.OrderItemCounter = value;
-    }
+    //public static int CurrentOrderItemID
+    //{
+    //    get => OrderItem.OrderItemCounter;
+    //    set => OrderItem.OrderItemCounter = value;
+    //}
     public static ReceiptData ToData(Receipt receipt)
     {
         var data = new ReceiptData
@@ -642,6 +663,7 @@ public class ReceiptSystem : MonoBehaviour
         {
             var orderData = new OrderItemData
             {
+                ItemID = order.ItemID,
                 MenuName = order.Menu.Name,
                 BasePrice = order.Menu.BasePrice,
                 Extras = new List<KeyValueStringInt>()
@@ -672,8 +694,16 @@ public class ReceiptSystem : MonoBehaviour
             {
                 extras[kv.Key] = kv.Value;
             }
-
-            receipt.AddOrder(orderData.MenuName, extras);
+            // ✨ [NEW] 로드할 때: 저장된 ID가 0보다 크면 '로드 전용 함수' 사용
+            if (orderData.ItemID > 0)
+            {
+                receipt.AddLoadedOrder(orderData.ItemID, orderData.MenuName, extras);
+            }
+            else
+            {
+                // (혹시 예전 세이브파일이라 ID가 없으면) 기존 방식 사용
+                receipt.AddOrder(orderData.MenuName, extras);
+            }
         }
 
         return receipt;

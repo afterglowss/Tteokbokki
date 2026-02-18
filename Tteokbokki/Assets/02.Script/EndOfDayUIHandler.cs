@@ -61,6 +61,11 @@ public class EndOfDayUIHandler : MonoBehaviour
     // ✨ 현재 활성화된 패널 추적용
     private GameObject currentActivePanel;
 
+    private bool hasShownBonusDialogue = false;
+
+    public bool IsShutterAnimating { get; private set; } = false;
+    private bool isShutterMode = false;
+
     private void Awake()
     {
         if (blackCurtainImage != null) blackCurtainImage.gameObject.SetActive(false);
@@ -107,7 +112,19 @@ public class EndOfDayUIHandler : MonoBehaviour
 
     private void OnEnable()
     {
+        // ✨ [핵심 수정] 셔터 애니메이션 모드라면, 정산 데이터 초기화를 하지 않고 나갑니다.
+        if (isShutterMode)
+        {
+            // 패널들이 혹시 켜져있다면 확실하게 끕니다.
+            if (panelSettlement != null) panelSettlement.SetActive(false);
+            if (panelShop != null) panelShop.SetActive(false);
+            if (panelClosing != null) panelClosing.SetActive(false);
+            return;
+        }
+
         InitializeSettlementData(animate: true);
+
+        hasShownBonusDialogue = false;
 
         // ✨ [핵심 수정] 켜지자마자 크기를 0으로 만듭니다!
         // 딜레이(0.1초) 동안 원본 크기로 보이는 것을 방지합니다.
@@ -260,7 +277,7 @@ public class EndOfDayUIHandler : MonoBehaviour
             }
         }
 
-        int grossIncome = PlayerWalletManager.Instance.TodayEarnedAmount;
+        int grossIncome = successTotal + bonusTotal;
         float taxRate = 0.1f;
         currentTaxAmount = Mathf.RoundToInt(grossIncome * taxRate);
         int netIncome = grossIncome - currentTaxAmount;
@@ -402,6 +419,8 @@ public class EndOfDayUIHandler : MonoBehaviour
 
         PunchButton(buttonFinalClose); // 눌림 효과
 
+        IsShutterAnimating = true;
+
         Debug.Log("[마감] 영업 종료. 셔터 연출 시작");
         buttonFinalClose.interactable = false;
 
@@ -442,14 +461,24 @@ public class EndOfDayUIHandler : MonoBehaviour
         if (blackCurtainImage != null) closeSeq.Join(blackCurtainImage.DOFade(0f, 0.3f));
 
         // ✨ [핵심 수정] 셔터가 내려간 뒤, '다음 날 세팅(StartOfDay)'을 하고 나서 바로 저장!
+
+        gameObject.SetActive(false);
+
         closeSeq.AppendCallback(() =>
         {
-            // 1. 날짜 변경, 화구 초기화, 데일리 보너스 적용 등 '내일' 준비
+
+            // ✨ [NEW] "이제 정산 끝났어!"라고 명시적으로 알려줍니다.
+            // 이걸 안 하면 SaveGame()이 "어 아직 정산 중인가 봐" 하고 마감 창 켜진 상태로 저장해버립니다.
+            if (GameSaveManager.Instance != null)
+            {
+                GameSaveManager.Instance.IsSettlementPhase = false;
+            }
+
+
+            // 1. 날짜 변경, 화구 초기화 등 '내일' 준비
             GameManager.Instance.StartOfDay();
 
-            // 2. ✨ [NEW] 다음 날 상태로 자동 저장
-            // 이제 재료 구매 내역, 세금 납부 내역이 모두 반영된 'Day N+1' 상태가 저장됩니다.
-            // 여기서 게임을 끄고 다시 켜면, 17:00 영업 시작 상태로 로드됩니다.
+            // 2. 다음 날 상태로 자동 저장 (이제 clean한 상태로 저장됨)
             GameSaveManager.Instance.SaveGame();
             Debug.Log("[시스템] 다음 영업일 시작 상태로 자동 저장되었습니다.");
         });
@@ -465,7 +494,9 @@ public class EndOfDayUIHandler : MonoBehaviour
         {
             if (blackCurtainImage != null) blackCurtainImage.gameObject.SetActive(false);
             if (shutterRect != null) shutterRect.gameObject.SetActive(false);
-            gameObject.SetActive(false);
+
+            IsShutterAnimating = false;
+
             GameManager.Instance.StartDayGameplay();
         });
     }
@@ -473,26 +504,51 @@ public class EndOfDayUIHandler : MonoBehaviour
     // ✨ [수정] 세금 납부 및 다음 단계
     private void OnPayTaxAndNextClicked()
     {
-        PunchButton(buttonPayTaxAndNext); // 버튼 효과
+        PunchButton(buttonPayTaxAndNext);
 
         if (isTaxPaid)
         {
-            IngredientShop.OpenShop();
-            SwitchPanel(panelShop); // ✨ 슬라이드 전환
+            GoToShopStep(); // 중복 코드 방지를 위해 함수로 분리하거나, 아래 로직 수행
             return;
         }
 
         if (PlayerWalletManager.Instance.Spend(currentTaxAmount))
         {
             Debug.Log($"[세금 납부] {currentTaxAmount:N0}원 납부 완료");
+
+            // ✨ [NEW] 세금 납부 기록
+            if (GameDataLogger.Instance != null)
+            {
+                GameDataLogger.Instance.AddTaxExpense(currentTaxAmount);
+            }
             isTaxPaid = true;
-            IngredientShop.OpenShop();
-            SwitchPanel(panelShop); // ✨ 슬라이드 전환
+            GoToShopStep(); // 상점 진입
         }
         else
         {
             Debug.LogWarning("[세금 납부 실패] 잔액이 부족합니다.");
             TooltipManager.ShowFollowMouse(TooltipType.UI, "잔액이 부족하여 세금을 낼 수 없습니다!", 2f);
+        }
+    }
+
+    // ✨ [NEW] 상점 진입 처리 및 대화 시작
+    private void GoToShopStep()
+    {
+        IngredientShop.OpenShop();
+        SwitchPanel(panelShop); // 패널 전환
+
+        // ✨ 여기서 대화 시작! (상점 화면이 보일 때)
+        if (!hasShownBonusDialogue)
+        {
+            hasShownBonusDialogue = true; // 한번만 실행되게 잠금
+
+            // 튜토리얼 중이 아닐 때만 실행
+            // (GameManager가 싱글톤이므로 바로 접근 가능)
+            if (TutorialManager.Instance == null && GameManager.Instance.dialogueRunner != null)
+            {
+                // Yarn 대화 시작 ("내일의 보너스는...")
+                GameManager.Instance.dialogueRunner.StartDialogue("TomorrowBonusLine");
+            }
         }
     }
 
@@ -553,5 +609,84 @@ public class EndOfDayUIHandler : MonoBehaviour
 
         // 7. ✨ [피날레] 이제 위치가 완벽하니 스르륵 보여줍니다.
         cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad);
+    }
+
+    // ✨ [NEW] 1. 셔터를 올리고 가게 문을 여는 애니메이션 (튜토리얼 직후용)
+    public void PlayOpenShutterAnimation()
+    {
+        isShutterMode = true;
+
+        gameObject.SetActive(true); // 핸들러 자체 활성화
+
+        // 1. 초기 상태 설정: 셔터와 암전 커튼이 꽉 닫혀있어야 함
+        if (shutterRect != null)
+        {
+            shutterRect.gameObject.SetActive(true);
+            shutterRect.anchoredPosition = Vector2.zero; // 화면 중앙(닫힘)
+            shutterRect.SetAsLastSibling(); // 제일 앞으로
+        }
+
+        if (blackCurtainImage != null)
+        {
+            blackCurtainImage.gameObject.SetActive(true);
+            Color c = blackCurtainImage.color;
+            c.a = 1f; // 완전 불투명
+            blackCurtainImage.color = c;
+        }
+
+        // 2. 애니메이션 시퀀스
+        Sequence openSeq = DOTween.Sequence();
+
+        // (1) 잠시 대기 (로딩 직후 깜빡임 방지)
+        openSeq.AppendInterval(0.5f);
+
+        // (2) 셔터 위로 올리기
+        if (shutterRect != null)
+        {
+            float height = shutterRect.rect.height;
+            if (height == 0) height = 1920f; // 안전장치
+
+            // 위로 이동 (Y축 height만큼)
+            openSeq.Append(shutterRect.DOAnchorPosY(height, shutterMoveDuration).SetEase(Ease.OutQuad));
+        }
+
+        // (3) 동시에 암전 커튼 페이드 아웃
+        if (blackCurtainImage != null)
+        {
+            openSeq.Join(blackCurtainImage.DOFade(0f, 0.5f));
+        }
+
+        // 3. 종료 후 정리
+        openSeq.OnComplete(() =>
+        {
+            if (shutterRect != null) shutterRect.gameObject.SetActive(false);
+            if (blackCurtainImage != null) blackCurtainImage.gameObject.SetActive(false);
+
+            // ✨ [핵심] 다 끝났으면 플래그 해제하고 오브젝트 끄기
+            isShutterMode = false;
+            gameObject.SetActive(false);
+        });
+    }
+
+    // ✨ [NEW] 2. 셔터 없이 즉시 가게 열기 (스킵, 이어하기용)
+    public void ForceOpenShutterImmediately()
+    {
+        // 애니메이션 없이 바로 끈 상태로 만듦
+        if (shutterRect != null)
+        {
+            shutterRect.anchoredPosition = new Vector2(0, 2000); // 시야 밖으로
+            shutterRect.gameObject.SetActive(false);
+        }
+
+        if (blackCurtainImage != null)
+        {
+            Color c = blackCurtainImage.color;
+            c.a = 0f;
+            blackCurtainImage.color = c;
+            blackCurtainImage.gameObject.SetActive(false);
+        }
+
+        // 핸들러가 켜져 있으면 안 되므로 비활성화
+        gameObject.SetActive(false);
     }
 }

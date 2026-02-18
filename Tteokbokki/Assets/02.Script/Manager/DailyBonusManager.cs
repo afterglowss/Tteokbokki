@@ -10,12 +10,14 @@ public class DailyBonusManager : MonoBehaviour
     private HashSet<string> todayBonusIngredients = new();    // 오늘 적용 중인 보너스 재료
     private HashSet<string> tomorrowBonusCandidates = new();  // 마감 시 보여줄 내일 보너스 재료
 
-    private const int bonusPerIngredient = 5000; // 1개 포함당 보너스 금액
+    public const int bonusPerIngredient = 5000; // 1개 포함당 보너스 금액
 
     public TextMeshProUGUI bonusText;
 
     // ✨ [NEW] 오늘 하루 누적된 보너스 금액
     public int TodayAccumulatedBonus { get; private set; } = 0;
+
+    public int CurrentBonusCycleIndex { get; private set; } = 0;
 
     [SerializeField]
     private static readonly HashSet<string> excludedBonusIngredients = new()
@@ -42,20 +44,34 @@ public class DailyBonusManager : MonoBehaviour
         GetTomorrowBonusText();
     }
 
+    // ✨ [핵심 수정] 내일의 보너스 정하기 (퐁당퐁당 로직)
     public void SetTomorrowBonusIngredients()
     {
-        tomorrowBonusCandidates = PickRandomIngredients(2);  // 랜덤 2종 선택
-        Debug.Log($"[보너스] 내일 보너스 재료 예정: {string.Join(", ", tomorrowBonusCandidates)}");
+        // 0이면: 내일은 '보너스 데이' (재료 뽑기)
+        if (CurrentBonusCycleIndex == 0)
+        {
+            tomorrowBonusCandidates = PickRandomIngredients(2);
+            CurrentBonusCycleIndex = 1; // 다음 턴은 '쉬는 날'로 설정
+            Debug.Log("[보너스 추첨] 내일은 보너스가 있는 날입니다! 🎉");
+        }
+        // 1이면: 내일은 '쉬는 날' (재료 비우기)
+        else
+        {
+            tomorrowBonusCandidates.Clear();
+            CurrentBonusCycleIndex = 0; // 다음 턴은 '보너스 날'로 설정
+            Debug.Log("[보너스 추첨] 내일은 보너스가 없는 날입니다. 💤");
+        }
     }
 
     public void ApplyNewDayBonus()
     {
         todayBonusIngredients = new HashSet<string>(tomorrowBonusCandidates);
+        TodayAccumulatedBonus = 0; // 누적 금액 초기화
 
-        // ✨ [NEW] 하루 시작할 때 누적 금액 초기화
-        TodayAccumulatedBonus = 0;
-
-        Debug.Log($"[보너스] 오늘 보너스 재료 적용됨: {string.Join(", ", todayBonusIngredients)}");
+        if (todayBonusIngredients.Count > 0)
+            Debug.Log($"[보너스] 오늘 보너스 재료: {string.Join(", ", todayBonusIngredients)}");
+        else
+            Debug.Log("[보너스] 오늘은 보너스가 없는 날입니다.");
     }
 
     // ✨ [NEW] 보너스 금액 추가 (PackagingSlot에서 호출)
@@ -84,11 +100,12 @@ public class DailyBonusManager : MonoBehaviour
     public string GetTomorrowBonusText()
     {
         if (tomorrowBonusCandidates.Count == 0)
-            return "예정된 보너스 재료 없음";
+            return "내일은 보너스 없음";
 
-        bonusText.text = "내일의 보너스 재료: " + string.Join(", ", tomorrowBonusCandidates);
+        string msg = "내일의 보너스 재료: " + string.Join(", ", tomorrowBonusCandidates);
 
-        return "내일의 보너스 재료: " + string.Join(", ", tomorrowBonusCandidates);
+        if (bonusText != null) bonusText.text = msg;
+        return msg;
     }
 
     private HashSet<string> PickRandomIngredients(int count)
@@ -134,7 +151,7 @@ public class DailyBonusManager : MonoBehaviour
     }
 
     // ✨ [NEW] 로드용: 저장된 리스트 복원
-    public void RestoreBonusData(List<string> savedBonuses)
+    public void RestoreBonusData(List<string> savedBonuses, int savedIndex, int savedAccumulatedBonus)
     {
         tomorrowBonusCandidates.Clear();
         if (savedBonuses != null)
@@ -145,7 +162,18 @@ public class DailyBonusManager : MonoBehaviour
             }
         }
 
-        // 로드 직후 UI 갱신 (선택 사항)
+        CurrentBonusCycleIndex = savedIndex;
+
+        // 🚨 [핵심 수정] 로드 시점에는 StartOfDay가 안 돌기 때문에,
+        // 복구된 '내일 후보'를 '오늘 적용' 리스트에도 강제로 넣어줘야 합니다!
+        // (게임플레이 도중 저장/로드 시 today와 tomorrow는 동일하므로 안전합니다)
+        todayBonusIngredients = new HashSet<string>(tomorrowBonusCandidates);
+
+        // ✨ 누적 금액 복구
+        TodayAccumulatedBonus = savedAccumulatedBonus;
+
         GetTomorrowBonusText();
+
+        Debug.Log($"[로드] 보너스 데이터 복구 완료. 오늘 재료: {string.Join(", ", todayBonusIngredients)}");
     }
 }

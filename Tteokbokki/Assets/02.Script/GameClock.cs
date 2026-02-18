@@ -45,6 +45,8 @@ public class GameClock : MonoBehaviour
 
     private void Awake()
     {
+        isPaused = false;
+
         gameTime = new DateTime(startYear, startMonth, startDay, startHour, startMinute, 0);
 
         if (Instance != null && Instance != this)
@@ -99,6 +101,15 @@ public class GameClock : MonoBehaviour
     public static void SetGameTime(DateTime newTime)
     {
         gameTime = newTime;
+
+        if (Instance != null)
+        {
+            // 현재 시간이 마감 시간보다 크거나 같으면 true, 아니면 false
+            Instance.hasReachedClosingTime = (newTime.Hour >= closingHour);
+
+            // 텍스트도 즉시 갱신
+            Instance.UpdateTimeAndDateDisplay();
+        }
     }
 
     public void SetToStartOfDay()
@@ -112,7 +123,7 @@ public class GameClock : MonoBehaviour
     public void SetToEightFiftyNine()
     {
         DateTime dateOnly = gameTime.Date;
-        gameTime = dateOnly.AddHours(20).AddMinutes(59);
+        gameTime = dateOnly.AddHours(20).AddMinutes(59).AddSeconds(59);
         Debug.Log($"[DEBUG] 게임 시간이 오후 8시 59분으로 설정됨: {gameTime:yyyy-MM-dd HH:mm}");
         UpdateTimeAndDateDisplay();
     }

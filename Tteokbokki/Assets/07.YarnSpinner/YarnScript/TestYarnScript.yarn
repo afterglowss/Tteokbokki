@@ -26,8 +26,15 @@
 
 title: TomorrowBonusLine
 ---
+<<declare $hasBonus = false >>
 <<declare $bonus1 = "" >>
 <<declare $bonus2 = "" >>
 <<waitInput>>
-뱁새: 내일의 보너스 재료는 {$bonus1}, {$bonus2} 입니다!
+<<if $hasBonus>>
+    <<set $Junk = setFace("smile")>>
+    뱁새: 내일의 보너스 재료는 {$bonus1}, {$bonus2} 입니다!
+<<else>>
+    <<set $Junk = setFace("sad")>>
+    뱁새: 아쉽게도 내일은 보너스가 없어요!
+<<endif>>
 ===

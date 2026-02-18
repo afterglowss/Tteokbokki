@@ -247,6 +247,9 @@ MonoBehaviour:
   - id: 404
     description: "\uB053\uB294 \uC18C\uB9AC"
     clip: {fileID: 8300000, guid: 18b9e86987e76d54f9eb577afa26382b, type: 3}
+  - id: 501
+    description: "\uC2DC\uACC4 \uC18C\uB9AC"
+    clip: {fileID: 8300000, guid: a8c40492e2d02c54187cde53443678e4, type: 3}
 --- !u!1 &7144029604973056552
 GameObject:
   m_ObjectHideFlags: 0

@@ -22,6 +22,14 @@ public class GameSaveData
     public List<ReceiptData> pendingReceipts;
     public bool isTutorialCompleted;
     public List<string> tomorrowBonusCandidates;
+    public int bonusCycleIndex;
+    public int todayAccumulatedBonus;
+
+    public bool isEndOfDayPanelActive;
+
+    public int totalSuccessCount; // 2주간 총 성공 횟수
+    public int totalMissedCount;  // 2주간 총 실패 횟수
+    public int consecutiveZeroSuccessDays; // 연속 0건 성공 일수 (배드엔딩1 용)
 }
 
 [Serializable]
@@ -50,6 +58,8 @@ public class GameSaveManager : MonoBehaviour
         Instance = this;
     }
 
+    public bool IsSettlementPhase { get; set; }
+
     public void SaveGame()
     {
         GameSaveData data = new GameSaveData
@@ -61,7 +71,15 @@ public class GameSaveManager : MonoBehaviour
             packagingArea = PackagingAreaManager.Instance.GetSlotWiseCookedFoods(),
             stoveStates = new List<StoveSlotSaveData>(),
             isTutorialCompleted = this.IsTutorialCompleted,
-            tomorrowBonusCandidates = DailyBonusManager.Instance.GetTomorrowBonusForSave()
+            tomorrowBonusCandidates = DailyBonusManager.Instance.GetTomorrowBonusForSave(),
+            bonusCycleIndex = DailyBonusManager.Instance.CurrentBonusCycleIndex,
+            todayAccumulatedBonus = DailyBonusManager.Instance.TodayAccumulatedBonus,
+
+            isEndOfDayPanelActive = GameManager.Instance.endOfDayPanel.activeSelf,
+
+            totalSuccessCount = GameManager.Instance.TotalSuccessCount,
+            totalMissedCount = GameManager.Instance.TotalMissedCount,
+            consecutiveZeroSuccessDays = GameManager.Instance.ConsecutiveZeroSuccessDays
         };
 
         // 화구 상태 저장 (Pending 포함)
@@ -79,7 +97,7 @@ public class GameSaveManager : MonoBehaviour
         }
 
         data.lastReceiptID = ReceiptSystem.CurrentReceiptID;
-        data.lastOrderItemID = ReceiptSystem.CurrentOrderItemID;
+        //data.lastOrderItemID = ReceiptSystem.CurrentOrderItemID;
         data.receiptSlots = ReceiptLineManager.Instance.GetCurrentReceiptSlots();
         data.pendingReceipts = ReceiptLineManager.Instance.GetPendingReceiptsData();
         data.missedReceipts = ReceiptSystem.GetMissedReceiptsData();
@@ -114,7 +132,13 @@ public class GameSaveManager : MonoBehaviour
 
         if (DailyBonusManager.Instance != null)
         {
-            DailyBonusManager.Instance.RestoreBonusData(data.tomorrowBonusCandidates);
+            // ✨ [NEW] 보너스 후보 + 순서(Cycle) 복원
+            // ✨ [수정] 저장된 누적 금액(todayAccumulatedBonus)도 같이 넘겨줌
+            DailyBonusManager.Instance.RestoreBonusData(
+                data.tomorrowBonusCandidates,
+                data.bonusCycleIndex,
+                data.todayAccumulatedBonus
+            );
         }
 
         // 화구 복원
@@ -126,9 +150,19 @@ public class GameSaveManager : MonoBehaviour
         ReceiptLineManager.Instance.RestoreReceiptSlots(data.receiptSlots);
 
         ReceiptSystem.CurrentReceiptID = data.lastReceiptID;
-        ReceiptSystem.CurrentOrderItemID = data.lastOrderItemID;
+        //ReceiptSystem.CurrentOrderItemID = data.lastOrderItemID;
         ReceiptSystem.RestoreReceipts(data.missedReceipts, data.successfulReceipts);
         ReceiptLineManager.Instance.RestorePendingReceipts(data.pendingReceipts);
+
+        GameManager.Instance.RestoreSessionData(
+            data.totalSuccessCount,
+            data.totalMissedCount,
+            data.consecutiveZeroSuccessDays
+        );
+
+        IsSettlementPhase = data.isEndOfDayPanelActive;
+
+        Debug.Log($"[로드] 마감 패널 상태 복원: {IsSettlementPhase}");
 
         Debug.Log("게임 불러오기 완료!");
     }
@@ -147,5 +181,11 @@ public class GameSaveManager : MonoBehaviour
         // 2. 변경된 상태를 JSON 파일에 즉시 물리적으로 기록
         SaveGame();
         Debug.Log("<color=green>[시스템] 튜토리얼 완료 상태가 세이브 데이터에 기록되었습니다.</color>");
+    }
+
+    public bool HasSaveFile()
+    {
+        string fullPath = Path.Combine(Application.persistentDataPath, "SaveData.json");
+        return File.Exists(fullPath);
     }
 }

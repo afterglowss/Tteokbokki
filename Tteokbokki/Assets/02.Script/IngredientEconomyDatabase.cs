@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 
 public class IngredientMetaData
 {
     public string Name;
-    public int SalePricePerUse;  // Àç·á ÇÏ³ª´ç ¹ŞÀ» ±İ¾× (0¿ø °¡´É)
+    public int SalePricePerUse;  // ì¬ë£Œ í•˜ë‚˜ë‹¹ ë°›ì„ ê¸ˆì•¡ (0ì› ê°€ëŠ¥)
     public int OrderAmountKg;
     public int PricePerKg;
     public int GramsPerServing;
@@ -20,27 +20,35 @@ public static class IngredientEconomyDatabase
 {
     public static readonly Dictionary<string, IngredientMetaData> Data = new()
     {
-        // SalePricePerUse: 1ÀÎºĞ ÆÇ¸Å°¡, OrderAmountKg: 1È¸ ÁÖ¹® ½Ã ÁÖ¹®ÇÏ´Â ¾ç(kg), PricePerKg: 1kg ´ç ¿ø°¡, GramsPerServing: 1ÀÎºĞ Á¶¸®½Ã µé¾î°¡´Â ¾ç(g)
-        { "¶±", new IngredientMetaData { Name = "¶±", SalePricePerUse = 1500, OrderAmountKg = 20, PricePerKg = 2500, GramsPerServing = 200 } },
-        { "¿Àµ­", new IngredientMetaData { Name = "¿Àµ­", SalePricePerUse = 1500, OrderAmountKg = 20, PricePerKg = 2500, GramsPerServing = 200 } },
-        { "ÆÄ", new IngredientMetaData { Name = "ÆÄ", SalePricePerUse = 0, OrderAmountKg = 3, PricePerKg = 1200, GramsPerServing = 50 } },
-        { "¾ç¹èÃß", new IngredientMetaData { Name = "¾ç¹èÃß", SalePricePerUse = 0, OrderAmountKg = 12, PricePerKg = 600, GramsPerServing = 200 } },
-        { "¸ğÂ¥·¼¶ó", new IngredientMetaData { Name = "¸ğÂ¥·¼¶ó", SalePricePerUse = 1500, OrderAmountKg = 2, PricePerKg = 14000, GramsPerServing = 50 } },
-        { "¿ì»ï°ã", new IngredientMetaData { Name = "¿ì»ï°ã", SalePricePerUse = 3000, OrderAmountKg = 2, PricePerKg = 17000, GramsPerServing = 50 } },
-        { "°è¶õ", new IngredientMetaData { Name = "°è¶õ", SalePricePerUse = 1500, OrderAmountKg = 4, PricePerKg = 10000, GramsPerServing = 100 } },
-        { "ÀÏ¹İ´ç¸é", new IngredientMetaData { Name = "ÀÏ¹İ´ç¸é", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 10000, GramsPerServing = 50 } },
-        { "¶ó¸é»ç¸®", new IngredientMetaData { Name = "¶ó¸é»ç¸®", SalePricePerUse = 1000, OrderAmountKg = 4, PricePerKg = 3000, GramsPerServing = 100 } },
-        { "°öÃ¢", new IngredientMetaData { Name = "°öÃ¢", SalePricePerUse = 5000, OrderAmountKg = 4, PricePerKg = 30000, GramsPerServing = 100 } },
-        { "Á¶·©ÀÌ¶±", new IngredientMetaData { Name = "Á¶·©ÀÌ¶±", SalePricePerUse = 1500, OrderAmountKg = 4, PricePerKg = 2500, GramsPerServing = 100 } },
-        { "°í±¸¸¶", new IngredientMetaData { Name = "°í±¸¸¶", SalePricePerUse = 2000, OrderAmountKg = 8, PricePerKg = 6000, GramsPerServing = 200 } },
-        { "¿Á¼ö¼ö", new IngredientMetaData { Name = "¿Á¼ö¼ö", SalePricePerUse = 2500, OrderAmountKg = 4, PricePerKg = 8000, GramsPerServing = 100 } },
-        { "¼Ò¼¼Áö", new IngredientMetaData { Name = "¼Ò¼¼Áö", SalePricePerUse = 1500, OrderAmountKg = 4, PricePerKg = 8000, GramsPerServing = 100 } },
-        { "±ºÀÚ ¼Ò½º", new IngredientMetaData { Name = "±ºÀÚ ¼Ò½º", SalePricePerUse = 500, OrderAmountKg = 6, PricePerKg = 4000, GramsPerServing = 50 } },
-        { "¸¶¶ó ¼Ò½º", new IngredientMetaData { Name = "¸¶¶ó ¼Ò½º", SalePricePerUse = 1500, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
-        { "·ÎÁ¦ ¼Ò½º", new IngredientMetaData { Name = "·ÎÁ¦ ¼Ò½º", SalePricePerUse = 1500, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
-        { "Å©¸² ¼Ò½º", new IngredientMetaData { Name = "Å©¸² ¼Ò½º", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
-        { "°£Àå ¼Ò½º", new IngredientMetaData { Name = "°£Àå ¼Ò½º", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 20000, GramsPerServing = 50 } },
-        { "Ä«·¹ ¼Ò½º", new IngredientMetaData { Name = "Ä«·¹ ¼Ò½º", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
-        { "Â¥Àå ¼Ò½º", new IngredientMetaData { Name = "Â¥Àå ¼Ò½º", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+        // SalePricePerUse: 1ì¸ë¶„ íŒë§¤ê°€, OrderAmountKg: 1íšŒ ì£¼ë¬¸ ì‹œ ì£¼ë¬¸í•˜ëŠ” ì–‘(kg), PricePerKg: 1kg ë‹¹ ì›ê°€, GramsPerServing: 1ì¸ë¶„ ì¡°ë¦¬ì‹œ ë“¤ì–´ê°€ëŠ” ì–‘(g)
+        { "ë–¡", new IngredientMetaData { Name = "ë–¡", SalePricePerUse = 1500, OrderAmountKg = 20, PricePerKg = 2500, GramsPerServing = 200 } },
+        { "ì˜¤ë…", new IngredientMetaData { Name = "ì˜¤ë…", SalePricePerUse = 1500, OrderAmountKg = 20, PricePerKg = 2500, GramsPerServing = 200 } },
+        { "íŒŒ", new IngredientMetaData { Name = "íŒŒ", SalePricePerUse = 0, OrderAmountKg = 3, PricePerKg = 1200, GramsPerServing = 50 } },
+        { "ì–‘ë°°ì¶”", new IngredientMetaData { Name = "ì–‘ë°°ì¶”", SalePricePerUse = 0, OrderAmountKg = 12, PricePerKg = 600, GramsPerServing = 200 } },
+        { "ëª¨ì§œë ë¼", new IngredientMetaData { Name = "ëª¨ì§œë ë¼", SalePricePerUse = 1500, OrderAmountKg = 2, PricePerKg = 14000, GramsPerServing = 50 } },
+        { "ìš°ì‚¼ê²¹", new IngredientMetaData { Name = "ìš°ì‚¼ê²¹", SalePricePerUse = 3000, OrderAmountKg = 2, PricePerKg = 17000, GramsPerServing = 50 } },
+        { "ê³„ë€", new IngredientMetaData { Name = "ê³„ë€", SalePricePerUse = 1500, OrderAmountKg = 4, PricePerKg = 10000, GramsPerServing = 100 } },
+        { "ì¼ë°˜ë‹¹ë©´", new IngredientMetaData { Name = "ì¼ë°˜ë‹¹ë©´", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 10000, GramsPerServing = 50 } },
+        { "ë¼ë©´ì‚¬ë¦¬", new IngredientMetaData { Name = "ë¼ë©´ì‚¬ë¦¬", SalePricePerUse = 1000, OrderAmountKg = 4, PricePerKg = 3000, GramsPerServing = 100 } },
+        { "ê³±ì°½", new IngredientMetaData { Name = "ê³±ì°½", SalePricePerUse = 5000, OrderAmountKg = 4, PricePerKg = 30000, GramsPerServing = 100 } },
+        { "ì¡°ë­ì´ë–¡", new IngredientMetaData { Name = "ì¡°ë­ì´ë–¡", SalePricePerUse = 1500, OrderAmountKg = 4, PricePerKg = 2500, GramsPerServing = 100 } },
+        { "ê³ êµ¬ë§ˆ", new IngredientMetaData { Name = "ê³ êµ¬ë§ˆ", SalePricePerUse = 2000, OrderAmountKg = 8, PricePerKg = 6000, GramsPerServing = 200 } },
+        { "ì˜¥ìˆ˜ìˆ˜", new IngredientMetaData { Name = "ì˜¥ìˆ˜ìˆ˜", SalePricePerUse = 2500, OrderAmountKg = 4, PricePerKg = 8000, GramsPerServing = 100 } },
+        { "ì†Œì„¸ì§€", new IngredientMetaData { Name = "ì†Œì„¸ì§€", SalePricePerUse = 1500, OrderAmountKg = 4, PricePerKg = 8000, GramsPerServing = 100 } },
+        { "êµ°ì ì†ŒìŠ¤", new IngredientMetaData { Name = "êµ°ì ì†ŒìŠ¤", SalePricePerUse = 500, OrderAmountKg = 6, PricePerKg = 4000, GramsPerServing = 50 } },
+        { "ë§ˆë¼ ì†ŒìŠ¤", new IngredientMetaData { Name = "ë§ˆë¼ ì†ŒìŠ¤", SalePricePerUse = 1500, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+        { "ë¡œì œ ì†ŒìŠ¤", new IngredientMetaData { Name = "ë¡œì œ ì†ŒìŠ¤", SalePricePerUse = 1500, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+        { "í¬ë¦¼ ì†ŒìŠ¤", new IngredientMetaData { Name = "í¬ë¦¼ ì†ŒìŠ¤", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+        { "ê°„ì¥ ì†ŒìŠ¤", new IngredientMetaData { Name = "ê°„ì¥ ì†ŒìŠ¤", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 20000, GramsPerServing = 50 } },
+        { "ì¹´ë ˆ ì†ŒìŠ¤", new IngredientMetaData { Name = "ì¹´ë ˆ ì†ŒìŠ¤", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+        { "ì§œì¥ ì†ŒìŠ¤", new IngredientMetaData { Name = "ì§œì¥ ì†ŒìŠ¤", SalePricePerUse = 1000, OrderAmountKg = 2, PricePerKg = 16000, GramsPerServing = 50 } },
+    };
+    // âœ¨ [NEW] ë¡œê·¸ ë° ì •ë ¬ì„ ìœ„í•œ 'ìˆœì„œ ê³ ì • ë¦¬ìŠ¤íŠ¸'
+    // ì—¬ê¸°ì— ì íŒ ìˆœì„œëŒ€ë¡œ ì—‘ì…€(CSV)ì— ì €ì¥ë©ë‹ˆë‹¤.
+    public static readonly List<string> SortOrder = new List<string>()
+    {
+        "ë–¡", "ì˜¤ë…", "íŒŒ", "ì–‘ë°°ì¶”", "ëª¨ì§œë ë¼", "ìš°ì‚¼ê²¹", "ê³„ë€", "ì¼ë°˜ë‹¹ë©´", "ë¼ë©´ì‚¬ë¦¬",
+        "ê³±ì°½", "ì¡°ë­ì´ë–¡", "ê³ êµ¬ë§ˆ", "ì˜¥ìˆ˜ìˆ˜", "ì†Œì„¸ì§€",
+        "êµ°ì ì†ŒìŠ¤", "ë§ˆë¼ ì†ŒìŠ¤", "ë¡œì œ ì†ŒìŠ¤", "í¬ë¦¼ ì†ŒìŠ¤", "ê°„ì¥ ì†ŒìŠ¤", "ì¹´ë ˆ ì†ŒìŠ¤", "ì§œì¥ ì†ŒìŠ¤"
     };
 }
