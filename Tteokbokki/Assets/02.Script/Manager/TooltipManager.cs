@@ -167,4 +167,16 @@ public class TooltipManager : MonoBehaviour
             manager.gameObject.SetActive(false);
         }
     }
+
+    public static void HideAll()
+    {
+        foreach (var manager in instances.Values)
+        {
+            if (manager != null)
+            {
+                manager.followMouse = false;
+                manager.gameObject.SetActive(false);
+            }
+        }
+    }
 }

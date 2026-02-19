@@ -352,6 +352,13 @@ public class IngredientStockManager : MonoBehaviour
         TotalSpent += cost;
         orderedToday.Add(ingredientName);
 
+        // ✨ [NEW] 로거에게 방금 산 재료와 쓴 돈을 알려줍니다!
+        if (GameDataLogger.Instance != null)
+        {
+            GameDataLogger.Instance.AddShoppingExpense(cost);
+            GameDataLogger.Instance.LogIngredientBought(ingredientName, servings);
+        }
+
         // ✨ [중요] 구매 시 해금 목록에 추가 (중복 방지 필수)
         if (!purchasedAtLeastOnce.Contains(ingredientName))
         {

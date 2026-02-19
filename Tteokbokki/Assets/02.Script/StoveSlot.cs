@@ -265,7 +265,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         // 2. 위쪽 오버레이 이미지: 목표 이미지 결정
         Sprite targetSprite;
-        if (string.IsNullOrEmpty(menuName) || menuName == "Ruined")
+        if (string.IsNullOrEmpty(menuName) || menuName == "Ruined" || menuName == "Invalid")
         {
             targetSprite = StoveManager.Instance.ruinedCookingSprite;
         }
@@ -279,12 +279,12 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         if (wokOverlayImage != null)
         {
             wokOverlayImage.sprite = targetSprite;
-            wokOverlayImage.gameObject.SetActive(true);
 
             // 투명하게 시작
-            Color c = wokOverlayImage.color;
+            Color c = Color.white;
             c.a = 0f;
             wokOverlayImage.color = c;
+            wokOverlayImage.gameObject.SetActive(true);
         }
 
         // ✨ [수정/확인] 조리 시작 시 슬라이더를 반드시 켜줘야 합니다!

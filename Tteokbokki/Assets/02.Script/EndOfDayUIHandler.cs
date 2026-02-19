@@ -112,6 +112,8 @@ public class EndOfDayUIHandler : MonoBehaviour
 
     private void OnEnable()
     {
+        TooltipManager.HideAll();
+
         // ✨ [핵심 수정] 셔터 애니메이션 모드라면, 정산 데이터 초기화를 하지 않고 나갑니다.
         if (isShutterMode)
         {
@@ -473,7 +475,13 @@ public class EndOfDayUIHandler : MonoBehaviour
             {
                 GameSaveManager.Instance.IsSettlementPhase = false;
             }
+            if (GameDataLogger.Instance != null)
+            {
+                GameDataLogger.Instance.SaveDailyLog();
 
+                // ✨ (중요) 저장 후 내일 기록을 위해 초기화하는 함수가 있다면 여기서 호출!
+                GameDataLogger.Instance.StartNewDayLog(PlayerWalletManager.Instance.CurrentBalance);
+            }
 
             // 1. 날짜 변경, 화구 초기화 등 '내일' 준비
             GameManager.Instance.StartOfDay();

@@ -418,22 +418,22 @@ public class IngredientShopUI : MonoBehaviour
                 {
                     IngredientStockManager.Instance.OrderIngredient(item.Data.Name);
                 }
-                // ✨ [NEW] 재료별 구매 수량 기록
-                if (GameDataLogger.Instance != null)
-                {
-                    GameDataLogger.Instance.LogIngredientBought(item.Data.Name, item.CurrentCount);
-                }
+                //// ✨ [NEW] 재료별 구매 수량 기록
+                //if (GameDataLogger.Instance != null)
+                //{
+                //    GameDataLogger.Instance.LogIngredientBought(item.Data.Name, item.CurrentCount);
+                //}
 
                 totalCost += item.Data.OrderCost * item.CurrentCount;
                 purchaseCount++;
             }
         }
 
-        // ✨ [NEW] 총 지출 금액 기록
-        if (purchaseCount > 0 && GameDataLogger.Instance != null)
-        {
-            GameDataLogger.Instance.AddShoppingExpense(totalCost);
-        }
+        //// ✨ [NEW] 총 지출 금액 기록
+        //if (purchaseCount > 0 && GameDataLogger.Instance != null)
+        //{
+        //    GameDataLogger.Instance.AddShoppingExpense(totalCost);
+        //}
 
         if (purchaseCount > 0)
         {

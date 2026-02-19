@@ -517,8 +517,7 @@ public class GameManager : MonoBehaviour
                 GameDataLogger.Instance.AddBonusIncome(DailyBonusManager.Instance.TodayAccumulatedBonus);
             }
 
-            // 3. 파일 저장
-            GameDataLogger.Instance.SaveDailyLog();
+            
         }
 
         // 마감 UI 출력

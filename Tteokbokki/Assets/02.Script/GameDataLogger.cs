@@ -23,6 +23,8 @@ public class GameDataLogger : MonoBehaviour
     public int FailMistakeCount { get; private set; }
     public int FailTrashCount { get; private set; } // 영수증 휴지통 거절
 
+    public int DayStartUnlockedCount { get; private set; }
+
     // 3. 재료 통계 (Key: 재료명)
     public class IngredientDailyStat
     {
@@ -60,6 +62,11 @@ public class GameDataLogger : MonoBehaviour
         FailTrashCount = 0;
 
         dailyIngredientStats.Clear();
+
+        if (IngredientStockManager.Instance != null)
+        {
+            DayStartUnlockedCount = IngredientStockManager.Instance.GetPurchasedIngredientCount();
+        }
     }
 
     // === [데이터 수집용 함수들] ===
@@ -153,7 +160,7 @@ public class GameDataLogger : MonoBehaviour
         float cumulRate = (totalSuccess + totalMissed) > 0
             ? (float)totalSuccess / (totalSuccess + totalMissed) * 100f
             : 0f;
-        int unlockedCount = IngredientStockManager.Instance.GetPurchasedIngredientCount();
+        int unlockedCount = DayStartUnlockedCount;
         int zeroDays = GameManager.Instance.ConsecutiveZeroSuccessDays;
 
         sb.Append($"{cumulRate:F1}%,{unlockedCount},{zeroDays},");
