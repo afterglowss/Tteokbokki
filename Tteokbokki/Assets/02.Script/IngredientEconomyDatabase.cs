@@ -13,7 +13,7 @@ public class IngredientMetaData
     public int ProfitPerServing => SalePricePerUse - CostPerServing;
     public int ServingsPerOrder => (OrderAmountKg * 1000) / GramsPerServing;
 
-    public int LowStockThreshold => ServingsPerOrder / 4;
+    public int LowStockThreshold => ServingsPerOrder / 2;
 }
 
 public static class IngredientEconomyDatabase

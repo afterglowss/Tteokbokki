@@ -738,6 +738,11 @@ public class ReceiptSystem : MonoBehaviour
         var list = ReceiptLineManager.Instance.GetSuccessfulReceipts();
         return list != null ? ConvertToDataList(list) : new List<ReceiptData>();
     }
+    public static List<ReceiptData> GetCanceledReceiptsData()
+    {
+        var list = ReceiptLineManager.Instance.GetCanceledReceipts();
+        return list != null ? ConvertToDataList(list) : new List<ReceiptData>();
+    }
 
     public static void RestoreReceipts(
         List<ReceiptData> missedData,

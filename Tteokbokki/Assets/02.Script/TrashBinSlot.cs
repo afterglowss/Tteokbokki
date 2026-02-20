@@ -37,7 +37,7 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
             {
                 GameDataLogger.Instance.CountFail("Trash");
             }
-            ReceiptLineManager.Instance.RecordFailedReceipt(receiptItem.GetReceipt());
+            ReceiptLineManager.Instance.RecordCanceledReceipt(receiptItem.GetReceipt());
             ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
             return;
         }

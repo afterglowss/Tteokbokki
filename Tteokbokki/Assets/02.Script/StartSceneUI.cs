@@ -29,6 +29,10 @@ public class StartSceneUI : MonoBehaviour
     [Header("디버그")]
     [SerializeField] private Button deleteSaveButton;
 
+    // ✨ [NEW] 타이틀 로고 애니메이션용 변수
+    [Header("타이틀 애니메이션")]
+    [SerializeField] private RectTransform titleLogoRect;
+
     [Header("이어하기 정보")]
     [SerializeField] private TextMeshProUGUI continueDateText;
 
@@ -136,6 +140,8 @@ public class StartSceneUI : MonoBehaviour
             // 배경음악 재생 (볼륨은 매니저가 알아서 처리하므로 ID만 넘겨도 됨)
             AudioManager.Instance.PlayBGM(201, AudioManager.Instance.GetBGMVolume());
         }
+
+        PlayTitleAnimation();
     }
 
     // ✨ [NEW] 팝업 열기
@@ -465,6 +471,27 @@ public class StartSceneUI : MonoBehaviour
 
             // 5. 다시 싹 지우고(루프 처음으로 돌아감) 다음 멘트 타이핑
         }
+    }
+
+    // ✨ [NEW] 타이틀 애니메이션 전용 함수
+    private void PlayTitleAnimation()
+    {
+        if (titleLogoRect == null) return;
+
+        // 다른 씬에 갔다가 돌아올 때를 대비해 DOTween 초기화
+        titleLogoRect.DOKill();
+
+
+        //// ==========================================
+        //// 💥 후보 2. 위에서 툭! 띠용~ 바운스 (테스트하려면 주석 해제)
+        //// ==========================================
+        //titleLogoRect.localScale = Vector3.one; // 크기 초기화
+        //float originalY = titleLogoRect.anchoredPosition.y;
+        //// 위로 600만큼 올려놓은 상태에서
+        //titleLogoRect.anchoredPosition = new Vector2(titleLogoRect.anchoredPosition.x, originalY + 600f);
+        //// 원래 자리로 탱탱볼처럼 떨어짐
+        //titleLogoRect.DOAnchorPosY(originalY, 1.5f).SetEase(Ease.OutBounce);
+
     }
 
     private void OnSettingButtonClicked()

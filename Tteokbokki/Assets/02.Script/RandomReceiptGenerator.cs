@@ -147,7 +147,7 @@ public class RandomReceiptGenerator : MonoBehaviour
         }
 
 
-        int menuCount = GetRandomWeightedValue(new int[] { 84, 15, 1}) + 1;
+        int menuCount = GetRandomWeightedValue(new int[] { 89, 10, 1}) + 1;
 
         for (int i = 0; i < menuCount; i++)
         {

@@ -252,6 +252,8 @@ public class EndOfDayUIHandler : MonoBehaviour
             successTotal = ReceiptLineManager.Instance.GetTotalSuccessfulAmount();
             missedTotal = ReceiptLineManager.Instance.GetTotalMissedAmount();
 
+            int canceledCount = ReceiptLineManager.Instance.GetCanceledReceipts().Count;
+
             // ✨ [NEW] 보너스 금액 가져오기
             if (DailyBonusManager.Instance != null)
                 bonusTotal = DailyBonusManager.Instance.TodayAccumulatedBonus;
@@ -274,8 +276,18 @@ public class EndOfDayUIHandler : MonoBehaviour
             }
             if (textMissedAmount != null)
             {
-                if (animate) AnimateMoneyText(textMissedAmount, 0, missedTotal, "총 손실 금액", "red", "-");
-                else textMissedAmount.text = $"총 손실 금액: <color=red>-{missedTotal:N0}원</color>";
+                // ✨ [수정] 텍스트 뒤에 " / 주문 취소: 0건" 을 붙여줍니다.
+                if (animate)
+                {
+                    DOVirtual.Float(0, missedTotal, 1f, (value) =>
+                    {
+                        textMissedAmount.text = $"총 손실 금액: <color=red>-{(int)value:N0}원</color> / 주문 취소: {canceledCount}건";
+                    }).SetEase(Ease.OutQuart).SetDelay(0.3f);
+                }
+                else
+                {
+                    textMissedAmount.text = $"총 손실 금액: <color=red>-{missedTotal:N0}원</color> / 주문 취소: {canceledCount}건";
+                }
             }
         }
 

@@ -60,6 +60,13 @@ public class IngredientStockManager : MonoBehaviour
     private readonly Key[] row2Keys = { Key.A, Key.S, Key.D, Key.F, Key.G, Key.H, Key.J };
     private readonly Key[] row3Keys = { Key.Z, Key.X, Key.C, Key.V, Key.B, Key.N, Key.M };
 
+    public static readonly Dictionary<Key, Key> ShiftSubstituteMap = new Dictionary<Key, Key>
+    {
+        { Key.T, Key.Q }, { Key.Y, Key.W }, { Key.U, Key.E },
+        { Key.G, Key.A }, { Key.H, Key.S }, { Key.J, Key.D },
+        { Key.B, Key.Z }, { Key.N, Key.X }, { Key.M, Key.C }
+    };
+
     // ✨ 매핑 딕셔너리 타입 변경 (Key -> string)
     private Dictionary<Key, string> keyToIngredientMap = new Dictionary<Key, string>();
 
@@ -700,6 +707,47 @@ public class IngredientStockManager : MonoBehaviour
         {
             stock[name][0].count -= amount;
             if (stock[name][0].count < 0) stock[name][0].count = 0; // 음수 방지
+        }
+    }
+
+    // ✨ [NEW] Shift 키 입력 상태에 따라 버튼의 단축키 텍스트를 실시간으로 변경합니다.
+    public void UpdateShiftUI(bool isShiftHeld)
+    {
+        foreach (var kvp in registeredButtons)
+        {
+            string ingredientName = kvp.Key;
+            IngredientButton btn = kvp.Value;
+
+            // 이 재료에 할당된 기본 키 찾기
+            var matchedPair = keyToIngredientMap.FirstOrDefault(x => x.Value == ingredientName);
+            Key assignedKey = matchedPair.Key;
+
+            if (assignedKey != Key.None)
+            {
+                if (isShiftHeld)
+                {
+                    // 1. 내가 오른쪽 끝 키(T, Y, U 등)라면 -> ⇧Q 로 표시 (강조)
+                    if (ShiftSubstituteMap.TryGetValue(assignedKey, out Key shiftKey))
+                    {
+                        btn.SetHotkeyDisplay($"{shiftKey}");
+                    }
+                    // 2. 내가 왼쪽 기본 키(Q, W, E 등)라면 -> 일시적으로 기능이 잃었음을 회색으로 표시
+                    else if (ShiftSubstituteMap.ContainsValue(assignedKey))
+                    {
+                        btn.SetHotkeyDisplay($"<color=#A0A0A0><alpha=#66>{assignedKey}</color>");
+                    }
+                    // 3. 영향 없는 중간 키 (R, F, V 등)
+                    else
+                    {
+                        btn.SetHotkeyDisplay(assignedKey.ToString());
+                    }
+                }
+                else
+                {
+                    // Shift 안 눌렀을 때 원상복구
+                    btn.SetHotkeyDisplay(assignedKey.ToString());
+                }
+            }
         }
     }
 }

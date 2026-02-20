@@ -67,6 +67,8 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     public bool IsCooked => isCooked;
     public bool HasPendingIngredients => pendingIngredients.Count > 0 && !isCooking && !isCooked;
 
+    public int maxIngredientPerType = 10;
+
     // ✨ [수정] 초기화 시 인덱스(번호)를 받습니다.
     public void Initialize(StoveManager manager, int index)
     {
@@ -733,5 +735,15 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         {
             selectionOutline.SetActive(isVisible);
         }
+    }
+
+    // ✨ [NEW] 해당 재료를 화구에 더 넣을 수 있는지 검사
+    public bool CanAddIngredient(string name)
+    {
+        if (pendingIngredients.ContainsKey(name))
+        {
+            return pendingIngredients[name] < maxIngredientPerType;
+        }
+        return true; // 아직 안 담은 재료면 당연히 추가 가능
     }
 }

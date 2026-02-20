@@ -33,7 +33,7 @@ public class IngredientButton : MonoBehaviour
         // 1. 화구 선택 여부 확인
         if (!StoveManager.Instance.HasSelectedSlot())
         {
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "화구를 먼저 선택해주세요!", 1f);
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "화구를 먼저 선택해주세요 (1~5)", 1f);
             return; // ❌ 화구가 없으면 재고 차감하지 않고 종료
         }
 
@@ -43,6 +43,13 @@ public class IngredientButton : MonoBehaviour
         {
             TooltipManager.ShowFollowMouse(TooltipType.UI, "조리 중이거나 음식이 있는 화구입니다!", 1f);
             return; // ❌ 이미 사용 중인 화구면 재고 차감하지 않고 종료
+        }
+
+        // ✨ [NEW] 화구 내 재료 최대 개수(10개) 제한 체크! (재고 차감 전에 해야 함)
+        if (!selectedSlot.CanAddIngredient(ingredientName))
+        {
+            TooltipManager.ShowFollowMouse(TooltipType.UI, $"{ingredientName}은(는) 한 화구에 최대 10개까지만 넣을 수 있습니다!", 1f);
+            return;
         }
 
         // 3. 위 조건을 모두 통과했을 때만 재고 차감 시도

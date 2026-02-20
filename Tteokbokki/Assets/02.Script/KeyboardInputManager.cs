@@ -10,6 +10,8 @@ public class KeyboardInputManager : MonoBehaviour
     private HashSet<Key> allowedKeys = new HashSet<Key>();
     private bool isTutorialMode = false;
 
+    private bool wasShiftHeld = false; // ✨ [NEW] Shift 키 이전 상태 저장용
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -50,11 +52,24 @@ public class KeyboardInputManager : MonoBehaviour
             if (GameClock.isPaused) return;
         }
 
+        // ✨ [NEW] Shift 키 눌림 감지 (왼쪽, 오른쪽 Shift 모두 대응)
+        bool isShiftHeld = Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed;
+
+        // 상태가 변했을 때만 UI 업데이트 한 번 실행 (성능 최적화)
+        if (isShiftHeld != wasShiftHeld)
+        {
+            wasShiftHeld = isShiftHeld;
+            if (IngredientStockManager.Instance != null)
+            {
+                IngredientStockManager.Instance.UpdateShiftUI(isShiftHeld);
+            }
+        }
+
         // 1. 화구 선택 (1 ~ 5)
         HandleStoveSelection();
 
         // 2. 재료 투입 (Q~M)
-        HandleIngredientInput();
+        HandleIngredientInput(isShiftHeld);
 
         // 3. 조리 시작 (Space Bar)
         // ✨ Input.GetKeyDown(KeyCode.Space) -> Keyboard.current.spaceKey.wasPressedThisFrame
@@ -108,7 +123,7 @@ public class KeyboardInputManager : MonoBehaviour
         }
     }
 
-    private void HandleIngredientInput()
+    private void HandleIngredientInput(bool isShiftHeld)
     {
         if (IngredientStockManager.Instance == null) return;
 
@@ -117,16 +132,42 @@ public class KeyboardInputManager : MonoBehaviour
 
         foreach (Key key in registeredKeys)
         {
-            // ✨ New Input System 방식의 키 입력 감지
             if (Keyboard.current[key].wasPressedThisFrame)
             {
+                // ✨ Shift가 눌려있고, 지금 누른 키가 Q, W, E 등이라면 -> 입력 무시 (기능 상실)
+                if (isShiftHeld && IngredientStockManager.ShiftSubstituteMap.ContainsValue(key))
+                {
+                    continue;
+                }
+
                 if (isTutorialMode && !allowedKeys.Contains(key)) continue;
 
                 string ingredientName = IngredientStockManager.Instance.GetIngredientByKey(key);
-
                 if (!string.IsNullOrEmpty(ingredientName))
                 {
                     TryAddIngredient(ingredientName);
+                }
+            }
+        }
+
+        if (isShiftHeld)
+        {
+            foreach (var kvp in IngredientStockManager.ShiftSubstituteMap)
+            {
+                Key originalKey = kvp.Key;   // 예: T
+                Key shiftKey = kvp.Value;    // 예: Q
+
+                // Shift 누른 채로 Q가 눌렸다면?
+                if (Keyboard.current[shiftKey].wasPressedThisFrame)
+                {
+                    if (isTutorialMode && (!allowedKeys.Contains(originalKey) && !allowedKeys.Contains(shiftKey))) continue;
+
+                    // Q를 눌렀지만 T에 해당하는 재료를 꺼내옵니다.
+                    string ingredientName = IngredientStockManager.Instance.GetIngredientByKey(originalKey);
+                    if (!string.IsNullOrEmpty(ingredientName))
+                    {
+                        TryAddIngredient(ingredientName);
+                    }
                 }
             }
         }
@@ -146,6 +187,13 @@ public class KeyboardInputManager : MonoBehaviour
         if (selectedSlot.IsCooking || selectedSlot.IsCooked)
         {
             TooltipManager.ShowFollowMouse(TooltipType.UI, "조리 중에는 재료를 넣을 수 없습니다!", 1f);
+            return;
+        }
+
+        // ✨ [NEW] 화구 내 재료 최대 개수(10개) 제한 체크! (재고 차감 전에 해야 함)
+        if (!selectedSlot.CanAddIngredient(ingredientName))
+        {
+            TooltipManager.ShowFollowMouse(TooltipType.UI, $"{ingredientName}은(는) 한 화구에 최대 10개까지만 넣을 수 있습니다!", 1f);
             return;
         }
 

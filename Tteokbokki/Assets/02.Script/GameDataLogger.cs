@@ -142,9 +142,12 @@ public class GameDataLogger : MonoBehaviour
         // [B] 경제
         int sales = ReceiptLineManager.Instance.GetTotalSuccessfulAmount();
         int balanceEnd = PlayerWalletManager.Instance.CurrentBalance;
-        int oppLoss = ReceiptLineManager.Instance.GetTotalMissedAmount(); // 기회 비용
+        // ✨ [NEW] 손실 금액 분리 및 합산
+        int lossMissed = ReceiptLineManager.Instance.GetTotalMissedAmount();     // 시간초과 등
+        int lossCanceled = ReceiptLineManager.Instance.GetTotalCanceledAmount(); // 주문취소 (휴지통)
+        int lossTotal = lossMissed + lossCanceled;
 
-        sb.Append($"{DayStartBalance},{sales},{IncomeBonus},{ExpenseTax},{ExpenseShopping},{balanceEnd},{oppLoss},");
+        sb.Append($"{DayStartBalance},{sales},{IncomeBonus},{ExpenseTax},{ExpenseShopping},{balanceEnd},{lossTotal},");
 
         // [C] 플레이
         int successCount = ReceiptLineManager.Instance.GetSuccessfulReceipts().Count;

@@ -65,6 +65,11 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private Slider sliderBGM;
     [SerializeField] private Slider sliderSFX;
 
+    [Header("레시피 도감 탭")]
+    [SerializeField] private Transform recipeContentParent; // 스크롤뷰의 Content
+    [SerializeField] private GameObject recipeItemPrefab;   // 아까 만든 RecipeItemUI가 붙은 프리팹
+    private bool isRecipeLoaded = false; // 중복 생성 방지 플래그
+
     // ✨ [NEW] 해상도 관리를 위한 리스트
     private List<Resolution> validResolutions = new List<Resolution>();
     private bool isPauseOpen = false;
@@ -133,6 +138,8 @@ public class PauseMenuUI : MonoBehaviour
         {
             if (saveButtonObj != null && !isMainMenu) saveButtonObj.SetActive(true);
         }
+
+        LoadRecipesFromDatabase();
     }
 
     private void InitializeMenuButtons()
@@ -579,5 +586,44 @@ public class PauseMenuUI : MonoBehaviour
                 quitWarningPanel.SetActive(false);
             }
         }
+    }
+
+    private void LoadRecipesFromDatabase()
+    {
+        if (isRecipeLoaded || recipeContentParent == null || recipeItemPrefab == null) return;
+
+        // MenuDatabase.Menus 는 ReceiptSystem 쪽에 있는 DB를 가정합니다.
+        foreach (var menuPair in MenuDatabase.Menus)
+        {
+            string menuName = menuPair.Key;
+            MenuItem menuData = menuPair.Value;
+
+            // 1. 프리팹 생성
+            GameObject itemObj = Instantiate(recipeItemPrefab, recipeContentParent);
+            RecipeItemUI recipeUI = itemObj.GetComponent<RecipeItemUI>();
+
+            if (recipeUI != null)
+            {
+                // 2. 재료 텍스트 조합하기
+                string recipeString = "";
+                foreach (var ing in menuData.DefaultIngredients)
+                {
+                    // 예: "떡 x2\n오뎅 x2\n군자 소스 x1"
+                    recipeString += $"- {ing.Key} <color=#FF8C00>x{ing.Value}</color>\n";
+                }
+
+                // ✨ [NEW] StoveManager에서 해당 메뉴의 '완성된 스프라이트' 가져오기
+                Sprite finishedSprite = null;
+                if (StoveManager.Instance != null)
+                {
+                    finishedSprite = StoveManager.Instance.GetFinishedSprite(menuName);
+                }
+
+                // 3. UI에 적용 (가져온 스프라이트 같이 넘기기)
+                recipeUI.Setup(menuName, recipeString.TrimEnd(), finishedSprite);
+            }
+        }
+
+        isRecipeLoaded = true;
     }
 }

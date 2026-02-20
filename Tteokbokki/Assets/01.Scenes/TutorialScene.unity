@@ -5165,7 +5165,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &577950860
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15504,6 +15504,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   endOfDayPanel: {fileID: 244394298}
   endOfDayUIHandler: {fileID: 610889260}
+  announcementBanner: {fileID: 0}
+  announcementText: {fileID: 0}
   dialogueRunner: {fileID: 9205710100398790771}
   endingCount: 3
   panelBadEnding1: {fileID: 1862345003}

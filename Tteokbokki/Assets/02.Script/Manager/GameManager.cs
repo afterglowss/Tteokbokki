@@ -1,6 +1,8 @@
 using DG.Tweening;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -13,6 +15,11 @@ public class GameManager : MonoBehaviour
     [Header("마감창 UI")]
     public GameObject endOfDayPanel;
     public EndOfDayUIHandler endOfDayUIHandler;
+
+    // ✨ [NEW] 긴급 공지 배너 UI
+    [Header("Announcement Banner")]
+    public RectTransform announcementBanner; // 화면 상단에 배치될 패널
+    public TextMeshProUGUI announcementText; // 패널 안의 텍스트
 
     public static GameManager Instance { get; private set; }
 
@@ -59,22 +66,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        //if (GameSaveManager.Instance.IsLoading)
-        //{
-        //    // A. 이어하기인 경우: 아무것도 안 함 (LoadGame이 RestoreStock을 부를 테니까)
-        //}
-        //else if (TutorialManager.Instance.IsTutorialJustFinished) // 튜토리얼 직후인지 확인하는 플래그 필요
-        //{
-        //    // B. 튜토리얼 끝내고 온 경우
-        //    IngredientStockManager.Instance.ApplyTutorialAftermath();
-        //    TutorialManager.Instance.IsTutorialJustFinished = false; // 플래그 초기화
-        //}
-        //else
-        //{
-        //    // C. 튜토리얼 스킵하고 바로 새 게임 (그냥 기본 재료만 지급)
-        //    IngredientStockManager.Instance.OrderBasicIngredients(); // 기존 함수 public으로 변경 필요
-        //}
-
         // ✨ Yarn 커맨드 등록 (대화 끝날 때 호출됨)
         if (dialogueRunner != null)
         {
@@ -201,6 +192,8 @@ public class GameManager : MonoBehaviour
         
         // 초기화: 엔딩 패널은 꺼둠
         if (panelBadEnding1 != null) panelBadEnding1.SetActive(false);
+
+        //ShowAnnouncement($"<color=red>[긴급 영업 종료]</color> 재고로 조리 가능한 메뉴가 없습니다! 잔여 주문 처리 시 즉시 마감됩니다.");
     }
 
     // ✨ [NEW] 마감 상태 이어하기 전용 함수
@@ -311,6 +304,8 @@ public class GameManager : MonoBehaviour
 
         isEmergencyClosing = false; // ✨ 플래그 초기화
 
+        if (announcementBanner != null) announcementBanner.gameObject.SetActive(false);
+
         GameClock.gameTime = GameClock.gameTime.AddDays(1);
 
         if (GetDayCount() > endingCount)
@@ -354,6 +349,7 @@ public class GameManager : MonoBehaviour
         ReceiptLineManager.Instance.ClearAllReceipts(); // 영수증 리스트 초기화
         ReceiptLineManager.Instance.ClearMissedReceipts(); // 실패 영수증 리스트 초기화
         ReceiptLineManager.Instance.ClearSuccessfulReceipts(); // 성공 영수증 리스트 초기화
+        ReceiptLineManager.Instance.ClearCanceledReceipts(); // ✨ [NEW] 잊지 말고 꼭 비워주기!
 
         ReceiptSystem.CurrentReceiptID = 1; // 주문 번호 초기화
         //ReceiptSystem.CurrentOrderItemID = 1; // 메뉴 번호 초기화
@@ -417,6 +413,8 @@ public class GameManager : MonoBehaviour
         GameClock.Pause();
         OrderSpawner.Instance.StopSpawning();
 
+        HideAnnouncement();
+
         // ✨ [NEW] 전화기 코드 뽑기 (전화 강제 종료)
         if (PhoneCallManager.Instance != null)
         {
@@ -432,13 +430,15 @@ public class GameManager : MonoBehaviour
         // 1. 오늘 성적 가져오기
         var todaySuccess = ReceiptLineManager.Instance.GetSuccessfulReceipts();
         var todayMissed = ReceiptLineManager.Instance.GetMissedReceipts();
+        var todayCanceled = ReceiptLineManager.Instance.GetCanceledReceipts(); // ✨ [NEW] 취소 내역 가져오기
 
         int successCount = todaySuccess.Count;
         int missedCount = todayMissed.Count;
+        int canceledCount = todayCanceled.Count; // ✨ [NEW]
 
         // 2. 누적 데이터 업데이트
         TotalSuccessCount += successCount;
-        TotalMissedCount += missedCount;
+        TotalMissedCount += (missedCount + canceledCount);
 
         // 3. 배드엔딩 1 (조기 폐업) 체크 조건 업데이트
         if (successCount == 0)
@@ -453,11 +453,15 @@ public class GameManager : MonoBehaviour
 
         PackagingAreaManager.Instance.ClearAllFoods();
 
-        var missed = ReceiptLineManager.Instance.GetMissedReceipts();
+        var totalFailedList = new List<Receipt>();
+        totalFailedList.AddRange(todayMissed);
+        totalFailedList.AddRange(todayCanceled);
+
+        //var missed = ReceiptLineManager.Instance.GetMissedReceipts();
         var successful = ReceiptLineManager.Instance.GetSuccessfulReceipts();
         DateTime today = GameClock.gameTime.Date;
 
-        ReceiptManager.SaveMissedReceipts(missed, today);
+        ReceiptManager.SaveMissedReceipts(totalFailedList, today);
         ReceiptManager.SaveSuccessfulReceipts(successful, today);
 
         // 판매 총액 계산
@@ -467,14 +471,14 @@ public class GameManager : MonoBehaviour
         // PlayerWalletManager.Instance.DeductDailyTaxes(successTotal); 
 
         // 손실 총액 계산
-        int missedTotal = missed.Sum(r => r.GetOrders().Sum(o => o.TotalPrice));
+        int missedTotal = totalFailedList.Sum(r => r.GetOrders().Sum(o => o.TotalPrice));
         // 성공률 계산
-        float successRate = successful.Count / (float)(successful.Count + missed.Count + 0.01f);
+        float successRate = successful.Count / (float)(successful.Count + totalFailedList.Count + 0.01f);
         OrderSpawner.Instance.SetPreviousDaySuccessRate(successRate); // 다음날 확률 반영용
 
         // 로그 출력
         Debug.Log($"[마감] 성공 주문 {successful.Count}건 / 총 판매금액: {successTotal:N0}원");
-        Debug.Log($"[마감] 미완료 주문 {missed.Count}건 / 손실 금액: {missedTotal:N0}원");
+        Debug.Log($"[마감] 미완료 주문 {totalFailedList.Count}건 / 손실 금액: {missedTotal:N0}원");
         // 세금 로그도 여기서 띄우기 애매하므로 제거하거나 예상액으로 변경
         // Debug.Log($"[마감] 세금 {Mathf.RoundToInt(successTotal * PlayerWalletManager.Instance.taxRate):N0}원 납부");
 
@@ -617,6 +621,8 @@ public class GameManager : MonoBehaviour
         // 3. 안내 메시지
         TooltipManager.ShowFollowMouse(TooltipType.UI, $"{reason}\n남은 주문을 처리하거나 시간이 지나면\n영업을 종료합니다.", 5f);
 
+        ShowAnnouncement($"<color=red>[긴급 영업 종료]</color> {reason} 잔여 주문 처리 시 즉시 마감됩니다.");
+
         // 4. 영수증 감시 코루틴 시작
         StartCoroutine(WaitForReceiptsAndEmergencyClose());
     }
@@ -668,7 +674,8 @@ public class GameManager : MonoBehaviour
 
         // ✨ [NEW] 현재 자산 가져오기
         int currentBalance = PlayerWalletManager.Instance.CurrentBalance;
-        int targetBalance = 2500000; // 목표 금액: 250만 원
+        int normalEndingTargetBalance = 2500000; // 목표 금액: 250만 원
+        int happyEndingTargetBalance = 3000000;  // 해피 엔딩 목표 금액
 
         Debug.Log($"최종 성적 - 성공률: {successRate:F1}% ({TotalSuccessCount}/{totalOrders}), 해금 재료: {unlockedIngredientsCount}개");
 
@@ -679,16 +686,16 @@ public class GameManager : MonoBehaviour
             LoadEndingScene(badEnding2Scene);
         }
         // ✨ [NEW] 2. 자산이 250만 원 미만이면 -> 배드 엔딩 2 (성공률이 좋아도 돈이 없음)
-        else if (currentBalance < targetBalance)
+        else if (currentBalance < normalEndingTargetBalance)
         {
-            Debug.Log($"[엔딩] 자산 부족({currentBalance:N0} < {targetBalance:N0}) -> Bad Ending 2");
+            Debug.Log($"[엔딩] 자산 부족({currentBalance:N0} < {normalEndingTargetBalance:N0}) -> Bad Ending 2");
             LoadEndingScene(badEnding2Scene);
         }
-        // 3. (여기 온 시점에서 성공률 > 30%이고 자산 >= 250만 원임)
-        else if (successRate <= 70f)
+        // 3. (여기 온 시점에서 성공률 > 30%이고 250만원 <= 자산 < 300만 원임)
+        else if (successRate <= 70f || currentBalance < happyEndingTargetBalance)
         {
             // 성공률이 평범함 (31~70%) -> 노멀 엔딩
-            Debug.Log("[엔딩] 자산 충족, 성공률 평범 -> Normal Ending");
+            Debug.Log("[엔딩] 250만원 자산 충족, 성공률 평범 -> Normal Ending");
             LoadEndingScene(normalEndingScene);
         }
         else // 4. 성공률 높음 (71% 이상) + 자산 충족
@@ -728,5 +735,30 @@ public class GameManager : MonoBehaviour
         // UI 정리 및 씬 이동
         GameClock.Pause();
         SceneManager.LoadScene(sceneName);
+    }
+
+    public void ShowAnnouncement(string message)
+    {
+        if (announcementBanner == null || announcementText == null) return;
+
+        announcementText.text = message;
+        announcementBanner.gameObject.SetActive(true);
+
+        // DOTween: 화면 밖(위)에서 아래로 튕기며 내려오는 연출
+        announcementBanner.DOKill(); // 진행 중인 애니메이션 취소
+        announcementBanner.anchoredPosition = new Vector2(0, 300f); // 완전히 숨겨진 위치 (패널 높이에 따라 조절)
+        announcementBanner.DOAnchorPosY(-35f, 0.5f).SetEase(Ease.OutBounce); // 살짝 띄워진 제자리로 이동
+    }
+
+    // ✨ [NEW] 공지 배너 숨기기
+    public void HideAnnouncement()
+    {
+        if (announcementBanner == null || !announcementBanner.gameObject.activeSelf) return;
+
+        announcementBanner.DOKill();
+        announcementBanner.DOAnchorPosY(300f, 0.4f).SetEase(Ease.InQuad).OnComplete(() =>
+        {
+            announcementBanner.gameObject.SetActive(false);
+        });
     }
 }

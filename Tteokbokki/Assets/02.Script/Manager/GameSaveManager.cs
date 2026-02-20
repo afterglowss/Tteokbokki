@@ -18,6 +18,7 @@ public class GameSaveData
     public int lastOrderItemID;
     public List<ReceiptData> missedReceipts;
     public List<ReceiptData> successfulReceipts;
+    public List<ReceiptData> canceledReceipts; // ✨ [NEW] 취소된 영수증 세이브 데이터
     public List<ReceiptSlotSaveData> receiptSlots;
     public List<ReceiptData> pendingReceipts;
     public bool isTutorialCompleted;
@@ -102,6 +103,7 @@ public class GameSaveManager : MonoBehaviour
         data.pendingReceipts = ReceiptLineManager.Instance.GetPendingReceiptsData();
         data.missedReceipts = ReceiptSystem.GetMissedReceiptsData();
         data.successfulReceipts = ReceiptSystem.GetSuccessfulReceiptsData();
+        data.canceledReceipts = ReceiptSystem.GetCanceledReceiptsData(); // ✨ [NEW] 취소된 영수증 데이터 저장
 
         string json = JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
         File.WriteAllText(Path.Combine(Application.persistentDataPath, SaveFilePath), json);
@@ -153,6 +155,11 @@ public class GameSaveManager : MonoBehaviour
         //ReceiptSystem.CurrentOrderItemID = data.lastOrderItemID;
         ReceiptSystem.RestoreReceipts(data.missedReceipts, data.successfulReceipts);
         ReceiptLineManager.Instance.RestorePendingReceipts(data.pendingReceipts);
+        if (data.canceledReceipts != null)
+        {
+            var canceledList = ReceiptSystem.ConvertToReceiptList(data.canceledReceipts);
+            ReceiptLineManager.Instance.RestoreCanceled(canceledList);
+        }
 
         GameManager.Instance.RestoreSessionData(
             data.totalSuccessCount,

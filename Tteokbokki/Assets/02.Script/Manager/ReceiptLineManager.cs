@@ -24,6 +24,19 @@ public class ReceiptLineManager : MonoBehaviour
     }
     public void ClearMissedReceipts() => missedReceipts.Clear();
 
+    // ✨ [NEW] 사용자가 휴지통에 버려 직접 취소한 영수증 리스트
+    private List<Receipt> canceledReceipts = new List<Receipt>();
+    public List<Receipt> GetCanceledReceipts() => new List<Receipt>(canceledReceipts);
+    public void ClearCanceledReceipts() => canceledReceipts.Clear();
+
+    // ✨ [NEW] 취소된 영수증 등록 함수
+    public void RecordCanceledReceipt(Receipt receipt)
+    {
+        if (canceledReceipts.Contains(receipt)) return;
+        canceledReceipts.Add(receipt);
+        Debug.Log($"[기록] 취소(휴지통) 영수증: {receipt.OrderID}");
+    }
+
     private List<Receipt> successfulReceipts = new();
     public List<Receipt> GetSuccessfulReceipts() => new(successfulReceipts);
     public void ClearSuccessfulReceipts() => successfulReceipts.Clear();
@@ -182,6 +195,8 @@ public class ReceiptLineManager : MonoBehaviour
         {
             receiptPopup.Close();
         }
+
+        ClearCanceledReceipts();
     }
     private Queue<Receipt> pendingReceipts = new();
     public float slotSpacing = 160f;  // 슬롯 간 거리
@@ -515,6 +530,21 @@ public class ReceiptLineManager : MonoBehaviour
 
             // 상태 적용
             item.SetHighlight(isSelected);
+        }
+    }
+
+    // ✨ [NEW] 총 취소 금액 반환
+    public int GetTotalCanceledAmount()
+    {
+        return canceledReceipts.Sum(r => r.GetTotalPrice());
+    }
+
+    // ✨ [NEW] 세이브 로드 시 취소 리스트 복원
+    public void RestoreCanceled(List<Receipt> list)
+    {
+        foreach (var r in list)
+        {
+            canceledReceipts.Add(r);
         }
     }
 }
