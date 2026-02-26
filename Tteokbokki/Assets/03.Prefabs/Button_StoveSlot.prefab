@@ -416,6 +416,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timerText: {fileID: 2251461746495951782}
+  defaultCookTimeMinutes: 4
   selectionOutline: {fileID: 8433025344820710925}
   cookProgressSlider: {fileID: 3634065026270753671}
   wokImage: {fileID: 3701728728454780688}
@@ -426,6 +427,7 @@ MonoBehaviour:
   wokLidSprite: {fileID: 5964812258594303015, guid: a34cffb86a9aec84ea3c2c538dc4d800, type: 3}
   cookedFoodSpawnPoint: {fileID: 4558697428426436743}
   cookedFoodPrefab: {fileID: 355488986595139890, guid: 91224ac8f4764854c8f5e44e67f684e4, type: 3}
+  maxIngredientPerType: 10
 --- !u!1 &5129409093941185752
 GameObject:
   m_ObjectHideFlags: 0

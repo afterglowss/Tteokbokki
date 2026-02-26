@@ -4131,7 +4131,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &476810737
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4923,7 +4923,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &577950860
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7617,7 +7617,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &871315881
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8743,7 +8743,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1123651206
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11933,9 +11933,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -435.64996, y: -182.02509}
+  m_AnchoredPosition: {x: -155.07, y: -553.3751}
   m_SizeDelta: {x: 280.58, y: 371.35}
-  m_Pivot: {x: 0, y: 1}
+  m_Pivot: {x: 1, y: 0}
 --- !u!114 &1436988764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11950,7 +11950,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   receiptPrefab: {fileID: 4321631299712797681, guid: 6103c986792de864dacab856ffdd3818, type: 3}
   receiptLineParent: {fileID: 1436988763}
-  cookLimitMinutes: 45
+  cookLimitMinutes: 60
   receiptPopup: {fileID: 1179952589}
   combinedIngredientManager: {fileID: 1517885323}
   maxSlots: 15
@@ -13961,7 +13961,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5368113041583635612, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 127.16998
+      value: 127.16999
       objectReference: {fileID: 0}
     - target: {fileID: 5462474807788006319, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
       propertyPath: m_Navigation.m_Mode
@@ -14026,6 +14026,10 @@ PrefabInstance:
     - target: {fileID: 7127652231099524180, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7136619801558373963, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -4.5
       objectReference: {fileID: 0}
     - target: {fileID: 7141192771941039318, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
       propertyPath: m_AnchorMax.x
@@ -15370,7 +15374,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dateTimeText: {fileID: 1950824747}
-  realSecondsPerGameMinute: 2
+  realSecondsPerGameMinute: 1.5
   startYear: 2025
   startMonth: 7
   startDay: 4
