@@ -45,34 +45,33 @@ public class AudioManager : MonoBehaviour
         bgmVol = PlayerPrefs.GetFloat("BGMVolume", 0.5f);
         sfxVol = PlayerPrefs.GetFloat("SFXVolume", 0.5f);
     }
-
     private void Start()
     {
-        UpdateAllVolumes();
-        PlayBGM(201, 1.0f);
-    }
+        // 1. 저장된 값을 변수에 로드 (이미 Awake에서 했겠지만 한 번 더 확인)
+        masterVol = PlayerPrefs.GetFloat("MasterVolume", 1f);
+        bgmVol = PlayerPrefs.GetFloat("BGMVolume", 0.5f);
+        sfxVol = PlayerPrefs.GetFloat("SFXVolume", 0.5f);
 
-    private void SetMixerValue(string parameterName, float sliderValue)
-    {
-        if (mainMixer == null) return;
-        float dB = sliderValue > 0.0001f ? Mathf.Log10(sliderValue) * 20 : -80f;
-        mainMixer.SetFloat(parameterName, dB);
+        // 2. 배경음악 재생 전에 '믹서' 파라미터를 먼저 강제 세팅
+        UpdateAllVolumes();
+
+        // 3. 믹서가 세팅된 "후"에 배경음악 재생
+        PlayBGM(201, GetBGMVolume());
     }
 
     private void UpdateAllVolumes()
     {
-        SetMixerValue("MasterVolume", masterVol);
-        SetMixerValue("BGMVolume", bgmVol);
-        SetMixerValue("SFXVolume", sfxVol);
-
-        bgmSource.volume = currentBgmScale;
-        sfxSource.volume = 1f;
-
-        for (int i = activeLoopingSources.Count - 1; i >= 0; i--)
+        // 확실하게 로그 스케일로 밀어 넣으세요.
+        if (mainMixer != null)
         {
-            if (activeLoopingSources[i] == null) { activeLoopingSources.RemoveAt(i); continue; }
-            activeLoopingSources[i].volume = 1f;
+            mainMixer.SetFloat("MasterVolume", masterVol > 0.0001f ? Mathf.Log10(masterVol) * 20 : -80f);
+            mainMixer.SetFloat("BGMVolume", bgmVol > 0.0001f ? Mathf.Log10(bgmVol) * 20 : -80f);
+            mainMixer.SetFloat("SFXVolume", sfxVol > 0.0001f ? Mathf.Log10(sfxVol) * 20 : -80f);
         }
+
+        // 소스 볼륨도 믹서와 별개로 0이면 0으로 밀어버립니다 (2중 잠금)
+        bgmSource.volume = (bgmVol <= 0.001f) ? 0 : currentBgmScale;
+        sfxSource.volume = (sfxVol <= 0.001f) ? 0 : 1f;
     }
 
     // --- 재생 함수 ---
@@ -163,13 +162,39 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    public void StopBGM() { if (bgmSource != null) bgmSource.Stop(); }
-    public void ResumeBGM() { if (bgmSource != null && !bgmSource.isPlaying) bgmSource.UnPause(); }
+    public void StopBGM()
+    {
+        if (bgmSource != null)
+            bgmSource.Stop();
+    }
+    public void ResumeBGM()
+    {
+        if (bgmSource != null && !bgmSource.isPlaying)
+            bgmSource.UnPause();
+    }
 
     // --- 볼륨 조절 ---
-    public void SetMasterVolume(float volume) { masterVol = volume; PlayerPrefs.SetFloat("MasterVolume", volume); UpdateAllVolumes(); }
-    public void SetBGMVolume(float volume) { bgmVol = volume; PlayerPrefs.SetFloat("BGMVolume", volume); UpdateAllVolumes(); }
-    public void SetSFXVolume(float volume) { sfxVol = volume; PlayerPrefs.SetFloat("SFXVolume", volume); UpdateAllVolumes(); }
+    public void SetMasterVolume(float volume)
+    { 
+        masterVol = volume;
+        PlayerPrefs.SetFloat("MasterVolume", volume);
+        PlayerPrefs.Save();
+        UpdateAllVolumes();
+    }
+    public void SetBGMVolume(float volume)
+    {
+        bgmVol = volume;
+        PlayerPrefs.SetFloat("BGMVolume", volume);
+        PlayerPrefs.Save();
+        UpdateAllVolumes();
+    }
+    public void SetSFXVolume(float volume)
+    {
+        sfxVol = volume;
+        PlayerPrefs.SetFloat("SFXVolume", volume);
+        PlayerPrefs.Save();
+        UpdateAllVolumes();
+    }
 
     public float GetMasterVolume() => masterVol;
     public float GetBGMVolume() => bgmVol;
