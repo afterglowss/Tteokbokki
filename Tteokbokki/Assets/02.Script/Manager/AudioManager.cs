@@ -1,19 +1,15 @@
 ﻿using UnityEngine;
-using UnityEngine.Audio;
 using System.Collections.Generic;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
-    [Header("Audio Mixer")]
-    [SerializeField] private AudioMixer mainMixer;
-
     [Header("Audio Sources")]
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioSource sfxSource;
 
-    [Header("Audio Clips")]
+    [Header("Audio Clips (BGM+SFX)")]
     [SerializeField] private List<SoundData> soundClips;
 
     private Dictionary<int, AudioClip> soundDict = new Dictionary<int, AudioClip>();
@@ -22,6 +18,8 @@ public class AudioManager : MonoBehaviour
     private float masterVol = 1f;
     private float bgmVol = 0.5f;
     private float sfxVol = 0.5f;
+
+    // BGM 개별 볼륨 기억용 변수
     private float currentBgmScale = 1.0f;
 
     [System.Serializable]
@@ -41,6 +39,7 @@ public class AudioManager : MonoBehaviour
         foreach (var data in soundClips)
             soundDict[data.id] = data.clip;
 
+        // 게임 시작 시 저장된 볼륨 불러오기
         masterVol = PlayerPrefs.GetFloat("MasterVolume", 1f);
         bgmVol = PlayerPrefs.GetFloat("BGMVolume", 0.5f);
         sfxVol = PlayerPrefs.GetFloat("SFXVolume", 0.5f);
@@ -49,40 +48,32 @@ public class AudioManager : MonoBehaviour
     private void Start()
     {
         UpdateAllVolumes();
-        PlayBGM(201, 1.0f);
+        PlayBGM(201, GetBGMVolume());
     }
 
-    private void SetMixerValue(string parameterName, float sliderValue)
+    // --- 1. 단발성 효과음 (SFX) ---
+    public void PlaySFX(int id)
     {
-        if (mainMixer == null) return;
-        float dB = sliderValue > 0.0001f ? Mathf.Log10(sliderValue) * 20 : -80f;
-        mainMixer.SetFloat(parameterName, dB);
+        PlaySFX(id, 1.0f);
     }
 
-    private void UpdateAllVolumes()
+    public void PlaySFX(int id, float volumeScale)
     {
-        SetMixerValue("MasterVolume", masterVol);
-        SetMixerValue("BGMVolume", bgmVol);
-        SetMixerValue("SFXVolume", sfxVol);
-
-        bgmSource.volume = currentBgmScale;
-        sfxSource.volume = 1f;
-
-        for (int i = activeLoopingSources.Count - 1; i >= 0; i--)
+        if (soundDict.TryGetValue(id, out AudioClip clip))
         {
-            if (activeLoopingSources[i] == null) { activeLoopingSources.RemoveAt(i); continue; }
-            activeLoopingSources[i].volume = 1f;
+            // UpdateAllVolumes에서 이미 sfxSource.volume이 0으로 처리되었다면, 
+            // PlayOneShot도 완벽하게 무음으로 재생됩니다.
+            sfxSource.PlayOneShot(clip, volumeScale);
         }
     }
 
-    // --- 재생 함수 ---
-    public void PlaySFX(int id, float volumeScale = 1.0f)
+    // --- 2. 반복 효과음 (Loop SFX) ---
+    public AudioSource PlayLoopSFX(int id)
     {
-        if (soundDict.TryGetValue(id, out AudioClip clip))
-            sfxSource.PlayOneShot(clip, volumeScale);
+        return PlayLoopSFX(id, 1.0f);
     }
 
-    public AudioSource PlayLoopSFX(int id, float volumeScale = 1.0f)
+    public AudioSource PlayLoopSFX(int id, float volumeScale)
     {
         if (!soundDict.TryGetValue(id, out AudioClip clip)) return null;
 
@@ -92,49 +83,45 @@ public class AudioManager : MonoBehaviour
         AudioSource source = soundObj.AddComponent<AudioSource>();
         source.clip = clip;
         source.loop = true;
-        source.outputAudioMixerGroup = sfxSource.outputAudioMixerGroup;
-        source.volume = volumeScale;
-        source.Play();
+        source.spatialBlend = 0f;
 
+        // ✨ [수정] 생성 시점에도 미세 소음 차단 로직 적용
+        if (masterVol <= 0.001f || sfxVol <= 0.001f)
+        {
+            source.volume = 0f;
+        }
+        else
+        {
+            source.volume = sfxVol * masterVol * volumeScale;
+        }
+
+        source.Play();
         activeLoopingSources.Add(source);
+
         return source;
     }
 
-    // --- 제어 함수 (중복 해결) ---
-
-    // 1. AudioSource 객체로 멈추기
     public void StopLoopSFX(AudioSource source)
     {
-        if (source != null && activeLoopingSources.Contains(source))
+        if (source != null)
         {
-            activeLoopingSources.Remove(source);
+            if (activeLoopingSources.Contains(source))
+            {
+                activeLoopingSources.Remove(source);
+            }
             source.Stop();
             Destroy(source.gameObject);
         }
     }
 
-    // 2. 사운드 ID(int)로 멈추기 (오버로딩)
-    public void StopLoopSFX(int soundID)
-    {
-        if (!soundDict.ContainsKey(soundID)) return;
-        AudioClip targetClip = soundDict[soundID];
-        for (int i = activeLoopingSources.Count - 1; i >= 0; i--)
-        {
-            if (activeLoopingSources[i] != null && activeLoopingSources[i].clip == targetClip)
-            {
-                AudioSource src = activeLoopingSources[i];
-                activeLoopingSources.RemoveAt(i);
-                src.Stop();
-                Destroy(src.gameObject);
-            }
-        }
-    }
-
     public void PauseAllLoopSFX(bool isPaused)
     {
-        foreach (var src in activeLoopingSources)
+        foreach (var source in activeLoopingSources)
         {
-            if (src != null) { if (isPaused) src.Pause(); else src.UnPause(); }
+            if (source == null) continue;
+
+            if (isPaused) source.Pause();
+            else source.UnPause();
         }
     }
 
@@ -151,27 +138,133 @@ public class AudioManager : MonoBehaviour
         activeLoopingSources.Clear();
     }
 
-    public void PlayBGM(int id, float volumeScale = 1.0f)
+    public void StopLoopSFX(int soundID)
+    {
+        if (!soundDict.ContainsKey(soundID)) return;
+        AudioClip targetClip = soundDict[soundID];
+
+        for (int i = activeLoopingSources.Count - 1; i >= 0; i--)
+        {
+            AudioSource source = activeLoopingSources[i];
+            if (source != null && source.clip == targetClip)
+            {
+                source.Stop();
+                source.clip = null;
+                activeLoopingSources.RemoveAt(i);
+                Destroy(source.gameObject);
+            }
+        }
+    }
+
+    // --- 3. BGM ---
+    public void PlayBGM(int id)
+    {
+        PlayBGM(id, 1.0f);
+    }
+
+    public void PlayBGM(int id, float volumeScale)
     {
         if (soundDict.TryGetValue(id, out AudioClip clip))
         {
             if (bgmSource.clip == clip && bgmSource.isPlaying) return;
             bgmSource.clip = clip;
+
             currentBgmScale = volumeScale;
-            bgmSource.volume = currentBgmScale;
+
+            // ✨ [수정] BGM 재생 시작 시점에도 차단 로직 적용
+            if (masterVol <= 0.001f || bgmVol <= 0.001f)
+            {
+                bgmSource.volume = 0f;
+            }
+            else
+            {
+                bgmSource.volume = bgmVol * masterVol * currentBgmScale;
+            }
+
             bgmSource.Play();
         }
     }
 
-    public void StopBGM() { if (bgmSource != null) bgmSource.Stop(); }
-    public void ResumeBGM() { if (bgmSource != null && !bgmSource.isPlaying) bgmSource.UnPause(); }
+    public void StopBGM()
+    {
+        if (bgmSource != null) bgmSource.Stop();
+    }
 
-    // --- 볼륨 조절 ---
-    public void SetMasterVolume(float volume) { masterVol = volume; PlayerPrefs.SetFloat("MasterVolume", volume); UpdateAllVolumes(); }
-    public void SetBGMVolume(float volume) { bgmVol = volume; PlayerPrefs.SetFloat("BGMVolume", volume); UpdateAllVolumes(); }
-    public void SetSFXVolume(float volume) { sfxVol = volume; PlayerPrefs.SetFloat("SFXVolume", volume); UpdateAllVolumes(); }
+    public void ResumeBGM()
+    {
+        if (bgmSource != null && !bgmSource.isPlaying) bgmSource.UnPause();
+    }
 
-    public float GetMasterVolume() => masterVol;
-    public float GetBGMVolume() => bgmVol;
-    public float GetSFXVolume() => sfxVol;
+    // --- 볼륨 조절 (핵심 수정 구역) ---
+    private void UpdateAllVolumes()
+    {
+        // ✨ [핵심 수정] 0.001f 이하라면 소수점 잔여값을 무시하고 완벽하게 0으로 만들어버립니다!
+
+        // 1. BGM
+        if (masterVol <= 0.001f || bgmVol <= 0.001f)
+        {
+            bgmSource.volume = 0f;
+        }
+        else
+        {
+            bgmSource.volume = bgmVol * masterVol * currentBgmScale;
+        }
+
+        // 2. SFX (OneShot용 소스)
+        if (masterVol <= 0.001f || sfxVol <= 0.001f)
+        {
+            sfxSource.volume = 0f;
+        }
+        else
+        {
+            sfxSource.volume = sfxVol * masterVol;
+        }
+
+        // 3. Loop 소스들
+        for (int i = activeLoopingSources.Count - 1; i >= 0; i--)
+        {
+            if (activeLoopingSources[i] == null)
+            {
+                activeLoopingSources.RemoveAt(i);
+                continue;
+            }
+
+            if (masterVol <= 0.001f || sfxVol <= 0.001f)
+            {
+                activeLoopingSources[i].volume = 0f;
+            }
+            else
+            {
+                activeLoopingSources[i].volume = sfxVol * masterVol;
+            }
+        }
+    }
+
+    public void SetMasterVolume(float volume)
+    {
+        masterVol = Mathf.Clamp01(volume);
+        PlayerPrefs.SetFloat("MasterVolume", masterVol);
+        PlayerPrefs.Save();
+        UpdateAllVolumes();
+    }
+
+    public void SetBGMVolume(float volume)
+    {
+        bgmVol = Mathf.Clamp01(volume);
+        PlayerPrefs.SetFloat("BGMVolume", bgmVol);
+        PlayerPrefs.Save();
+        UpdateAllVolumes();
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        sfxVol = Mathf.Clamp01(volume);
+        PlayerPrefs.SetFloat("SFXVolume", sfxVol);
+        PlayerPrefs.Save();
+        UpdateAllVolumes();
+    }
+
+    public float GetMasterVolume() => PlayerPrefs.GetFloat("MasterVolume", 1f);
+    public float GetBGMVolume() => PlayerPrefs.GetFloat("BGMVolume", 0.5f);
+    public float GetSFXVolume() => PlayerPrefs.GetFloat("SFXVolume", 0.5f);
 }
