@@ -44,19 +44,22 @@ public class EndOfDayUIHandler : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textLowStockCost;
     [SerializeField] private Button buttonOrderAndNext; // (외부 버튼용)
 
-    [Header("Step 3: 마감 체크 UI")]
-    [SerializeField] private Toggle checkReciptToggle;
-    [SerializeField] private Toggle checkTaxToggle;
-    [SerializeField] private Toggle checkIngredientToggle;
-    [SerializeField] private Toggle checkAllToggle;
-    [SerializeField] private Button buttonFinalClose;
+    // ✨ [새로 교체할 코드]
+    [Header("Step 3: 일일 결산(Daily Report) UI")]
+    [SerializeField] private TextMeshProUGUI textReportNetIncome; // 최상단: 오늘의 순이익
+    [SerializeField] private TextMeshProUGUI textReportFinance;   // 좌측: 재무 요약
+    [SerializeField] private TextMeshProUGUI textReportStats;     // 좌측: 영업 성과
+    [SerializeField] private TextMeshProUGUI textReportUnlocked;  // 우측: 해금 현황
+    [SerializeField] private TextMeshProUGUI textReportShopping;  // 우측: 쇼핑 내역
+    [SerializeField] private Toggle checkFinalConfirmToggle;      // 딱 하나 남긴 마감 확인 체크박스
+    [SerializeField] private Button buttonFinalClose;             // 기존 마감 버튼
 
     [Header("재료 상점 UI")]
     [SerializeField] private IngredientShopUI IngredientShop;
 
     private int currentTaxAmount = 0;
     private bool isTaxPaid = false;
-    private bool isUpdating = false;
+    //private bool isUpdating = false;
 
     // ✨ 현재 활성화된 패널 추적용
     private GameObject currentActivePanel;
@@ -104,10 +107,11 @@ public class EndOfDayUIHandler : MonoBehaviour
 
         buttonFinalClose.onClick.AddListener(OnFinalCloseClicked);
 
-        checkAllToggle.onValueChanged.AddListener(OnToggleAllChanged);
-        checkReciptToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
-        checkTaxToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
-        checkIngredientToggle.onValueChanged.AddListener(_ => OnIndividualToggleChanged());
+        // ✨ [수정] 단일 체크박스 이벤트 연결
+        if (checkFinalConfirmToggle != null)
+        {
+            checkFinalConfirmToggle.onValueChanged.AddListener(_ => UpdateCloseButtonState());
+        }
     }
 
     private void OnEnable()
@@ -360,7 +364,9 @@ public class EndOfDayUIHandler : MonoBehaviour
 
             if (stepForInit == 3)
             {
-                PrepareClosingChecklist();
+                //PrepareClosingChecklist();
+
+                PrepareDailyReport();
                 UpdateCloseButtonState();
             }
 
@@ -392,42 +398,150 @@ public class EndOfDayUIHandler : MonoBehaviour
         }
     }
 
-    // ... (PrepareClosingChecklist, UpdateCloseButtonState, Toggle 관련 함수들 동일) ...
-    private void PrepareClosingChecklist()
+    // ✨ [NEW] 일일 결산 대시보드 데이터 세팅
+    private void PrepareDailyReport()
     {
-        checkTaxToggle.isOn = isTaxPaid;
-        checkReciptToggle.isOn = false;
-        checkIngredientToggle.isOn = false;
-        checkAllToggle.isOn = false;
-    }
-    private void UpdateCloseButtonState() => buttonFinalClose.interactable = checkAllToggle.isOn;
-    private void OnToggleAllChanged(bool isOn)
-    {
-        if (isUpdating) return;
-        isUpdating = true;
-        checkReciptToggle.isOn = isOn;
-        checkTaxToggle.isOn = isOn;
-        checkIngredientToggle.isOn = isOn;
-        isUpdating = false;
+        if (GameDataLogger.Instance == null || ReceiptLineManager.Instance == null) return;
+
+        // --- 1. 재무 데이터 수집 ---
+        int startBalance = GameDataLogger.Instance.DayStartBalance;
+        int sales = ReceiptLineManager.Instance.GetTotalSuccessfulAmount();
+        int bonus = GameDataLogger.Instance.IncomeBonus;
+        int totalRevenue = sales + bonus; // 총 매출 (보너스 포함)
+        int tax = GameDataLogger.Instance.ExpenseTax;
+        int shopping = GameDataLogger.Instance.ExpenseShopping;
+        int netIncome = totalRevenue - tax - shopping; // 순이익
+
+        // --- 2. 성과 데이터 수집 ---
+        int successCount = ReceiptLineManager.Instance.GetSuccessfulReceipts().Count;
+        int missedCount = ReceiptLineManager.Instance.GetMissedReceipts().Count;
+        int canceledCount = ReceiptLineManager.Instance.GetCanceledReceipts().Count;
+        int dailyTotal = successCount + missedCount + canceledCount;
+        float dailyRate = dailyTotal > 0 ? ((float)successCount / dailyTotal) * 100f : 0f;
+
+        // 누적 데이터 (GameManager.EndOfDay에서 이미 더해진 최신 값)
+        int totalSuccess = GameManager.Instance.TotalSuccessCount;
+        int totalMissed = GameManager.Instance.TotalMissedCount; // 취소 포함됨
+        int cumulTotal = totalSuccess + totalMissed;
+        float cumulRate = cumulTotal > 0 ? ((float)totalSuccess / cumulTotal) * 100f : 0f;
+
+        // --- 3. 재료 데이터 수집 ---
+        int unlockedCount = IngredientStockManager.Instance.GetPurchasedIngredientCount();
+        int totalDbCount = IngredientDatabase.Ingredients.Count; // 전체 구현된 재료 수
+
+        // === 4. UI 텍스트 적용 ===
+        // [최상단] 순이익
+        string netColor = netIncome >= 0 ? "#008000" : "red";
+        string netSign = netIncome >= 0 ? "+" : "";
+        if (textReportNetIncome != null)
+            textReportNetIncome.text = $"오늘의 순이익: <color={netColor}>{netSign}{netIncome:N0}원</color>";
+
+        // [좌측] 재무 요약
+        if (textReportFinance != null)
+        {
+            textReportFinance.text =
+                $"시작 자산: {startBalance:N0}원\n" +
+                $"총 매출(보너스 포함): <color=#008000>+{totalRevenue:N0}원</color>\n" +
+                $"세금 납부: <color=red>-{tax:N0}원</color>\n" +
+                $"재료 구매: <color=red>-{shopping:N0}원</color>";
+        }
+
+        // [좌측] 영업 성과
+        if (textReportStats != null)
+        {
+            textReportStats.text =
+                $"하루 성공률: {dailyRate:F1}% <size=80%>(누적: {cumulRate:F1}%)</size>\n" +
+                $"<color=#008000>성공 {successCount}건</color> / <color=red>실패 {missedCount}건</color> / 취소 {canceledCount}건";
+        }
+
+        // [우측] 해금 현황
+        if (textReportUnlocked != null)
+            textReportUnlocked.text = $"해금된 재료: {unlockedCount} / {totalDbCount} 종류";
+
+        // [우측] 쇼핑 내역 리스트
+        if (textReportShopping != null)
+        {
+            var boughtItems = GameDataLogger.Instance.GetTodayBoughtIngredients();
+            if (boughtItems.Count > 0)
+            {
+                string shopList = "";
+                int count = 0; // ✨ [NEW] 몇 번째 재료인지 세는 카운터
+
+                foreach (var kvp in boughtItems)
+                {
+                    // 재료 이름과 구매 개수 추가
+                    shopList += $"- {kvp.Key} <color=#FF8C00>x {kvp.Value}</color>";
+                    count++;
+
+                    if (count % 2 == 0)
+                    {
+                        // 짝수 번째(두 번째) 재료를 출력했다면 줄바꿈
+                        shopList += "\n";
+                    }
+                    else
+                    {
+                        // 홀수 번째(첫 번째) 재료를 출력했다면, 
+                        // 다음 글씨가 텍스트 상자 가로 길이의 딱 절반(50%) 위치에서 시작되도록 이동
+                        shopList += "<pos=50%>";
+                    }
+                }
+                textReportShopping.text = shopList;
+            }
+            else
+            {
+                textReportShopping.text = "<color=#888888>오늘 구매한 재료가 없습니다.</color>";
+            }
+        }
+
+        // --- 5. 확인 체크박스 초기화 ---
+        if (checkFinalConfirmToggle != null) checkFinalConfirmToggle.isOn = false;
         UpdateCloseButtonState();
     }
-    private void OnIndividualToggleChanged()
+
+    private void UpdateCloseButtonState()
     {
-        if (isUpdating) return;
-        isUpdating = true;
-        bool allOn = checkReciptToggle.isOn && checkTaxToggle.isOn && checkIngredientToggle.isOn;
-        checkAllToggle.isOn = allOn;
-        isUpdating = false;
-        UpdateCloseButtonState();
+        if (buttonFinalClose != null)
+        {
+            // ✨ [수정] 체크박스 UI가 켜져(Active) 있을 때만 isOn 상태를 확인
+            if (checkFinalConfirmToggle != null && checkFinalConfirmToggle.gameObject.activeSelf)
+            {
+                buttonFinalClose.interactable = checkFinalConfirmToggle.isOn;
+            }
+            else
+            {
+                // 체크박스 UI가 에디터에서 꺼져있다면 무조건 버튼 활성화!
+                buttonFinalClose.interactable = true;
+            }
+        }
     }
+    //private void OnToggleAllChanged(bool isOn)
+    //{
+    //    if (isUpdating) return;
+    //    isUpdating = true;
+    //    checkReciptToggle.isOn = isOn;
+    //    checkTaxToggle.isOn = isOn;
+    //    checkIngredientToggle.isOn = isOn;
+    //    isUpdating = false;
+    //    UpdateCloseButtonState();
+    //}
+    //private void OnIndividualToggleChanged()
+    //{
+    //    if (isUpdating) return;
+    //    isUpdating = true;
+    //    bool allOn = checkReciptToggle.isOn && checkTaxToggle.isOn && checkIngredientToggle.isOn;
+    //    checkAllToggle.isOn = allOn;
+    //    isUpdating = false;
+    //    UpdateCloseButtonState();
+    //}
 
     // ✨ [수정] 최종 마감 버튼
     private void OnFinalCloseClicked()
     {
-        if (!checkAllToggle.isOn)
+        // ✨ [수정] 체크박스가 살아있는데(activeSelf), 체크가 안 된(!isOn) 경우에만 막음!
+        if (checkFinalConfirmToggle != null && checkFinalConfirmToggle.gameObject.activeSelf && !checkFinalConfirmToggle.isOn)
         {
-            PunchButton(buttonFinalClose); // 안 눌릴 때도 흔들어주기
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "모든 마감 항목을 확인해주세요!", 1f);
+            PunchButton(buttonFinalClose);
+            TooltipManager.ShowFollowMouse(TooltipType.UI, "결산 내용을 확인하고 체크해주세요!", 1f);
             return;
         }
 

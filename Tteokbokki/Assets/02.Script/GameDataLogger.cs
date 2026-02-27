@@ -210,4 +210,17 @@ public class GameDataLogger : MonoBehaviour
     {
         return IngredientEconomyDatabase.SortOrder;
     }
+
+    public Dictionary<string, int> GetTodayBoughtIngredients()
+    {
+        Dictionary<string, int> boughtList = new Dictionary<string, int>();
+        foreach (var kvp in dailyIngredientStats)
+        {
+            if (kvp.Value.Bought > 0)
+            {
+                boughtList[kvp.Key] = kvp.Value.Bought;
+            }
+        }
+        return boughtList;
+    }
 }

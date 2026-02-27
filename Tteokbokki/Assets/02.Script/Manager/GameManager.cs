@@ -189,6 +189,11 @@ public class GameManager : MonoBehaviour
                     endOfDayUIHandler.ForceOpenShutterImmediately();
                 }
             }
+
+            if (GameDataLogger.Instance != null)
+            {
+                GameDataLogger.Instance.StartNewDayLog(PlayerWalletManager.Instance.CurrentBalance);
+            }
             // 새 게임은 영업 시작
             OrderSpawner.Instance.RestartSpawning();
         }
