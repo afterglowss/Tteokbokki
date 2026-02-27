@@ -2,7 +2,7 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
+//using System.Drawing;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -20,6 +20,10 @@ public class GameManager : MonoBehaviour
     [Header("Announcement Banner")]
     public RectTransform announcementBanner; // 화면 상단에 배치될 패널
     public TextMeshProUGUI announcementText; // 패널 안의 텍스트
+
+    [Header("D-Day Animation UI")]
+    public RectTransform ddayContainer; // 화면 중앙으로 이동할 전체 부모 (빈 오브젝트 또는 배경 패널)
+    public TextMeshProUGUI ddayText;    // 숫자가 틱! 하고 바뀔 텍스트
 
     public static GameManager Instance { get; private set; }
 
@@ -397,6 +401,9 @@ public class GameManager : MonoBehaviour
         {
             // ✅ [정상 영업 루트]
             OrderSpawner.Instance.RestartSpawning(); // 주문 시작
+
+            PlayDDayAnimation();
+
             Debug.Log("[시작] 셔터가 열리고 영업이 시작되었습니다!");
         }
     }
@@ -760,5 +767,73 @@ public class GameManager : MonoBehaviour
         {
             announcementBanner.gameObject.SetActive(false);
         });
+    }
+
+    // ✨ [NEW] 애니메이션 없이 즉시 D-Day 텍스트만 업데이트 (세이브 로드용)
+    public void UpdateDDayImmediate()
+    {
+        if (ddayText == null) return;
+
+        DateTime startDate = new DateTime(GameClock.Instance.startYear, GameClock.Instance.startMonth, GameClock.Instance.startDay);
+        int daysPassed = (GameClock.gameTime.Date - startDate.Date).Days;
+        int currentDDay = endingCount - daysPassed;
+
+        // 즉시 텍스트만 갱신
+        ddayText.text = $"D - {currentDDay}";
+    }
+
+    // ✨ [NEW] 하루 시작 시 D-Day 애니메이션을 재생하는 함수
+    // ✨ [수정] 위치 이동 없이 제자리에서 커지고 슬롯이 돌아가는 애니메이션
+    public void PlayDDayAnimation()
+    {
+        if (ddayContainer == null || ddayText == null) return;
+
+        DateTime startDate = new DateTime(GameClock.Instance.startYear, GameClock.Instance.startMonth, GameClock.Instance.startDay);
+        int daysPassed = (GameClock.gameTime.Date - startDate.Date).Days;
+
+        int currentDDay = endingCount - daysPassed;
+        int previousDDay = currentDDay + 1;
+
+        if (daysPassed == 0) previousDDay = currentDDay;
+
+        // 초기 셋팅
+        ddayText.text = $"D - {previousDDay}";
+        ddayText.rectTransform.anchoredPosition = Vector2.zero;
+        ddayText.color = new Color(ddayText.color.r, ddayText.color.g, ddayText.color.b, 1f);
+
+        Sequence seq = DOTween.Sequence();
+
+        // [STEP 1] 위치 이동 삭제! 제자리에서 1.5배로 스르륵 커짐
+        seq.Append(ddayContainer.DOScale(1.5f, 0.8f).SetEase(Ease.OutCubic));
+
+        seq.AppendInterval(0.5f);
+
+        if (daysPassed > 0)
+        {
+            // [STEP 2] 슬롯머신 연출: 어제 숫자가 위로 휙! 올라가면서 투명해짐
+            seq.Append(ddayText.rectTransform.DOAnchorPosY(50f, 0.3f).SetEase(Ease.InBack));
+            seq.Join(ddayText.DOFade(0f, 0.3f));
+
+            // [STEP 3] 글자 내용 교체 및 아래로 몰래 이동
+            seq.AppendCallback(() =>
+            {
+                ddayText.text = $"D - {currentDDay}";
+                ddayText.rectTransform.anchoredPosition = new Vector2(0, -50f);
+            });
+
+            // [STEP 4] 틱! 하고 튕겨 올라오며 뚜렷해짐
+            seq.Append(ddayText.rectTransform.DOAnchorPosY(0f, 0.3f).SetEase(Ease.OutBack));
+            seq.Join(ddayText.DOFade(1f, 0.3f));
+        }
+        else
+        {
+            // 첫날은 귀엽게 꿀렁임
+            seq.Append(ddayText.transform.DOPunchScale(Vector3.one * 0.2f, 0.5f, 10, 1f));
+        }
+
+        seq.AppendInterval(1f);
+
+        // [STEP 5] 제자리에서 다시 원래 크기(1배)로 얌전히 줄어듦
+        seq.Append(ddayContainer.DOScale(1f, 0.8f).SetEase(Ease.InOutSine));
     }
 }

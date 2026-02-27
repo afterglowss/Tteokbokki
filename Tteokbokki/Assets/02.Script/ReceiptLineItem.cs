@@ -4,8 +4,9 @@ using TMPro;
 using System;
 using DG.Tweening;
 using Unity.VisualScripting;
+using UnityEngine.EventSystems;
 
-public class ReceiptLineItem : MonoBehaviour
+public class ReceiptLineItem : MonoBehaviour, IPointerClickHandler
 {
     public Button receiptButton;
     public TextMeshProUGUI orderIDText;
@@ -273,4 +274,38 @@ public class ReceiptLineItem : MonoBehaviour
         }
     }
 
+    // ✨ [NEW] 마우스 클릭 이벤트를 감지하는 함수 (IPointerClickHandler 구현)
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        // 마우스 우클릭(Right Click)이 감지되었을 때
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            CancelReceipt();
+        }
+    }
+
+    // ✨ [NEW] 휴지통에 드래그했을 때와 완벽히 동일한 동작을 수행하는 함수
+    private void CancelReceipt()
+    {
+        // 1. 휴지통 버리는 효과음 재생 (기존 TrashBinSlot과 동일)
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(114);
+
+        // 2. 데이터 로그에 '휴지통(Trash)' 실패로 기록
+        if (GameDataLogger.Instance != null)
+        {
+            GameDataLogger.Instance.CountFail("Trash");
+        }
+
+        // 3. 취소 내역에 기록 (어제 우리가 만든 Canceled 리스트에 쏙 들어갑니다!)
+        if (ReceiptLineManager.Instance != null)
+        {
+            ReceiptLineManager.Instance.RecordCanceledReceipt(receipt);
+
+            // 4. 영수증 목록에서 제거 및 UI 파괴
+            ReceiptLineManager.Instance.RemoveReceipt(this);
+        }
+
+        Debug.Log($"[시스템] 우클릭으로 영수증({receipt.OrderID})을 휴지통에 버렸습니다.");
+    }
 }

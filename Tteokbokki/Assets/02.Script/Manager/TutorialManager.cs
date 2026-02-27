@@ -962,4 +962,17 @@ public class TutorialManager : MonoBehaviour
     {
         KeyboardInputManager.Instance.SetTutorialMode(true);
     }
+
+    public void OnExitButtonClick()
+    {
+        // 하이라이트 제거
+        Unhighlight();
+
+        // Yarn 대화가 진행 중이었다면 강제 종료
+        if (dialogueRunner != null) dialogueRunner.Stop();
+
+        // 시작 화면으로
+        LoadScene("StartScene");
+
+    }
 }

@@ -169,6 +169,11 @@ public class GameSaveManager : MonoBehaviour
 
         IsSettlementPhase = data.isEndOfDayPanelActive;
 
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.UpdateDDayImmediate();
+        }
+
         Debug.Log($"[로드] 마감 패널 상태 복원: {IsSettlementPhase}");
 
         Debug.Log("게임 불러오기 완료!");
