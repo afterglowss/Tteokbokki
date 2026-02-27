@@ -19,7 +19,322 @@ MonoBehaviour:
     m_Items: []
   m_TableData:
   - m_Id: 83817259008
-    m_Localized: Tteokbokki
+    m_Localized: Rice Cake
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14722336677888
+    m_Localized: '=== Order No: {0} ===\n'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14751919104000
+    m_Localized: 'Order Time: {0}\n'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14837759729664
+    m_Localized: "Total Amount: \u20A9{0:N0}\\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15115196162048
+    m_Localized: "[{0}] {1} - \u20A9{2:N0}\\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15564292874240
+    m_Localized: '  Extras:\n'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15686145794048
+    m_Localized: "  + {0} x{1} (\u20A9{2:N0})\\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15821869277184
+    m_Localized: "  Subtotal: \u20A9{0:N0}\\n\\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16548255621120
+    m_Localized: '[{0}] No successful receipts.\n'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16590341267456
+    m_Localized: === [Successful Receipts] {0} ===\n\n
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16607051374592
+    m_Localized: "Base Total: \u20A9{0:N0}\\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16692262854656
+    m_Localized: "<color=#D95400>+ Bonus Income: \u20A9{0:N0}</color>\\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16732360400896
+    m_Localized: "Final Total: \u20A9{0:N0}\\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16767689023488
+    m_Localized: '[{0}] No missed receipts.\n'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16813557932032
+    m_Localized: === [Missed Receipts] {0} ===\n\n
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16852346855424
+    m_Localized: "Total Loss: \u20A9{0:N0}\\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17756307447808
+    m_Localized: Fish Cake
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18445280600064
+    m_Localized: Green Onion
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981696
+    m_Localized: Cabbage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981697
+    m_Localized: Mozzarella Cheese
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981698
+    m_Localized: Beef Belly
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981699
+    m_Localized: Boiled Egg
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981700
+    m_Localized: Glass Noodles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981701
+    m_Localized: Ramen Noodles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981702
+    m_Localized: Gopchang
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981703
+    m_Localized: Joraengi Rice Cake
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981704
+    m_Localized: Sweet Potato
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981705
+    m_Localized: Corn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981706
+    m_Localized: Sausage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981707
+    m_Localized: Gunja Sauce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981708
+    m_Localized: Mala Sauce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981709
+    m_Localized: Rose Sauce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981710
+    m_Localized: Cream Sauce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981711
+    m_Localized: Soy Sauce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981712
+    m_Localized: Curry Sauce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981713
+    m_Localized: Jjajang Sauce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981714
+    m_Localized: Gunja Tteokbokki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981715
+    m_Localized: Spicy Gunja Tteokbokki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981716
+    m_Localized: Mala Gunja Tteokbokki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981717
+    m_Localized: Rose Gunja Tteokbokki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981718
+    m_Localized: Cream Gunja Tteokbokki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981719
+    m_Localized: Soy Sauce Gunja Tteokbokki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981720
+    m_Localized: Curry Gunja Tteokbokki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981721
+    m_Localized: Jjajang Gunja Tteokbokki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22779628216320
+    m_Localized: (Bonus)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22848465133568
+    m_Localized: '[{0}] Order No. {1}\n\n'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22885840576512
+    m_Localized: "Total Amount: <color=#FF5555>\u20A9{0:N0}</color>\\n<size=70%>(Base
+      \u20A9{1:N0} + <color=#FF5555>Bonus \u20A9{2:N0}</color>)</size>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22933559173120
+    m_Localized: "Total Amount: \u20A9{0:N0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22969806348288
+    m_Localized: Current Ingredients
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23022428086272
+    m_Localized: Empty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23108570701824
+    m_Localized: '[Stove {0}]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23608762425344
+    m_Localized: Cooking...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23608762425345
+    m_Localized: Cooked!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23608762425346
+    m_Localized: Adding Ingredients
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23608762425347
+    m_Localized: Waiting
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26024228544512
+    m_Localized: 'Cooking:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26068361011200
+    m_Localized: 'Preparing:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26901572083712
+    m_Localized: 'Ingredients:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33890264014848
+    m_Localized: Throw in the trash
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33890360483840
+    m_Localized: "Balance: \u20A9{0:N0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33890360483841
+    m_Localized: "Current Assets: \u20A9{0:N0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038099320832
+    m_Localized: 'Tomorrow''s Bonus: <color=#D95400>{0}</color> (Income Up!)'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206912
+    m_Localized: No Bonus Info
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206913
+    m_Localized: 1 of All
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206914
+    m_Localized: 1 of Low Stock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206915
+    m_Localized: Clear
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206916
+    m_Localized: Cart is already empty.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206917
+    m_Localized: All ingredients reached the purchase limit (3).
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206918
+    m_Localized: No ingredients are low in stock.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206919
+    m_Localized: Low stock ingredients reached the purchase limit (3).
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206920
+    m_Localized: <color=#888888>Cart is empty.</color>
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206921
+    m_Localized: "Total: <color=#D95400>\u20A9{0:N0}</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206922
+    m_Localized: <size=80%>(Total {0} items)</size>
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206923
+    m_Localized: Skip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206924
+    m_Localized: Order
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206925
+    m_Localized: Not Enough Money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40165827796992
+    m_Localized: Please select a stove first!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40165920071680
+    m_Localized: '{0}\nWe will close after the remaining orders are completed or
+      time runs out.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40165920071681
+    m_Localized: <color=red>[Emergency Closing]</color> {0} We will close immediately
+      after finishing the remaining orders.
     m_Metadata:
       m_Items: []
   references:

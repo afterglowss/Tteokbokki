@@ -39,6 +39,14 @@ MonoBehaviour:
     m_Key: Report_NoShopping
     m_Metadata:
       m_Items: []
+  - m_Id: 3613470875648
+    m_Key: Report_Title_Finance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3655468441600
+    m_Key: Report_Title_Shopping
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

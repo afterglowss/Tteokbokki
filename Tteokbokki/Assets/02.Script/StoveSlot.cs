@@ -151,21 +151,31 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     {
         if (!stoveManager.IsSelected(this)) return;
 
-        string prefix = $"[{SlotIndex}번 화구]\n";
+        // ✨ 1. "[1번 화구]" 텍스트 번역
+        string prefix = TextTranslator.GetUIText("UI_StovePrefix", SlotIndex) + "\n";
 
         if (isCooking)
         {
-            PlayerWokManager.Instance.UpdateUI(currentIngredients, $"{prefix}조리 중...");
+            // ✨ 2. "조리 중..." 번역
+            string transStatus = TextTranslator.GetUIText("UI_StoveStatus_Cooking");
+            PlayerWokManager.Instance.UpdateUI(currentIngredients, $"{prefix}{transStatus}");
         }
         else if (isCooked)
         {
-            PlayerWokManager.Instance.UpdateUI(currentIngredients, $"{prefix}조리 완료!");
+            // ✨ 3. "조리 완료!" 번역
+            string transStatus = TextTranslator.GetUIText("UI_StoveStatus_Cooked");
+            PlayerWokManager.Instance.UpdateUI(currentIngredients, $"{prefix}{transStatus}");
         }
         else
         {
-            // 준비 중일 때도 재료가 없으면 "대기 중"이라고 표시
-            string status = pendingIngredients.Count > 0 ? "재료 담는 중" : "대기 중";
-            PlayerWokManager.Instance.UpdateUI(pendingIngredients, $"{prefix}{status}");
+            // ✨ 4. "재료 담는 중" or "대기 중" 번역
+            string transStatus;
+            if (pendingIngredients.Count > 0)
+                transStatus = TextTranslator.GetUIText("UI_StoveStatus_Adding");
+            else
+                transStatus = TextTranslator.GetUIText("UI_StoveStatus_Waiting");
+
+            PlayerWokManager.Instance.UpdateUI(pendingIngredients, $"{prefix}{transStatus}");
         }
     }
 
@@ -391,25 +401,34 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     }
 
     // --- 5. 툴팁 ---
+    // --- 5. 툴팁 ---
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (isDraggingWok) return;
 
         if (isCooking && currentIngredients != null)
         {
-            string tooltip = "조리 중:\n";
+            // ✨ 1. "조리 중:" 번역 (줄바꿈 \n 추가)
+            string tooltip = TextTranslator.GetUIText("Tooltip_Cooking") + "\n";
+
             foreach (var pair in currentIngredients)
             {
-                tooltip += $"{pair.Key} x{pair.Value}\n";
+                // ✨ 2. 재료 이름 번역
+                string transIngName = TextTranslator.GetIngredientName(pair.Key);
+                tooltip += $"{transIngName} x{pair.Value}\n";
             }
             TooltipManager.ShowFollowMouse(TooltipType.Info, tooltip);
         }
         else if (HasPendingIngredients)
         {
-            string tooltip = "준비 중:\n";
+            // ✨ 3. "준비 중:" 번역
+            string tooltip = TextTranslator.GetUIText("Tooltip_Preparing") + "\n";
+
             foreach (var pair in pendingIngredients)
             {
-                tooltip += $"{pair.Key} x{pair.Value}\n";
+                // ✨ 4. 재료 이름 번역
+                string transIngName = TextTranslator.GetIngredientName(pair.Key);
+                tooltip += $"{transIngName} x{pair.Value}\n";
             }
             TooltipManager.ShowFollowMouse(TooltipType.Info, tooltip);
         }

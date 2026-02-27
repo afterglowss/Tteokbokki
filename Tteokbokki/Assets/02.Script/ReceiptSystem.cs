@@ -209,8 +209,9 @@ public class Receipt
 
     public string GetReceiptText()
     {
-        string result = $"=== 주문번호: {OrderID} ===\n";
-        result += $"주문일시: {OrderDateTime:yyyy-MM-dd HH:mm}\n";
+        // ✨ 하드코딩된 한글 대신 TextTranslator 호출!
+        string result = TextTranslator.GetUIText("Receipt_Header", OrderID);
+        result += TextTranslator.GetUIText("Receipt_DateTime", OrderDateTime.ToString("yyyy-MM-dd HH:mm"));
 
         int total = 0;
         foreach (var order in orders)
@@ -220,7 +221,7 @@ public class Receipt
         }
 
         result += "=====================\n";
-        result += $"총 주문 금액: {total}원\n";
+        result += TextTranslator.GetUIText("Receipt_Total", total);
         return result;
     }
 
@@ -287,17 +288,23 @@ public class OrderItem
     }
     public string GetOrderText()
     {
-        string result = $"[{ItemID}] {Menu.Name} - {Menu.BasePrice}원\n";   // [{ItemID}]
+        // ✨ 1. 메뉴 이름부터 먼저 번역기 돌리기!
+        string transMenuName = TextTranslator.GetMenuName(Menu.Name);
+        string result = TextTranslator.GetUIText("Receipt_OrderItem", ItemID, transMenuName, Menu.BasePrice);
+
         if (Extras.Count > 0)
         {
-            result += "  추가 재료:\n";
+            result += TextTranslator.GetUIText("Receipt_ExtraHeader");
             foreach (var extra in Extras)
             {
                 int price = IngredientDatabase.Ingredients[extra.Key].Price * extra.Value;
-                result += $"  + {extra.Key} x{extra.Value} ({price}원)\n";
+                // ✨ 2. 추가 재료 이름도 번역기 돌리기!
+                string transIngName = TextTranslator.GetIngredientName(extra.Key);
+
+                result += TextTranslator.GetUIText("Receipt_ExtraItem", transIngName, extra.Value, price);
             }
         }
-        result += $"  합계: {TotalPrice}원\n\n";
+        result += TextTranslator.GetUIText("Receipt_OrderItemTotal", TotalPrice);
         return result;
     }
 

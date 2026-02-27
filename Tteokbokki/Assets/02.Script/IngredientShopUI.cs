@@ -146,12 +146,13 @@ public class IngredientShopUI : MonoBehaviour
         if (DailyBonusManager.Instance != null)
         {
             string bonusNames = DailyBonusManager.Instance.GetTodayBonusString();
-            // ✨ [COLOR] 노란색 대신 진한 오렌지(#D95400)로 변경
-            bonusInfoText.text = $"내일의 보너스: <color=#D95400>{bonusNames}</color> (수익 증가!)";
+            // ✨ 1. 보너스 텍스트 번역
+            bonusInfoText.text = TextTranslator.GetUIText("Shop_BonusInfo", bonusNames);
         }
         else
         {
-            bonusInfoText.text = "보너스 정보 없음";
+            // ✨ 2. 보너스 없음 텍스트 번역
+            bonusInfoText.text = TextTranslator.GetUIText("Shop_NoBonus");
         }
     }
 
@@ -216,11 +217,10 @@ public class IngredientShopUI : MonoBehaviour
         if (reorderTitleObject != null) reorderTitleObject.SetActive(unlockedCount > 0 && !isTutorialMode);
         if (newArrivalTitleObject != null) newArrivalTitleObject.SetActive(lockedCount > 0);
 
-        // 버튼 텍스트 설정
-        if (selectAllButtonText != null) selectAllButtonText.text = "전체 1개씩";
-        if (selectLowStockButtonText != null) selectLowStockButtonText.text = "부족분 1개씩";
-        // ✨ 비우기 버튼 텍스트 설정
-        if (clearCartButtonText != null) clearCartButtonText.text = "비우기";
+        // ✨ 3. 버튼 텍스트 설정 번역
+        if (selectAllButtonText != null) selectAllButtonText.text = TextTranslator.GetUIText("Shop_SelectAll");
+        if (selectLowStockButtonText != null) selectLowStockButtonText.text = TextTranslator.GetUIText("Shop_SelectLowStock");
+        if (clearCartButtonText != null) clearCartButtonText.text = TextTranslator.GetUIText("Shop_ClearCart");
     }
 
     // ✨ [NEW] 장바구니 비우기 로직
@@ -243,11 +243,7 @@ public class IngredientShopUI : MonoBehaviour
             // 취소/삭제 느낌의 사운드 (예: 109번)
             //if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
         }
-        else
-        {
-            // 이미 비어있음
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "장바구니가 이미 비어있습니다.", 1f);
-        }
+        else TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Shop_CartAlreadyEmpty"), 1f);
     }
 
     // ✨ [NEW] 모든 재료를 최소 1개씩 담기
@@ -270,11 +266,7 @@ public class IngredientShopUI : MonoBehaviour
             UpdateTotalCostUI();
             //if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(107);
         }
-        else
-        {
-            // 변경된 게 없다는 건 이미 모두 꽉 찼다는 뜻
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "모든 재료가 구매 제한(3개)에 도달했습니다.", 1f);
-        }
+        else TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Shop_AllItemsMaxed"), 1f);
     }
 
     // ✨ [NEW] 부족한 재료만 최소 1개씩 담기
@@ -305,9 +297,9 @@ public class IngredientShopUI : MonoBehaviour
         else
         {
             if (!hasLowStockItems)
-                TooltipManager.ShowFollowMouse(TooltipType.UI, "부족한 재료가 없습니다.", 1f);
+                TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Shop_NoLowStock"), 1f);
             else
-                TooltipManager.ShowFollowMouse(TooltipType.UI, "부족한 재료들이 이미 구매 제한(3개)에 도달했습니다.", 1f);
+                TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Shop_LowStockMaxed"), 1f);
         }
     }
 
@@ -337,27 +329,24 @@ public class IngredientShopUI : MonoBehaviour
                 totalItemsCount++;
                 totalQuantity += item.CurrentCount;
 
-                // ✨ [COLOR] 여기 수량 표시도 진한 오렌지로 변경
-                cartSb.AppendLine($"{item.Data.Name} <color=#D95400>x{item.CurrentCount}</color>");
+                string transName = TextTranslator.GetIngredientName(item.Data.Name);
+                cartSb.AppendLine($"{transName} <color=#D95400>x{item.CurrentCount}</color>");
             }
         }
 
         if (cartContentText != null)
         {
-            if (totalItemsCount > 0)
-                cartContentText.text = cartSb.ToString();
-            else
-                cartContentText.text = "<color=#888888>장바구니가 비어있습니다.</color>";
+            if (totalItemsCount > 0) cartContentText.text = cartSb.ToString();
+            else cartContentText.text = TextTranslator.GetUIText("Shop_CartEmpty"); // ✨ 번역
         }
 
-        // ✨ [COLOR] 총액 표시 색상 변경 (진한 오렌지)
         if (totalCostText != null)
-            totalCostText.text = $"총 주문 금액: <color=#D95400>{totalCost:N0}원</color>";
+            totalCostText.text = TextTranslator.GetUIText("Shop_TotalCost", totalCost);
 
         if (cartInfoText != null)
         {
             cartInfoText.text = totalItemsCount > 0
-                ? $"<size=80%>(총 {totalQuantity}개 품목)</size>"
+                ? TextTranslator.GetUIText("Shop_TotalItems", totalQuantity)
                 : "";
         }
 
@@ -375,7 +364,7 @@ public class IngredientShopUI : MonoBehaviour
             if (orderButton != null) orderButton.interactable = true;
             if (orderButtonText != null)
             {
-                orderButtonText.text = "넘어가기";
+                orderButtonText.text = TextTranslator.GetUIText("Shop_BtnSkip"); // ✨ 번역
                 orderButtonText.color = originalButtonTextColor;
             }
         }
@@ -384,22 +373,20 @@ public class IngredientShopUI : MonoBehaviour
         {
             if (canAfford)
             {
-                // 돈이 충분함 -> "주문하기" (가능)
                 if (orderButton != null) orderButton.interactable = true;
                 if (orderButtonText != null)
                 {
-                    orderButtonText.text = "주문하기";
+                    orderButtonText.text = TextTranslator.GetUIText("Shop_BtnOrder"); // ✨ 번역
                     orderButtonText.color = originalButtonTextColor;
                 }
             }
             else
             {
-                // 돈이 부족함 -> "잔고 부족" (불가능 & 빨간색)
                 if (orderButton != null) orderButton.interactable = false;
                 if (orderButtonText != null)
                 {
-                    orderButtonText.text = "잔고 부족";
-                    orderButtonText.color = Color.red; // 🔴 빨간색 강조
+                    orderButtonText.text = TextTranslator.GetUIText("Shop_BtnNoMoney"); // ✨ 번역
+                    orderButtonText.color = Color.red;
                 }
             }
         }

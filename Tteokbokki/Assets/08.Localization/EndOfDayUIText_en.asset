@@ -19,12 +19,12 @@ MonoBehaviour:
     m_Items: []
   m_TableData:
   - m_Id: 9469026304
-    m_Localized: 'Net Income: <color={0}>{1}${2:N0}</color>'
+    m_Localized: "Net Income: <color={0}>{1}\u20A9{2:N0}</color>"
     m_Metadata:
       m_Items: []
   - m_Id: 91828379648
-    m_Localized: 'Start Balance: ${0:N0}\nTotal Revenue: <color=#008000>+${1:N0}</color>\nTax
-      Paid: <color=red>-${2:N0}</color>\nIngredients: <color=red>-${3:N0}</color>'
+    m_Localized: "Start Balance: \u20A9{0:N0}\\nTotal Revenue: <color=#008000>+\u20A9{1:N0}</color>\\nTax
+      Paid: <color=red>-\u20A9{2:N0}</color>\\nIngredients: <color=red>-\u20A9{3:N0}</color>"
     m_Metadata:
       m_Items: []
   - m_Id: 285441646592
@@ -42,6 +42,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 489628753920
     m_Localized: <color=#888888>No ingredients bought today.</color>
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3613470875648
+    m_Localized: Finance & Performance Summary
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3655468441600
+    m_Localized: Today's Purchased Ingredients
     m_Metadata:
       m_Items: []
   references:

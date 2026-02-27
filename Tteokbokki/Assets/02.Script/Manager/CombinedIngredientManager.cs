@@ -54,13 +54,15 @@ public class CombinedIngredientManager : MonoBehaviour
         string result = "";
         foreach (var pair in combinedIngredients)
         {
-            string line = $"{pair.Key} x{pair.Value}";
+            // ✨ 1. 재료 이름 번역기 돌리기!
+            string transIngName = TextTranslator.GetIngredientName(pair.Key);
+            string line = $"{transIngName} x{pair.Value}";
 
-            // ✨ [NEW] 보너스 재료라면 색상 강조!
             if (DailyBonusManager.Instance != null && DailyBonusManager.Instance.IsBonusIngredient(pair.Key))
             {
-                // 진한 주황색(#D95400)으로 감싸고, (보너스) 텍스트 추가
-                line = $"<color=#D95400><font=\"KimjungchulMyungjo-Bold SDF\">{pair.Key} x{pair.Value}</font> (보너스)</color>";
+                // ✨ 2. "(보너스)" 텍스트도 번역기로 빼주기!
+                string bonusText = TextTranslator.GetUIText("UI_BonusTag");
+                line = $"<color=#D95400><font=\"KimjungchulMyungjo-Bold SDF\">{transIngName} x{pair.Value}</font> {bonusText}</color>";
             }
 
             result += line + "\n";
@@ -85,7 +87,7 @@ public class CombinedIngredientManager : MonoBehaviour
 
         // 2. 제목에 시간 추가
         // 예: "[14:30] 주문번호 1의 메뉴별 재료"
-        string result = $"[{timeStr}] 주문번호 {receipt.OrderID}\n\n";
+        string result = TextTranslator.GetUIText("UI_CombinedHeader", timeStr, receipt.OrderID);
 
         int totalBasePrice = receipt.GetTotalPrice();
         int totalBonusAmount = 0;
@@ -93,7 +95,9 @@ public class CombinedIngredientManager : MonoBehaviour
         foreach (var order in receipt.GetOrders())
         {
             var combined = GetCombinedIngredients(order.Menu, order.GetExtras());
-            result += $"[{order.ItemID}] {order.Menu.Name}\n";
+            // ✨ 4. 메뉴 이름 번역!
+            string transMenuName = TextTranslator.GetMenuName(order.Menu.Name);
+            result += $"[{order.ItemID}] {transMenuName}\n";
             result += GetIngredientsText(combined);
             result += "\n";
 
@@ -117,14 +121,14 @@ public class CombinedIngredientManager : MonoBehaviour
         {
             int finalTotal = totalBasePrice + totalBonusAmount;
 
-            // 보너스가 있으면 괄호로 강조해서 보여줌
+            // ✨ 5. 총 금액 텍스트 번역!
             if (totalBonusAmount > 0)
             {
-                totalPriceText.text = $"총 주문 금액: <color=#FF5555>{finalTotal:N0}원</color>\n<size=70%>(기본 {totalBasePrice:N0} + <color=#FF5555>보너스 {totalBonusAmount:N0}</color>)</size>";
+                totalPriceText.text = TextTranslator.GetUIText("UI_CombinedTotal_WithBonus", finalTotal, totalBasePrice, totalBonusAmount);
             }
             else
             {
-                totalPriceText.text = $"총 주문 금액: {finalTotal:N0}원";
+                totalPriceText.text = TextTranslator.GetUIText("UI_CombinedTotal_Normal", finalTotal);
             }
         }
     }

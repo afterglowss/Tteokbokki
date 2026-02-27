@@ -630,11 +630,13 @@ public class GameManager : MonoBehaviour
         // 2. 주문 생성 즉시 중단
         OrderSpawner.Instance.StopSpawning();
 
-        // 3. 안내 메시지
-        TooltipManager.ShowFollowMouse(TooltipType.UI, $"{reason}\n남은 주문을 처리하거나 시간이 지나면\n영업을 종료합니다.", 5f);
+        /// ✨ 1. 마우스 따라다니는 긴급 마감 툴팁 번역 ({0} 자리에 reason이 들어갑니다)
+        string tooltipMsg = TextTranslator.GetUIText("Tooltip_EmergencyClose", reason);
+        TooltipManager.ShowFollowMouse(TooltipType.UI, tooltipMsg, 5f);
 
-        ShowAnnouncement($"<color=red>[긴급 영업 종료]</color> {reason} 잔여 주문 처리 시 즉시 마감됩니다.");
-
+        // ✨ 2. 화면 상단 긴급 마감 배너 텍스트 번역
+        string bannerMsg = TextTranslator.GetUIText("Announcement_EmergencyClose", reason);
+        ShowAnnouncement(bannerMsg);
         // 4. 영수증 감시 코루틴 시작
         StartCoroutine(WaitForReceiptsAndEmergencyClose());
     }

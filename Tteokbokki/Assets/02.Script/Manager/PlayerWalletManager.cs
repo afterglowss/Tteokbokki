@@ -92,30 +92,31 @@ public class PlayerWalletManager : MonoBehaviour
             // startValue 부터 CurrentBalance 까지 0.5초 동안 변화
             balanceTween = DOVirtual.Float(startValue, CurrentBalance, 0.5f, (value) =>
             {
-                // value는 float이므로 int로 캐스팅하여 표시
+                // ✨ 1. 애니메이션 중 잔고 번역
                 if (balanceText != null)
-                    balanceText.text = $"잔고: {(int)value:N0}원";
+                    balanceText.text = TextTranslator.GetUIText("UI_Balance", (int)value);
 
                 if (endOfDayBalanceText != null)
                 {
-                    for(int i = 0; i<endOfDayBalanceText.Length; i++)
+                    for (int i = 0; i < endOfDayBalanceText.Length; i++)
                     {
-                        endOfDayBalanceText[i].text = $"현재 자산: {(int)value:N0}원";
+                        // ✨ 2. 애니메이션 중 현재 자산 번역
+                        endOfDayBalanceText[i].text = TextTranslator.GetUIText("UI_CurrentAsset", (int)value);
                     }
                 }
             }).SetEase(Ease.OutExpo); // OutExpo: 빠르다가 끝에 부드럽게 멈춤 (돈 계산 느낌에 좋음)
         }
         else
         {
-            // 애니메이션 없이 즉시 갱신 (초기화 등)
+            // ✨ 3. 애니메이션 없이 즉시 갱신될 때의 잔고/자산 번역
             if (balanceText != null)
-                balanceText.text = $"잔고: {CurrentBalance:N0}원";
+                balanceText.text = TextTranslator.GetUIText("UI_Balance", CurrentBalance);
 
             if (endOfDayBalanceText != null)
             {
                 for (int i = 0; i < endOfDayBalanceText.Length; i++)
                 {
-                    endOfDayBalanceText[i].text = $"현재 자산: {CurrentBalance:N0}원";
+                    endOfDayBalanceText[i].text = TextTranslator.GetUIText("UI_CurrentAsset", CurrentBalance);
                 }
             }
         }

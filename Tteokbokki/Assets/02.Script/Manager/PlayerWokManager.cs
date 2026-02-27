@@ -44,36 +44,40 @@ public class PlayerWokManager : MonoBehaviour
     }
 
     // ✨ [수정] 제목(statusTitle)을 받을 수 있도록 매개변수 추가 (기본값 설정)
-    public void UpdateUI(Dictionary<string, int> ingredients, string statusTitle = "현재 담은 재료")
+    // ✨ [수정] 외부에서 넘겨주는 제목(statusTitle)을 다시 받을 수 있게 살려냅니다!
+    // 기본값은 "" (빈 칸)으로 둡니다.
+    public void UpdateUI(Dictionary<string, int> ingredients, string statusTitle = "")
     {
         if (statusScrollView != null)
         {
-            // ✨ [NEW] 내용 표시 전 스크롤 초기화 판단
-            if (statusScrollView != null)
+            if (!statusScrollView.activeSelf)
             {
-                // 만약 지금까지 꺼져있었다면 -> 이제 막 켜지는 것이므로 스크롤 초기화!
-                if (!statusScrollView.activeSelf)
-                {
-                    statusScrollView.SetActive(true);
-                    StartCoroutine(ResetScrollCoroutine());
-                }
-                // 이미 켜져있는 상태에서 텍스트만 바뀌는 거라면 스크롤 유지 (유저가 내리고 있었을 수도 있음)
+                statusScrollView.SetActive(true);
+                StartCoroutine(ResetScrollCoroutine());
             }
         }
 
         if (playerIngredientsText == null) return;
 
+        // ✨ [핵심 로직] 외부에서 제목을 안 넘겨줬으면? -> 단어장에서 "현재 담은 재료" 번역해서 꺼내옴
+        // 외부(StoveSlot)에서 "[1번 화구] 조리 중" 이라고 넘겨줬으면? -> 그걸 그대로 씀!
+        string finalTitle = string.IsNullOrEmpty(statusTitle)
+                            ? TextTranslator.GetUIText("UI_WokStatus_Title")
+                            : statusTitle;
+
         if (ingredients == null || ingredients.Count == 0)
         {
-            // 재료가 없을 때도 제목은 반영
-            playerIngredientsText.text = $"{statusTitle}:\n없음";
+            string transEmpty = TextTranslator.GetUIText("UI_WokStatus_Empty");
+            playerIngredientsText.text = $"{finalTitle}:\n{transEmpty}";
             return;
         }
 
-        string result = $"{statusTitle}:\n";
+        string result = $"{finalTitle}:\n";
         foreach (var item in ingredients)
         {
-            result += $"{item.Key} x{item.Value}\n";
+            // 재료 이름 번역
+            string transIngName = TextTranslator.GetIngredientName(item.Key);
+            result += $"{transIngName} x{item.Value}\n";
         }
         playerIngredientsText.text = result;
     }

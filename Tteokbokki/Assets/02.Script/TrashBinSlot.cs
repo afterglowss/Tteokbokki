@@ -77,7 +77,7 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        TooltipManager.ShowFollowMouse(TooltipType.UI, "휴지통에 버리기");
+        TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Tooltip_TrashBin"));
     }
 
     public void OnPointerExit(PointerEventData eventData)

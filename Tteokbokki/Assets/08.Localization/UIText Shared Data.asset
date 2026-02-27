@@ -15,8 +15,320 @@ MonoBehaviour:
   m_TableCollectionName: UIText
   m_TableCollectionNameGuidString: e7934d7df2cc07c459fb09e33a20aa39
   m_Entries:
+  - m_Id: 14722336677888
+    m_Key: Receipt_Header
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14751919104000
+    m_Key: Receipt_DateTime
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14837759729664
+    m_Key: Receipt_Total
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15115196162048
+    m_Key: Receipt_OrderItem
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15564292874240
+    m_Key: Receipt_ExtraHeader
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15686145794048
+    m_Key: Receipt_ExtraItem
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15821869277184
+    m_Key: Receipt_OrderItemTotal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16548255621120
+    m_Key: Receipt_Success_Empty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16590341267456
+    m_Key: Receipt_Success_Header
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16607051374592
+    m_Key: Receipt_Success_BaseTotal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16692262854656
+    m_Key: Receipt_Success_Bonus
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16732360400896
+    m_Key: Receipt_Success_FinalTotal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16767689023488
+    m_Key: Receipt_Missed_Empty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16813557932032
+    m_Key: Receipt_Missed_Header
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16852346855424
+    m_Key: Receipt_Missed_Total
+    m_Metadata:
+      m_Items: []
   - m_Id: 83817259008
-    m_Key: Menu_Tteokbokki
+    m_Key: "Ing_\uB5A1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17756307447808
+    m_Key: "Ing_\uC624\uB385"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18445280600064
+    m_Key: "Ing_\uD30C"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981696
+    m_Key: "Ing_\uC591\uBC30\uCD94"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981697
+    m_Key: "Ing_\uBAA8\uC9DC\uB810\uB77C"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981698
+    m_Key: "Ing_\uC6B0\uC0BC\uACB9"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981699
+    m_Key: "Ing_\uACC4\uB780"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981700
+    m_Key: "Ing_\uC77C\uBC18\uB2F9\uBA74"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981701
+    m_Key: "Ing_\uB77C\uBA74\uC0AC\uB9AC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981702
+    m_Key: "Ing_\uACF1\uCC3D"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981703
+    m_Key: "Ing_\uC870\uB7AD\uC774\uB5A1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981704
+    m_Key: "Ing_\uACE0\uAD6C\uB9C8"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981705
+    m_Key: "Ing_\uC625\uC218\uC218"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981706
+    m_Key: "Ing_\uC18C\uC138\uC9C0"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981707
+    m_Key: "Ing_\uAD70\uC790 \uC18C\uC2A4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981708
+    m_Key: "Ing_\uB9C8\uB77C \uC18C\uC2A4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981709
+    m_Key: "Ing_\uB85C\uC81C \uC18C\uC2A4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981710
+    m_Key: "Ing_\uD06C\uB9BC \uC18C\uC2A4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981711
+    m_Key: "Ing_\uAC04\uC7A5 \uC18C\uC2A4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981712
+    m_Key: "Ing_\uCE74\uB808 \uC18C\uC2A4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981713
+    m_Key: "Ing_\uC9DC\uC7A5 \uC18C\uC2A4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981714
+    m_Key: "Menu_\uAD70\uC790 \uB5A1\uBCF6\uC774"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981715
+    m_Key: "Menu_\uC131\uC778\uAD70\uC790 \uB5A1\uBCF6\uC774"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981716
+    m_Key: "Menu_\uB9C8\uB77C \uAD70\uC790 \uB5A1\uBCF6\uC774"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981717
+    m_Key: "Menu_\uB85C\uC81C \uAD70\uC790 \uB5A1\uBCF6\uC774"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981718
+    m_Key: "Menu_\uD06C\uB9BC \uAD70\uC790 \uB5A1\uBCF6\uC774"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981719
+    m_Key: "Menu_\uAC04\uC7A5 \uAD70\uC790 \uB5A1\uBCF6\uC774"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981720
+    m_Key: "Menu_\uCE74\uB808 \uAD70\uC790 \uB5A1\uBCF6\uC774"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19847469981721
+    m_Key: "Menu_\uC9DC\uC7A5 \uAD70\uC790 \uB5A1\uBCF6\uC774"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22779628216320
+    m_Key: UI_BonusTag
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22848465133568
+    m_Key: UI_CombinedHeader
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22885840576512
+    m_Key: UI_CombinedTotal_WithBonus
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22933559173120
+    m_Key: UI_CombinedTotal_Normal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22969806348288
+    m_Key: UI_WokStatus_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23022428086272
+    m_Key: UI_WokStatus_Empty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23108570701824
+    m_Key: UI_StovePrefix
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23608762425344
+    m_Key: UI_StoveStatus_Cooking
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23608762425345
+    m_Key: UI_StoveStatus_Cooked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23608762425346
+    m_Key: UI_StoveStatus_Adding
+    m_Metadata:
+      m_Items: []
+  - m_Id: 23608762425347
+    m_Key: UI_StoveStatus_Waiting
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26024228544512
+    m_Key: Tooltip_Cooking
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26068361011200
+    m_Key: Tooltip_Preparing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26901572083712
+    m_Key: Tooltip_Ingredients
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33890264014848
+    m_Key: Tooltip_TrashBin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33890360483840
+    m_Key: UI_Balance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33890360483841
+    m_Key: UI_CurrentAsset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038099320832
+    m_Key: Shop_BonusInfo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206912
+    m_Key: Shop_NoBonus
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206913
+    m_Key: Shop_SelectAll
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206914
+    m_Key: Shop_SelectLowStock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206915
+    m_Key: Shop_ClearCart
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206916
+    m_Key: Shop_CartAlreadyEmpty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206917
+    m_Key: Shop_AllItemsMaxed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206918
+    m_Key: Shop_NoLowStock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206919
+    m_Key: Shop_LowStockMaxed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206920
+    m_Key: Shop_CartEmpty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206921
+    m_Key: Shop_TotalCost
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206922
+    m_Key: Shop_TotalItems
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206923
+    m_Key: Shop_BtnSkip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206924
+    m_Key: Shop_BtnOrder
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38038183206925
+    m_Key: Shop_BtnNoMoney
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40165827796992
+    m_Key: Warning_SelectStove
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40165920071680
+    m_Key: Tooltip_EmergencyClose
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40165920071681
+    m_Key: Announcement_EmergencyClose
     m_Metadata:
       m_Items: []
   m_Metadata:

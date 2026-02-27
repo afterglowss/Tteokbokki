@@ -350,12 +350,11 @@ public class ReceiptLineManager : MonoBehaviour
     public string GetTodaySuccessfulReceiptsText()
     {
         var today = GameClock.gameTime.Date;
-        //var todays = successfulReceipts.Where(r => r.OrderDateTime.Date == today);
 
         if (successfulReceipts.Count == 0)
-            return $"[{today:yyyy-MM-dd}] 성공한 영수증이 없습니다.\n";
+            return TextTranslator.GetUIText("Receipt_Success_Empty", today.ToString("yyyy-MM-dd"));
 
-        string result = $"=== [성공한 영수증] {today:yyyy-MM-dd} ===\n\n";
+        string result = TextTranslator.GetUIText("Receipt_Success_Header", today.ToString("yyyy-MM-dd"));
         int totalBase = 0;
 
         foreach (var receipt in successfulReceipts)
@@ -365,17 +364,17 @@ public class ReceiptLineManager : MonoBehaviour
         }
 
         result += "--------------------------------\n";
-        result += $"주문 기본 합계: {totalBase:N0}원\n";
+        result += TextTranslator.GetUIText("Receipt_Success_BaseTotal", totalBase);
 
-        // ✨ [NEW] 보너스 금액 표시 추가
+        // 보너스 금액 표시
         int bonus = DailyBonusManager.Instance.TodayAccumulatedBonus;
         if (bonus > 0)
         {
-            result += $"<color=#D95400>+ 추가 보너스 수익: {bonus:N0}원</color>\n";
+            result += TextTranslator.GetUIText("Receipt_Success_Bonus", bonus);
         }
 
         result += $"================================\n";
-        result += $"총 최종 수익: {totalBase + bonus:N0}원\n"; // 최종 합계
+        result += TextTranslator.GetUIText("Receipt_Success_FinalTotal", totalBase + bonus);
 
         return result;
     }
@@ -384,9 +383,9 @@ public class ReceiptLineManager : MonoBehaviour
     {
         DateTime today = GameClock.gameTime.Date;
         if (missedReceipts.Count == 0)
-            return $"[{today:yyyy-MM-dd}] 실패한 영수증이 없습니다.\n";
+            return TextTranslator.GetUIText("Receipt_Missed_Empty", today.ToString("yyyy-MM-dd"));
 
-        string result = $"=== [실패한 영수증] {today:yyyy-MM-dd} ===\n\n";
+        string result = TextTranslator.GetUIText("Receipt_Missed_Header", today.ToString("yyyy-MM-dd"));
         int total = 0;
 
         foreach (var receipt in missedReceipts)
@@ -395,7 +394,7 @@ public class ReceiptLineManager : MonoBehaviour
             total += receipt.GetTotalPrice();
         }
 
-        result += $"총 손실 금액: {total:N0}원\n";
+        result += TextTranslator.GetUIText("Receipt_Missed_Total", total);
         return result;
     }
 

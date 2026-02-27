@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Localization;
 
 public class EndOfDayUIHandler : MonoBehaviour
 {
@@ -57,6 +58,15 @@ public class EndOfDayUIHandler : MonoBehaviour
 
     [Header("재료 상점 UI")]
     [SerializeField] private IngredientShopUI IngredientShop;
+
+    // ✨ [NEW] 코드에서 불러다 쓸 번역 문장 변수들 (Inspector에 뜰 겁니다!)
+    [Header("Localization - Daily Report")]
+    public LocalizedString locReportNetIncome;
+    public LocalizedString locReportFinance;
+    public LocalizedString locReportStats;
+    public LocalizedString locReportUnlocked;
+    public LocalizedString locShoppingItem;
+    public LocalizedString locNoShopping;
 
     private int currentTaxAmount = 0;
     private bool isTaxPaid = false;
@@ -404,60 +414,48 @@ public class EndOfDayUIHandler : MonoBehaviour
     {
         if (GameDataLogger.Instance == null || ReceiptLineManager.Instance == null) return;
 
-        // --- 1. 재무 데이터 수집 ---
+        // --- 1. & 2. & 3. 데이터 수집 (이 부분은 계산만 하므로 완벽히 동일합니다) ---
         int startBalance = GameDataLogger.Instance.DayStartBalance;
         int sales = ReceiptLineManager.Instance.GetTotalSuccessfulAmount();
         int bonus = GameDataLogger.Instance.IncomeBonus;
-        int totalRevenue = sales + bonus; // 총 매출 (보너스 포함)
+        int totalRevenue = sales + bonus;
         int tax = GameDataLogger.Instance.ExpenseTax;
         int shopping = GameDataLogger.Instance.ExpenseShopping;
-        int netIncome = totalRevenue - tax - shopping; // 순이익
+        int netIncome = totalRevenue - tax - shopping;
 
-        // --- 2. 성과 데이터 수집 ---
         int successCount = ReceiptLineManager.Instance.GetSuccessfulReceipts().Count;
         int missedCount = ReceiptLineManager.Instance.GetMissedReceipts().Count;
         int canceledCount = ReceiptLineManager.Instance.GetCanceledReceipts().Count;
         int dailyTotal = successCount + missedCount + canceledCount;
         float dailyRate = dailyTotal > 0 ? ((float)successCount / dailyTotal) * 100f : 0f;
 
-        // 누적 데이터 (GameManager.EndOfDay에서 이미 더해진 최신 값)
         int totalSuccess = GameManager.Instance.TotalSuccessCount;
-        int totalMissed = GameManager.Instance.TotalMissedCount; // 취소 포함됨
+        int totalMissed = GameManager.Instance.TotalMissedCount;
         int cumulTotal = totalSuccess + totalMissed;
         float cumulRate = cumulTotal > 0 ? ((float)totalSuccess / cumulTotal) * 100f : 0f;
 
-        // --- 3. 재료 데이터 수집 ---
         int unlockedCount = IngredientStockManager.Instance.GetPurchasedIngredientCount();
-        int totalDbCount = IngredientDatabase.Ingredients.Count; // 전체 구현된 재료 수
+        int totalDbCount = IngredientDatabase.Ingredients.Count;
 
-        // === 4. UI 텍스트 적용 ===
-        // [최상단] 순이익
+        // === 4. UI 텍스트 적용 (✨ 여기가 번역 시스템으로 바뀝니다!) ===
         string netColor = netIncome >= 0 ? "#008000" : "red";
         string netSign = netIncome >= 0 ? "+" : "";
-        if (textReportNetIncome != null)
-            textReportNetIncome.text = $"오늘의 순이익: <color={netColor}>{netSign}{netIncome:N0}원</color>";
+
+        // [최상단] 순이익
+        locReportNetIncome.Arguments = new object[] { netColor, netSign, netIncome };
+        if (textReportNetIncome != null) textReportNetIncome.text = locReportNetIncome.GetLocalizedString();
 
         // [좌측] 재무 요약
-        if (textReportFinance != null)
-        {
-            textReportFinance.text =
-                $"시작 자산: {startBalance:N0}원\n" +
-                $"총 매출(보너스 포함): <color=#008000>+{totalRevenue:N0}원</color>\n" +
-                $"세금 납부: <color=red>-{tax:N0}원</color>\n" +
-                $"재료 구매: <color=red>-{shopping:N0}원</color>";
-        }
+        locReportFinance.Arguments = new object[] { startBalance, totalRevenue, tax, shopping };
+        if (textReportFinance != null) textReportFinance.text = locReportFinance.GetLocalizedString();
 
         // [좌측] 영업 성과
-        if (textReportStats != null)
-        {
-            textReportStats.text =
-                $"하루 성공률: {dailyRate:F1}% <size=80%>(누적: {cumulRate:F1}%)</size>\n" +
-                $"<color=#008000>성공 {successCount}건</color> / <color=red>실패 {missedCount}건</color> / 취소 {canceledCount}건";
-        }
+        locReportStats.Arguments = new object[] { dailyRate, cumulRate, successCount, missedCount, canceledCount };
+        if (textReportStats != null) textReportStats.text = locReportStats.GetLocalizedString();
 
         // [우측] 해금 현황
-        if (textReportUnlocked != null)
-            textReportUnlocked.text = $"해금된 재료: {unlockedCount} / {totalDbCount} 종류";
+        locReportUnlocked.Arguments = new object[] { unlockedCount, totalDbCount };
+        if (textReportUnlocked != null) textReportUnlocked.text = locReportUnlocked.GetLocalizedString();
 
         // [우측] 쇼핑 내역 리스트
         if (textReportShopping != null)
@@ -466,31 +464,24 @@ public class EndOfDayUIHandler : MonoBehaviour
             if (boughtItems.Count > 0)
             {
                 string shopList = "";
-                int count = 0; // ✨ [NEW] 몇 번째 재료인지 세는 카운터
-
+                int count = 0;
                 foreach (var kvp in boughtItems)
                 {
-                    // 재료 이름과 구매 개수 추가
-                    shopList += $"- {kvp.Key} <color=#FF8C00>x {kvp.Value}</color>";
+                    string translatedName = TextTranslator.GetIngredientName(kvp.Key);
+
+                    // 이제 한국어 아이디(kvp.Key) 대신 번역된 이름(translatedName)을 구멍에 넣어줍니다.
+                    locShoppingItem.Arguments = new object[] { translatedName, kvp.Value };
+                    shopList += locShoppingItem.GetLocalizedString();
                     count++;
 
-                    if (count % 2 == 0)
-                    {
-                        // 짝수 번째(두 번째) 재료를 출력했다면 줄바꿈
-                        shopList += "\n";
-                    }
-                    else
-                    {
-                        // 홀수 번째(첫 번째) 재료를 출력했다면, 
-                        // 다음 글씨가 텍스트 상자 가로 길이의 딱 절반(50%) 위치에서 시작되도록 이동
-                        shopList += "<pos=50%>";
-                    }
+                    if (count % 2 == 0) shopList += "\n";
+                    else shopList += "<pos=50%>";
                 }
                 textReportShopping.text = shopList;
             }
             else
             {
-                textReportShopping.text = "<color=#888888>오늘 구매한 재료가 없습니다.</color>";
+                textReportShopping.text = locNoShopping.GetLocalizedString();
             }
         }
 

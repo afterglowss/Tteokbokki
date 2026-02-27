@@ -175,10 +175,14 @@ public class KeyboardInputManager : MonoBehaviour
 
     private void TryAddIngredient(string ingredientName)
     {
+        // ✨ 0. 에러 메시지에 띄울 번역된 재료 이름 미리 준비!
+        string transName = TextTranslator.GetIngredientName(ingredientName);
+
         // 1. 화구 선택 확인
         if (!StoveManager.Instance.HasSelectedSlot())
         {
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "화구를 먼저 선택해주세요 (1~5)", 1f);
+            // ✨ 번역 적용: "화구를 먼저 선택해주세요 (1~5)"
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Warning_SelectStove_Key"), 1f);
             return;
         }
 
@@ -186,18 +190,20 @@ public class KeyboardInputManager : MonoBehaviour
         var selectedSlot = StoveManager.Instance.GetSelectedSlot();
         if (selectedSlot.IsCooking || selectedSlot.IsCooked)
         {
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "조리 중에는 재료를 넣을 수 없습니다!", 1f);
+            // ✨ 번역 적용: "조리 중에는 재료를 넣을 수 없습니다!"
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Warning_StoveInUse"), 1f);
             return;
         }
 
-        // ✨ [NEW] 화구 내 재료 최대 개수(10개) 제한 체크! (재고 차감 전에 해야 함)
+        // 3. 화구 내 재료 최대 개수 제한 체크
         if (!selectedSlot.CanAddIngredient(ingredientName))
         {
-            TooltipManager.ShowFollowMouse(TooltipType.UI, $"{ingredientName}은(는) 한 화구에 최대 10개까지만 넣을 수 있습니다!", 1f);
+            // ✨ 번역 적용: "{0}은(는) 한 화구에 최대 10개까지만 넣을 수 있습니다!"
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Warning_MaxIngredient", transName), 1f);
             return;
         }
 
-        // 3. 재고 차감 및 투입
+        // 4. 재고 차감 및 투입
         if (IngredientStockManager.Instance.UseIngredient(ingredientName))
         {
             StoveManager.Instance.AddIngredientToSelectedSlot(ingredientName);
@@ -205,7 +211,8 @@ public class KeyboardInputManager : MonoBehaviour
         }
         else
         {
-            TooltipManager.ShowFollowMouse(TooltipType.UI, $"{ingredientName} 재고가 부족합니다!", 1f);
+            // ✨ 번역 적용: "{0} 재고가 부족합니다!"
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Warning_OutOfStock", transName), 1f);
         }
     }
 }

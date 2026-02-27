@@ -85,14 +85,28 @@ public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     private void UpdateText()
     {
         string result = "";
-        foreach (var kv in Ingredients) result += $"{kv.Key} x{kv.Value}\n";
+        foreach (var kv in Ingredients)
+        {
+            // ✨ 숨어있는 텍스트도 번역기로 싹 바꿔줍니다!
+            string transIngName = TextTranslator.GetIngredientName(kv.Key);
+            result += $"{transIngName} x{kv.Value}\n";
+        }
+
         if (ingredientsText != null) ingredientsText.text = result;
     }
 
     private void ShowTooltip()
     {
-        string tooltip = "재료:\n";
-        foreach (var kv in Ingredients) tooltip += $"{kv.Key} x{kv.Value}\n";
+        // ✨ 1. "재료:" 텍스트 번역
+        string tooltip = TextTranslator.GetUIText("Tooltip_Ingredients") + "\n";
+
+        foreach (var kv in Ingredients)
+        {
+            // ✨ 2. 재료 이름 번역기 돌리기!
+            string transIngName = TextTranslator.GetIngredientName(kv.Key);
+            tooltip += $"{transIngName} x{kv.Value}\n";
+        }
+
         TooltipManager.ShowFollowMouse(TooltipType.Info, tooltip);
     }
     private void HideTooltip() => TooltipManager.Hide(TooltipType.Info);

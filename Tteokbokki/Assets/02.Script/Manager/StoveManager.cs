@@ -144,7 +144,7 @@ public class StoveManager : MonoBehaviour
         else
         {
             Debug.LogWarning("선택된 화구가 없어 재료를 넣을 수 없습니다.");
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "화구를 먼저 선택해주세요!", 1f);
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Warning_SelectStove"), 1f);
         }
     }
 
