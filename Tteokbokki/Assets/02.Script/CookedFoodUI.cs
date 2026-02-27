@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI; // Image 제어를 위해 추가
 using DG.Tweening;
+using UnityEngine.Localization;
 
 public class CookedFoodUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     IBeginDragHandler, IDragHandler, IEndDragHandler

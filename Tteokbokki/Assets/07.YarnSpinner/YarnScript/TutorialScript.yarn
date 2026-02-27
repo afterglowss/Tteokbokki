@@ -122,7 +122,7 @@ title: Tutorial
 <<set $Junk = setFace("idle")>>
 <<unhighlight>>
 뱁새: 가끔 한 번에 떡볶이가 여러 개 들어올 때가 있으니 영수증을 잘 체크해주세요.
-뱁새: 떡볶이와 영수증은 휴지통에 버릴 수 있어요.
+뱁새: 떡볶이와 영수증은 휴지통에 드래그하거나 마우스 우클릭을 통해 버릴 수 있어요.
 뱁새: 만약 잘못 조리했거나 재료가 없어 조리하지 못하는 경우에는 무리하지 말고 휴지통에 버려주세요.
 
 뱁새: 이제 마감 하는 법을 알려드릴게요.
@@ -182,11 +182,11 @@ title: Tutorial
 <<waitForOrderClick>>
 
 //소스 주문 완료
-뱁새: 마지막으로 <b>마감</b>을 알려드릴게요!
-뱁새: 영수증 확인, 세금 납부, 재료 확인 및 구매 모두 확인했으니 체크해 주세요.
-<<highlight Toggle_CheckReceipt>>
-<<highlight Toggle_CheckIngredient>>
-<<waitForChecking>>
+뱁새: 마지막으로 <b>일일 결산 보고서</b>를 보여드릴게요!
+뱁새: 오늘 하루 동안의 매출과 비용, 재료 구매 내역이 한눈에 들어오도록 정리되어 있어요.
+// <<highlight Toggle_CheckReceipt>>
+// <<highlight Toggle_CheckIngredient>>
+// <<waitForChecking>>
 
 //마감 - 체크 완료
 뱁새: 이제 <b>'마감하기'</b>를 눌러 보세요.

@@ -1,4 +1,5 @@
 ﻿using DG.Tweening; // DOTween 필수
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -590,8 +591,6 @@ public class EndOfDayUIHandler : MonoBehaviour
 
         // ✨ [핵심 수정] 셔터가 내려간 뒤, '다음 날 세팅(StartOfDay)'을 하고 나서 바로 저장!
 
-        gameObject.SetActive(false);
-
         closeSeq.AppendCallback(() =>
         {
 
@@ -615,6 +614,11 @@ public class EndOfDayUIHandler : MonoBehaviour
             // 2. 다음 날 상태로 자동 저장 (이제 clean한 상태로 저장됨)
             GameSaveManager.Instance.SaveGame();
             Debug.Log("[시스템] 다음 영업일 시작 상태로 자동 저장되었습니다.");
+
+            // ✨ [NEW] 셔터가 내려와서 화면이 가려졌을 때, 알맹이 패널들만 몰래 꺼줍니다.
+            if (panelSettlement != null) panelSettlement.SetActive(false);
+            if (panelShop != null) panelShop.SetActive(false);
+            if (panelClosing != null) panelClosing.SetActive(false);
         });
         closeSeq.AppendInterval(shutterStayDelay);
 
@@ -630,6 +634,8 @@ public class EndOfDayUIHandler : MonoBehaviour
             if (shutterRect != null) shutterRect.gameObject.SetActive(false);
 
             IsShutterAnimating = false;
+
+            gameObject.SetActive(false);
 
             GameManager.Instance.StartDayGameplay();
         });
@@ -668,16 +674,30 @@ public class EndOfDayUIHandler : MonoBehaviour
     // ✨ [NEW] 상점 진입 처리 및 대화 시작
     private void GoToShopStep()
     {
+        // 1. 현재 며칠째 영업인지 계산
+        DateTime startDate = new DateTime(GameClock.Instance.startYear, GameClock.Instance.startMonth, GameClock.Instance.startDay);
+        int currentDay = (GameClock.gameTime.Date - startDate.Date).Days + 1;
+
+        // ✨ 2. 마지막 날(엔딩 날)인지 확인
+        if (GameManager.Instance != null && currentDay >= GameManager.Instance.endingCount)
+        {
+            Debug.Log("[마감] 마지막 날이므로 재료 상점과 내일 보너스 안내를 건너뜁니다.");
+
+            // 상점 단계를 스킵하고 바로 마지막 3단계(결산 대시보드)로 직행!
+            SwitchPanel(panelClosing, stepForInit: 3);
+            return;
+        }
+
+        // 3. 마지막 날이 아닐 때만 기존처럼 상점 열기
         IngredientShop.OpenShop();
         SwitchPanel(panelShop); // 패널 전환
 
-        // ✨ 여기서 대화 시작! (상점 화면이 보일 때)
+        // 여기서 대화 시작! (상점 화면이 보일 때)
         if (!hasShownBonusDialogue)
         {
             hasShownBonusDialogue = true; // 한번만 실행되게 잠금
 
             // 튜토리얼 중이 아닐 때만 실행
-            // (GameManager가 싱글톤이므로 바로 접근 가능)
             if (TutorialManager.Instance == null && GameManager.Instance.dialogueRunner != null)
             {
                 // Yarn 대화 시작 ("내일의 보너스는...")

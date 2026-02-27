@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class SuccessBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public void OnDrop(PointerEventData eventData)
     {
-        // µå·¡±×µÈ °´Ã¼¿¡¼­ ¿µ¼öÁõ ÄÄÆ÷³ÍÆ® °¡Á®¿À±â
+        // ë“œë˜ê·¸ëœ ê°ì²´ì—ì„œ ì˜ìˆ˜ì¦ ì»´í¬ë„ŒíŠ¸ ê°€ì ¸ì˜¤ê¸°
         var receiptItem = eventData.pointerDrag?.GetComponent<ReceiptLineItem>();
 
         if (receiptItem != null)
@@ -14,23 +14,46 @@ public class SuccessBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler,
 
             Receipt receipt = receiptItem.GetReceipt();
 
-            Debug.Log($"[Debug] ¿µ¼öÁõ {receipt.OrderID} °­Á¦ ¼º°ø Ã³¸® (Success Bin)");
+            Debug.Log($"[Debug] ì˜ìˆ˜ì¦ {receipt.OrderID} ê°•ì œ ì„±ê³µ ì²˜ë¦¬ (Success Bin)");
 
-            // 1. ¼º°ø ³»¿ª¿¡ ±â·Ï (ReceiptLineManager)
+            // 1. ì„±ê³µ ë‚´ì—­ì— ê¸°ë¡ (ReceiptLineManager)
             ReceiptLineManager.Instance.RecordSuccessfulReceipt(receipt);
 
-            // 2. ¼öÀÔ Ãß°¡ (PlayerWalletManager)
-            // ½ÇÁ¦ Á¶¸®µÈ Àç·á º¸³Ê½º´Â °è»êÇÒ ¼ö ¾øÀ¸¹Ç·Î, ¿µ¼öÁõ Ç¥±â ±İ¾×¸¸ Ãß°¡ÇÕ´Ï´Ù.
-            if (PlayerWalletManager.Instance != null)
+            // âœ¨ [NEW] ë³´ë„ˆìŠ¤ ê¸ˆì•¡ ê³„ì‚°í•˜ê¸°
+            int totalBonus = 0;
+            foreach (var order in receipt.GetOrders())
             {
-                PlayerWalletManager.Instance.AddIncome(receipt.GetTotalPrice());
-                EffectManager.Instance.ShowMoneyPopup(gameObject.transform.position, receipt.GetTotalPrice());
+                // CombinedIngredientManagerì˜ ìœ ìš©í•œ í•¨ìˆ˜ë¥¼ ë¹Œë ¤ì™€ì„œ ë©”ë‰´ ê¸°ë³¸ì¬ë£Œ+ì¶”ê°€ì¬ë£Œë¥¼ ì‹¹ í•©ì¹©ë‹ˆë‹¤.
+                var combined = CombinedIngredientManager.GetCombinedIngredients(order.Menu, order.GetExtras());
+
+                // í•©ì¹œ ì¬ë£Œ ì¤‘ì— ì˜¤ëŠ˜ ë³´ë„ˆìŠ¤ ì¬ë£Œê°€ ìˆëŠ”ì§€ ê²€ì‚¬í•´ì„œ ê¸ˆì•¡ì„ êµ¬í•¨
+                if (DailyBonusManager.Instance != null)
+                {
+                    totalBonus += DailyBonusManager.Instance.CalculateBonusFromIngredients(combined);
+                }
             }
 
-            // 3. ¿µ¼öÁõ ¸ñ·Ï¿¡¼­ Á¦°Å ¹× UI ÆÄ±«
+            // âœ¨ [NEW] ë§¤ë‹ˆì €ì— ì˜¤ëŠ˜ì¹˜ ë³´ë„ˆìŠ¤ ìˆ˜ìµ ëˆ„ì ì‹œí‚¤ê¸° (ë§ˆê° ëŒ€ì‹œë³´ë“œì— ë°˜ì˜ë¨!)
+            if (DailyBonusManager.Instance != null && totalBonus > 0)
+            {
+                DailyBonusManager.Instance.AddBonusIncome(totalBonus);
+            }
+
+            // 2. ìˆ˜ì… ì¶”ê°€ (ê¸°ë³¸ ì˜ìˆ˜ì¦ ê¸ˆì•¡ + ë³´ë„ˆìŠ¤ ê¸ˆì•¡)
+            int basePrice = receipt.GetTotalPrice();
+            int finalPrice = basePrice + totalBonus;
+
+            if (PlayerWalletManager.Instance != null)
+            {
+                // ì§€ê°‘ì— ìµœì¢… ê¸ˆì•¡(ê¸°ë³¸+ë³´ë„ˆìŠ¤) ë„£ê¸°
+                PlayerWalletManager.Instance.AddIncome(finalPrice);
+                EffectManager.Instance.ShowMoneyPopup(gameObject.transform.position, finalPrice);
+            }
+
+            // 3. ì˜ìˆ˜ì¦ ëª©ë¡ì—ì„œ ì œê±° ë° UI íŒŒê´´
             ReceiptLineManager.Instance.RemoveReceipt(receiptItem);
 
-            // ÅøÆÁ ¼û±â±â
+            // íˆ´íŒ ìˆ¨ê¸°ê¸°
             TooltipManager.Hide(TooltipType.UI);
             return;
         }
@@ -38,8 +61,8 @@ public class SuccessBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler,
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // ¸¶¿ì½º ¿Ã·ÈÀ» ¶§ ÅøÆÁ Ç¥½Ã
-        TooltipManager.ShowFollowMouse(TooltipType.UI, "°­Á¦ ¼º°ø Ã³¸® (µğ¹ö±×¿ë)");
+        // ë§ˆìš°ìŠ¤ ì˜¬ë ¸ì„ ë•Œ íˆ´íŒ í‘œì‹œ
+        TooltipManager.ShowFollowMouse(TooltipType.UI, "ê°•ì œ ì„±ê³µ ì²˜ë¦¬ (ë””ë²„ê·¸ìš©)");
     }
 
     public void OnPointerExit(PointerEventData eventData)
