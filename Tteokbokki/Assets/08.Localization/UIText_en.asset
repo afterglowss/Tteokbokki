@@ -252,7 +252,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 33890264014848
-    m_Localized: Throw in the trash
+    m_Localized: Throw away
     m_Metadata:
       m_Items: []
   - m_Id: 33890360483840
@@ -284,23 +284,23 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 38038183206916
-    m_Localized: Cart is already empty.
+    m_Localized: Your cart is already empty.
     m_Metadata:
       m_Items: []
   - m_Id: 38038183206917
-    m_Localized: All ingredients reached the purchase limit (3).
+    m_Localized: All items have reached the purchase limit (3).
     m_Metadata:
       m_Items: []
   - m_Id: 38038183206918
-    m_Localized: No ingredients are low in stock.
+    m_Localized: There are no ingredients in short supply.
     m_Metadata:
       m_Items: []
   - m_Id: 38038183206919
-    m_Localized: Low stock ingredients reached the purchase limit (3).
+    m_Localized: Out-of-stock items have already reached the purchase limit (3).
     m_Metadata:
       m_Items: []
   - m_Id: 38038183206920
-    m_Localized: <color=#888888>Cart is empty.</color>
+    m_Localized: <color=#888888>Your cart is empty.</color>
     m_Metadata:
       m_Items: []
   - m_Id: 38038183206921
@@ -328,13 +328,12 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 40165920071680
-    m_Localized: '{0}\nWe will close after the remaining orders are completed or
-      time runs out.'
+    m_Localized: '{0}\nOnce the remaining orders are handled,\nwe close for the day.'
     m_Metadata:
       m_Items: []
   - m_Id: 40165920071681
-    m_Localized: <color=red>[Emergency Closing]</color> {0} We will close immediately
-      after finishing the remaining orders.
+    m_Localized: <color=red>[Emergency Closing]</color> {0} \nOnce the remaining
+      orders are handled, we close for the day.
     m_Metadata:
       m_Items: []
   - m_Id: 42467355648000
@@ -374,7 +373,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 42467355648009
-    m_Localized: Not enough base ingredients or no sauce!
+    m_Localized: Missing basic ingredients or sauce!
     m_Metadata:
       m_Items: []
   - m_Id: 42986354630656
@@ -453,12 +452,12 @@ MonoBehaviour:
       below.\r\n\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Select Stove</font>:
       Press number keys <color=#87CEEB>1 ~ 5</color> to instantly select a stove
       to cook on.\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Add Ingredients</font>:
-      With a stove selected, press the keyboard to add ingredients.\r\n\_ \_ - <color=#FFA500>Top
+      With a stove selected, press the keyboard to add ingredients.\r\n    - <color=#FFA500>Top
       Shelf (Q, W, E, R, T, Y, U)</color>: Base ingredients like Rice Cake, Fish
-      Cake, Green Onion.\r\n\_ \_ - <color=#FFA500>Middle Shelf (A, S, D, F, G, H,
-      J)</color>: Various toppings like Sweet Potato, Egg, Ramen.\r\n\_ \_ - <color=#FFA500>Bottom
+      Cake, Green Onion.\r\n    - <color=#FFA500>Middle Shelf (A, S, D, F, G, H,
+      J)</color>: Various toppings like Sweet Potato, Egg, Ramen.\r\n    - <color=#FFA500>Bottom
       Shelf (Z, X, C, V, B, N, M)</color>: Various sauces that determine the menu's
-      flavor.\r\n\_ \_ <size=80%><Tip> For keys that are further away, hold <color=#87CEEB>Shift</color>
+      flavor.\r\n    <size=80%><Tip> For keys that are further away, hold <color=#87CEEB>Shift</color>
       to map them to closer keys.</size>\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
       SDF\">Start Cooking</font>: Once all ingredients are added, press the <color=#87CEEB>Space
       Bar</color> to turn on the heat.\r\n\r\n<size=80%><color=#888888>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</color></size>\r\n\r\n<size=120%><font=\"KimjungchulMyungjo-Bold
@@ -482,7 +481,7 @@ MonoBehaviour:
       to succeed.\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Delivery Failure</font>:
       If you deliver the wrong food, you won't earn any money, and you might get
       a complaint call right away!\r\n\r\n<size=80%><color=#888888>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</color></size>\r\n\r\n<size=120%><font=\"KimjungchulMyungjo-Bold
-      SDF\">4. Essential Operations for the Boss</font></size>\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
+      SDF\">4. Essential Operations for the Manager</font></size>\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
       SDF\">Emergency Early Closing</font>: If you run out of any base ingredient,
       or if all sauces are depleted, the shop will be forced to close. Always check
       your stock!\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Complaint Calls</font>:
@@ -497,7 +496,7 @@ MonoBehaviour:
       SDF\">Tomorrow's Bonus</font>: At closing, 2 bonus ingredients for the next
       day are announced. Selling food with these ingredients earns you an extra <color=#FF6347>\u20A95,000</color>
       per ingredient.\r\n\r\n<size=80%><color=#888888>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</color></size>\r\n\r\n<size=125%><font=\"KimjungchulMyungjo-Bold
-      SDF\"><color=#32CD32>Veteran Boss's Secret Tips</color></font></size>\r\n1.
+      SDF\"><color=#32CD32>Veteran Manager's Secret Tips</color></font></size>\r\n1.
       <font=\"KimjungchulMyungjo-Bold SDF\">Click the Receipts!</font>: Click a receipt
       on the right to see the total number of required ingredients at a glance. Look
       at the list and use shortcuts to add ingredients quickly.\r\n2. <font=\"KimjungchulMyungjo-Bold
@@ -510,6 +509,282 @@ MonoBehaviour:
       Secret of the Queue</font>: Don't panic if the receipt line is full. There
       are pending orders waiting in line out of sight. Once you complete one, the
       next order will appear immediately."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 327958172917760
+    m_Localized: You can only purchase up to 3 items at a time.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 332793928605696
+    m_Localized: Save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 332835057950720
+    m_Localized: Quit to Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 335235013533696
+    m_Localized: Existing save data will be deleted.\nDo you want to continue?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 335235105808384
+    m_Localized: Unsaved progress will be lost.\nReturn to the main menu?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 335235105808385
+    m_Localized: Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 335235105808386
+    m_Localized: No
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911144828928
+    m_Localized: Record of {0}/{1}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023232
+    m_Localized: Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023233
+    m_Localized: Data Corrupted
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023234
+    m_Localized: No Save Data
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023235
+    m_Localized: Prepping ingredients...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023236
+    m_Localized: Simmering the broth...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023237
+    m_Localized: Restocking the pickled radish...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023238
+    m_Localized: Tying the apron strings...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023239
+    m_Localized: Training for difficult customers...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023240
+    m_Localized: Starting up the delivery bike...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023241
+    m_Localized: Checking the boss's wallet...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023242
+    m_Localized: Ready to open!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023243
+    m_Localized: New Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023244
+    m_Localized: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023245
+    m_Localized: Exit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023246
+    m_Localized: "<font=\"KimjungchulMyungjo-Bold SDF\">Team Milky Expedition</font>\r\n<size=80%><font=\"KimjungchulMyungjo-Bold
+      SDF\">PM</font> \t\t\tShin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Game
+      Design</font> \tYoon Hakyeong, Shin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold
+      SDF\">Programming</font> \tShin Hyewon, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold
+      SDF\">Art</font>\t\t\tShin Hyewon, Yoon Hakyeong, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold
+      SDF\">Presented by</font>\tPandoraCube</size>\r\n<size=60%><font=\"KimjungchulMyungjo-Bold
+      SDF\">Special Thanks</font>\t\uC2DC\uD0A4\uC2DC\uD0A4, \uB974\uB124, \uCD5C\uC885\uD604,
+      HJ, \uC774\uC0C1\uD604\r\n\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Credits</font>
+      \t\tTrack : \uB6B1\uB545\uB6B1\uB545 (Music provided by \uBE0C\uAE08\uB300\uD1B5\uB839)\r\n\t\t\tThis
+      content was produced using Typecast, \r\n\t\t\tan AI virtual actor service.
+      Cast: Berry\r\n\t\t\tAI-generated images were used in this game.</size>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 341561743630336
+    m_Localized: "<font=\"KimjungchulMyungjo-Bold SDF\">Thank you for playing!</font>\r\n\r\n<font=\"KimjungchulMyungjo-Bold
+      SDF\">Team Milky Expedition</font>\r\n\r\n<font=\"KimjungchulMyungjo-Bold SDF\">PM</font>
+      \t\t\tShin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Game Design</font>
+      \tYoon Hakyeong, Shin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Programming</font>
+      \tShin Hyewon, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Art</font>\t\t\tShin
+      Hyewon, Yoon Hakyeong, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Presented
+      by</font>\tPandoraCube\r\n\r\n<size=60%><font=\"KimjungchulMyungjo-Bold SDF\">Special
+      Thanks</font>\t\uC2DC\uD0A4\uC2DC\uD0A4, \uB974\uB124, \uCD5C\uC885\uD604,
+      HJ, \uC774\uC0C1\uD604\r\n\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Credits</font>
+      \t\tTrack : \uB6B1\uB545\uB6B1\uB545 (Music provided by \uBE0C\uAE08\uB300\uD1B5\uB839)\r\n\t\t\tThis
+      content was produced using Typecast, an AI virtual actor service. Cast: Berry\r\n\t\t\tAI-generated
+      images were used in this game.\r\n</size>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 347229070417920
+    m_Localized: 'You''re fired.
+
+
+
+
+
+
+
+
+      <size=50%>- Bad Ending -</size>'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 347229162692608
+    m_Localized: 'You failed to become a full-time employee.
+
+
+
+
+
+
+
+
+      <size=50%>-
+      Bad Ending -</size>'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 347229162692609
+    m_Localized: 'Congratulations! You''ve become a full-time employee and the owner.
+
+
+
+
+
+
+
+
+      <size=50%>-
+      Happy Ending -</size>'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 347229162692610
+    m_Localized: 'Congratulations! You''ve become a full-time employee.
+
+
+
+
+
+
+
+
+      <size=50%>-
+      Normal Ending -</size>'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349898954629120
+    m_Localized: "\u20A9{0:N0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349898954629121
+    m_Localized: (+{0} Servings)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349898954629122
+    m_Localized: <color=#888888>Not Stocked</color>
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204522696704
+    m_Localized: "Total Success: <color=#008000>+\u20A9{0:N0}</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582784
+    m_Localized: "Total Loss: <color=red>-\u20A9{0:N0}</color> / Canceled: {1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582785
+    m_Localized: "Total Sales: \u20A9{0:N0}\\nTax: <color=red>-\u20A9{1:N0}</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582786
+    m_Localized: "Net Income: <color=#008000>+\u20A9{0:N0}</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582787
+    m_Localized: Pay Tax & Next
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582788
+    m_Localized: Please review the report and check the box!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582789
+    m_Localized: Not enough balance to pay taxes!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357668898594816
+    m_Localized: Daily Settlement
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841024
+    m_Localized: Successful Orders
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841025
+    m_Localized: Missed Orders
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841026
+    m_Localized: Final Result
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841027
+    m_Localized: Order Ingredients
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841028
+    m_Localized: Reorder Items
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841029
+    m_Localized: New Arrivals
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841030
+    m_Localized: Daily Closing Report
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841031
+    m_Localized: Close Shop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 406002153676800
+    m_Localized: End Day
+    m_Metadata:
+      m_Items: []
+  - m_Id: 406267732811776
+    m_Localized: "Net Income: <color=red>-\u20A924,800</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 407026587262976
+    m_Localized: "Start Balance: \u20A9250,000\nTotal Revenue: <color=#008000>+\u20A98,000</color>\nTax
+      Paid: <color=red>-\u20A9800</color>\nIngredients: <color=red>-\u20A932,000</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 408169962921984
+    m_Localized: 'Daily Success: 100.0% <size=80%>(Total: 100.0%)</size>
+
+      <color=#008000>Success:
+      1</color> / <color=red>Missed: 0</color> / Canceled: 0'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 408881367212032
+    m_Localized: 'Unlocked Ingredients: 6 / 21'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 409192165138432
+    m_Localized: "\r- Mala Sauce <color=#FF8C00>x 40</color>"
     m_Metadata:
       m_Items: []
   references:

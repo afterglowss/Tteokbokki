@@ -279,9 +279,17 @@ public class EndOfDayUIHandler : MonoBehaviour
 
             if (textSuccessAmount != null)
             {
-                // 예: "총 성공 금액: +18,000원" (보너스 포함됨)
-                if (animate) AnimateMoneyText(textSuccessAmount, 0, finalSuccessTotal, "총 성공 금액", "#008000", "+");
-                else textSuccessAmount.text = $"총 성공 금액: <color=#008000>+{finalSuccessTotal:N0}원</color>";
+                if (animate)
+                {
+                    DOVirtual.Float(0, finalSuccessTotal, 1f, (value) =>
+                    {
+                        textSuccessAmount.text = TextTranslator.GetUIText("EOD_SuccessAmount", (int)value);
+                    }).SetEase(Ease.OutQuart).SetDelay(0.3f);
+                }
+                else
+                {
+                    textSuccessAmount.text = TextTranslator.GetUIText("EOD_SuccessAmount", finalSuccessTotal);
+                }
 
                 // (선택사항) 만약 보너스를 따로 괄호로 적어주고 싶다면 위 코드 대신 아래 사용:
                 /*
@@ -291,17 +299,17 @@ public class EndOfDayUIHandler : MonoBehaviour
             }
             if (textMissedAmount != null)
             {
-                // ✨ [수정] 텍스트 뒤에 " / 주문 취소: 0건" 을 붙여줍니다.
+                // ✨ 2. 총 손실 금액 및 취소 건수 번역
                 if (animate)
                 {
                     DOVirtual.Float(0, missedTotal, 1f, (value) =>
                     {
-                        textMissedAmount.text = $"총 손실 금액: <color=red>-{(int)value:N0}원</color> / 주문 취소: {canceledCount}건";
+                        textMissedAmount.text = TextTranslator.GetUIText("EOD_MissedAmount", (int)value, canceledCount);
                     }).SetEase(Ease.OutQuart).SetDelay(0.3f);
                 }
                 else
                 {
-                    textMissedAmount.text = $"총 손실 금액: <color=red>-{missedTotal:N0}원</color> / 주문 취소: {canceledCount}건";
+                    textMissedAmount.text = TextTranslator.GetUIText("EOD_MissedAmount", missedTotal, canceledCount);
                 }
             }
         }
@@ -311,22 +319,24 @@ public class EndOfDayUIHandler : MonoBehaviour
         currentTaxAmount = Mathf.RoundToInt(grossIncome * taxRate);
         int netIncome = grossIncome - currentTaxAmount;
 
-        textTotalAndTax.text = $"총 매출: {grossIncome:N0}원\n세금: <color=red>-{currentTaxAmount:N0}원</color>";
+        // ✨ 3. 총 매출 및 세금 번역
+        textTotalAndTax.text = TextTranslator.GetUIText("EOD_TotalAndTax", grossIncome, currentTaxAmount);
 
+        // ✨ 4.순수익 번역
         if (animate && textNetIncome != null)
         {
             DOVirtual.Float(0, netIncome, 1.5f, (value) =>
             {
-                textNetIncome.text = $"순수익: <color=#008000>+{(int)value:N0}원</color>";
+                textNetIncome.text = TextTranslator.GetUIText("EOD_NetIncome", (int)value);
             }).SetEase(Ease.OutCubic).SetDelay(0.5f);
         }
         else
         {
-            textNetIncome.text = $"순수익: <color=#008000>+{netIncome:N0}원</color>";
+            textNetIncome.text = TextTranslator.GetUIText("EOD_NetIncome", netIncome);
         }
 
         buttonPayTaxAndNext.interactable = true;
-        if (textPayButton != null) textPayButton.text = "세금 납부 및 다음 단계";
+        if (textPayButton != null) textPayButton.text = TextTranslator.GetUIText("EOD_BtnPayTax");
     }
 
     private void AnimateMoneyText(TextMeshProUGUI textUI, int start, int end, string prefix, string color, string sign)
@@ -533,7 +543,7 @@ public class EndOfDayUIHandler : MonoBehaviour
         if (checkFinalConfirmToggle != null && checkFinalConfirmToggle.gameObject.activeSelf && !checkFinalConfirmToggle.isOn)
         {
             PunchButton(buttonFinalClose);
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "결산 내용을 확인하고 체크해주세요!", 1f);
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("EOD_Warning_Check"), 1f);
             return;
         }
 
@@ -658,7 +668,7 @@ public class EndOfDayUIHandler : MonoBehaviour
         else
         {
             Debug.LogWarning("[세금 납부 실패] 잔액이 부족합니다.");
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "잔액이 부족하여 세금을 낼 수 없습니다!", 2f);
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("EOD_Warning_NoMoney"), 2f);
         }
     }
 

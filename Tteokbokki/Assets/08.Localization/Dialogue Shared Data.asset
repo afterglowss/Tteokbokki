@@ -1,0 +1,1665 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: Dialogue Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: Dialogue
+  m_TableCollectionNameGuidString: f47b00dd2c3e2634d94e87c8c0078e38
+  m_Entries:
+  - m_Id: 62510194688
+    m_Key: line:0cf083f
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018692
+  - m_Id: 62594080768
+    m_Key: line:0dd3623
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018693
+  - m_Id: 62594080769
+    m_Key: line:0968bcd
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018694
+  - m_Id: 62594080770
+    m_Key: line:01591d7
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018695
+  - m_Id: 62594080771
+    m_Key: line:0c34be7
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018696
+  - m_Id: 62594080772
+    m_Key: line:0e6560b
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018697
+  - m_Id: 62594080773
+    m_Key: line:09a5411
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018698
+  - m_Id: 62594080774
+    m_Key: line:097c832
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018699
+  - m_Id: 62594080775
+    m_Key: line:0a67a6e
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018700
+  - m_Id: 62594080776
+    m_Key: line:06cf7f7
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018701
+  - m_Id: 62594080777
+    m_Key: line:0ec3708
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018702
+  - m_Id: 62594080778
+    m_Key: line:0900fdf
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018703
+  - m_Id: 62594080779
+    m_Key: line:07f664b
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018704
+  - m_Id: 62594080780
+    m_Key: line:0675b64
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018705
+  - m_Id: 62594080781
+    m_Key: line:0f7edaf
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018706
+  - m_Id: 62594080782
+    m_Key: line:0799519
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018707
+  - m_Id: 62594080783
+    m_Key: line:02db3c5
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018708
+  - m_Id: 62594080784
+    m_Key: line:0b8fb65
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018709
+  - m_Id: 62594080785
+    m_Key: line:0b51cb4
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018710
+  - m_Id: 62594080786
+    m_Key: line:05ddaa2
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018711
+  - m_Id: 62594080787
+    m_Key: line:0e071d2
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018712
+  - m_Id: 62594080788
+    m_Key: line:038cf21
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018713
+  - m_Id: 62594080789
+    m_Key: line:0d2d6d8
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018714
+  - m_Id: 62594080790
+    m_Key: line:05f1d33
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018715
+  - m_Id: 62594080791
+    m_Key: line:0e4eb2c
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018716
+  - m_Id: 62594080792
+    m_Key: line:03c6b87
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018717
+  - m_Id: 62594080793
+    m_Key: line:0ed9dee
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018718
+  - m_Id: 62594080794
+    m_Key: line:0297c6b
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018719
+  - m_Id: 62594080795
+    m_Key: line:011abfd
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018720
+  - m_Id: 62594080796
+    m_Key: line:08d51bb
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018721
+  - m_Id: 62594080797
+    m_Key: line:0e73c3a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018722
+  - m_Id: 62594080798
+    m_Key: line:066ac60
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018723
+  - m_Id: 62594080799
+    m_Key: line:0454ce5
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018724
+  - m_Id: 62594080800
+    m_Key: line:06c0cdf
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018725
+  - m_Id: 62594080801
+    m_Key: line:03b0a08
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018726
+  - m_Id: 62594080802
+    m_Key: line:0f41c12
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018727
+  - m_Id: 62594080803
+    m_Key: line:066ae0a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018728
+  - m_Id: 62594080804
+    m_Key: line:0e37f3b
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018729
+  - m_Id: 62594080805
+    m_Key: line:044f6cb
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018730
+  - m_Id: 62594080806
+    m_Key: line:0cad2b3
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018731
+  - m_Id: 62594080807
+    m_Key: line:0d8e12c
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018732
+  - m_Id: 62594080808
+    m_Key: line:07ad5c0
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018733
+  - m_Id: 62594080809
+    m_Key: line:00bf10b
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018734
+  - m_Id: 62594080810
+    m_Key: line:00a36bd
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018735
+  - m_Id: 62594080811
+    m_Key: line:0663bb9
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018736
+  - m_Id: 62594080812
+    m_Key: line:093285a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018737
+  - m_Id: 62594080813
+    m_Key: line:04e3f70
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018738
+  - m_Id: 62594080814
+    m_Key: line:04396ef
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018739
+  - m_Id: 62594080815
+    m_Key: line:089bd84
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018740
+  - m_Id: 62594080816
+    m_Key: line:01372c6
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018741
+  - m_Id: 62594080817
+    m_Key: line:073ef2d
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018742
+  - m_Id: 62594080818
+    m_Key: line:07cdcbd
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018743
+  - m_Id: 62594080819
+    m_Key: line:0b11e7a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018744
+  - m_Id: 62594080820
+    m_Key: line:04ca0c9
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018745
+  - m_Id: 62594080821
+    m_Key: line:0c318d8
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018746
+  - m_Id: 62594080822
+    m_Key: line:096391d
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018747
+  - m_Id: 62594080823
+    m_Key: line:00a5f4a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018748
+  - m_Id: 62594080824
+    m_Key: line:0376e9a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018749
+  - m_Id: 62594080825
+    m_Key: line:030a6ab
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018750
+  - m_Id: 62594080826
+    m_Key: line:086e060
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018751
+  - m_Id: 62594080827
+    m_Key: line:0f8b81d
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018752
+  - m_Id: 62594080828
+    m_Key: line:070d7a6
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018753
+  - m_Id: 62598275072
+    m_Key: line:0861c34
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018754
+  - m_Id: 62598275073
+    m_Key: line:01928b3
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018755
+  - m_Id: 62598275074
+    m_Key: line:085bbbc
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018756
+  - m_Id: 62598275075
+    m_Key: line:0858aa7
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018757
+  - m_Id: 62598275076
+    m_Key: line:04ac2fa
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018758
+  - m_Id: 62598275077
+    m_Key: line:013596b
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018759
+  - m_Id: 62598275078
+    m_Key: line:02c515b
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018760
+  - m_Id: 62598275079
+    m_Key: line:003d19c
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018761
+  - m_Id: 62598275080
+    m_Key: line:012e70f
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018762
+  - m_Id: 62598275081
+    m_Key: line:04a348a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018763
+  - m_Id: 62598275082
+    m_Key: line:0740499
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018764
+  - m_Id: 62598275083
+    m_Key: line:0ea4a00
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018765
+  - m_Id: 62598275084
+    m_Key: line:084f975
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018766
+  - m_Id: 62598275085
+    m_Key: line:0659c11
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018767
+  - m_Id: 62598275086
+    m_Key: line:02cde16
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018768
+  - m_Id: 62598275087
+    m_Key: line:0c8a01a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018769
+  - m_Id: 62598275088
+    m_Key: line:0f8e179
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018770
+  - m_Id: 62598275089
+    m_Key: line:051c2d1
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018771
+  - m_Id: 62598275090
+    m_Key: line:0ee2c17
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018772
+  - m_Id: 62598275091
+    m_Key: line:0aa06fe
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018773
+  - m_Id: 62598275092
+    m_Key: line:09fbee6
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018774
+  - m_Id: 62598275093
+    m_Key: line:0fe3937
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018775
+  - m_Id: 62598275094
+    m_Key: line:019628e
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018776
+  - m_Id: 62598275095
+    m_Key: line:06a5f7d
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018777
+  - m_Id: 62598275096
+    m_Key: line:0b58de6
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018778
+  - m_Id: 62598275097
+    m_Key: line:0f8ac1c
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018779
+  - m_Id: 62598275098
+    m_Key: line:0a8f407
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018780
+  - m_Id: 62598275099
+    m_Key: line:0a4d0eb
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018781
+  - m_Id: 62598275100
+    m_Key: line:0e9bcc8
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018782
+  - m_Id: 62598275101
+    m_Key: line:02f3f6f
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018783
+  - m_Id: 62598275102
+    m_Key: line:0b2d890
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018784
+  - m_Id: 62598275103
+    m_Key: line:0be166b
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018785
+  - m_Id: 62598275104
+    m_Key: line:0d21a96
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018786
+  - m_Id: 62598275105
+    m_Key: line:0680986
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018787
+  - m_Id: 62598275106
+    m_Key: line:0f4b98b
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018788
+  - m_Id: 62598275107
+    m_Key: line:0f2c857
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018789
+  - m_Id: 62598275108
+    m_Key: line:0847b01
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018790
+  - m_Id: 62598275109
+    m_Key: line:0e0b111
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018791
+  - m_Id: 62598275110
+    m_Key: line:0486560
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018792
+  - m_Id: 62602469376
+    m_Key: line:03ae604
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018793
+  - m_Id: 62602469377
+    m_Key: line:0174593
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018794
+  - m_Id: 62602469378
+    m_Key: line:085ebe7
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018795
+  - m_Id: 62602469379
+    m_Key: line:0008bb6
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018796
+  - m_Id: 62602469380
+    m_Key: line:029baa3
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018797
+  - m_Id: 62602469381
+    m_Key: line:008d823
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018798
+  - m_Id: 62602469382
+    m_Key: line:0c6d479
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018799
+  - m_Id: 62602469383
+    m_Key: line:0c7a753
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018800
+  - m_Id: 62602469384
+    m_Key: line:05d7cc6
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018801
+  - m_Id: 62602469385
+    m_Key: line:0695b07
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018802
+  - m_Id: 62602469386
+    m_Key: line:041bf30
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018803
+  - m_Id: 62602469387
+    m_Key: line:03e8d20
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018804
+  - m_Id: 62602469388
+    m_Key: line:0dee3d9
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018805
+  - m_Id: 62602469389
+    m_Key: line:098b449
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018806
+  - m_Id: 62602469390
+    m_Key: line:04eb11f
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018807
+  - m_Id: 62602469391
+    m_Key: line:0d118bf
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018808
+  - m_Id: 62602469392
+    m_Key: line:087e2fd
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018809
+  - m_Id: 62602469393
+    m_Key: line:0ffc625
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018810
+  - m_Id: 62602469394
+    m_Key: line:01b5c3f
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018811
+  - m_Id: 62602469395
+    m_Key: line:0cffcc1
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018812
+  - m_Id: 62602469396
+    m_Key: line:05216dd
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018813
+  - m_Id: 62602469397
+    m_Key: line:06a6564
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018814
+  - m_Id: 62602469398
+    m_Key: line:0878070
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018815
+  - m_Id: 62602469399
+    m_Key: line:01a14d4
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018816
+  - m_Id: 62602469400
+    m_Key: line:0e3a79f
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018817
+  - m_Id: 62602469401
+    m_Key: line:0975bf9
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018818
+  - m_Id: 62602469402
+    m_Key: line:0b5ee2e
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018819
+  - m_Id: 62602469403
+    m_Key: line:0182f6a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018820
+  - m_Id: 62602469404
+    m_Key: line:01cefef
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018821
+  - m_Id: 62602469405
+    m_Key: line:070e286
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018822
+  - m_Id: 62602469406
+    m_Key: line:03a15be
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018823
+  - m_Id: 62602469407
+    m_Key: line:0442519
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018824
+  - m_Id: 62602469408
+    m_Key: line:0183067
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018825
+  - m_Id: 62602469409
+    m_Key: line:0095d71
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018826
+  - m_Id: 62602469410
+    m_Key: line:0b34612
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018827
+  - m_Id: 62602469411
+    m_Key: line:092c16a
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018828
+  - m_Id: 62602469412
+    m_Key: line:019d2fe
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018829
+  - m_Id: 62602469413
+    m_Key: line:0fdad80
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018830
+  - m_Id: 62602469414
+    m_Key: line:0efa7eb
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018831
+  - m_Id: 62602469415
+    m_Key: line:0618759
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018832
+  - m_Id: 62602469416
+    m_Key: line:0eeb96c
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018833
+  - m_Id: 62602469417
+    m_Key: line:03104c9
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018834
+  - m_Id: 62602469418
+    m_Key: line:04b7740
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018835
+  - m_Id: 62602469419
+    m_Key: line:03b75e3
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018836
+  - m_Id: 62602469420
+    m_Key: line:0a7fd98
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018837
+  - m_Id: 62602469421
+    m_Key: line:0f0b24f
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018838
+  - m_Id: 62602469422
+    m_Key: line:0d3f4b7
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018839
+  - m_Id: 62602469423
+    m_Key: line:0256222
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018840
+  - m_Id: 62602469424
+    m_Key: line:0836977
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018841
+  - m_Id: 62602469425
+    m_Key: line:096f0c6
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018842
+  - m_Id: 62602469426
+    m_Key: line:06cd68e
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018843
+  - m_Id: 62602469427
+    m_Key: line:0f30232
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018844
+  - m_Id: 62602469428
+    m_Key: line:0691ec1
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018845
+  - m_Id: 62602469429
+    m_Key: line:010b450
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018846
+  - m_Id: 62602469430
+    m_Key: line:0f64e82
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018847
+  - m_Id: 62602469431
+    m_Key: line:0d0809f
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018848
+  - m_Id: 62602469432
+    m_Key: line:08fc522
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018849
+  - m_Id: 62602469433
+    m_Key: line:06bd713
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018850
+  - m_Id: 62602469434
+    m_Key: line:01ce417
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018851
+  - m_Id: 62602469435
+    m_Key: line:0925ea9
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018852
+  - m_Id: 62602469436
+    m_Key: line:052e9f5
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018853
+  - m_Id: 62602469437
+    m_Key: line:0aea50f
+    m_Metadata:
+      m_Items:
+      - rid: 5277635568523018854
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 5277635568523018691
+  references:
+    version: 2
+    RefIds:
+    - rid: 5277635568523018691
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1772297493606
+    - rid: 5277635568523018692
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEnding1_Monologue
+        tags: []
+    - rid: 5277635568523018693
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEnding1_Monologue
+        tags: []
+    - rid: 5277635568523018694
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEnding1_Monologue
+        tags: []
+    - rid: 5277635568523018695
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEnding1_Monologue
+        tags: []
+    - rid: 5277635568523018696
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEnding1_Monologue
+        tags: []
+    - rid: 5277635568523018697
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEnding1_Monologue
+        tags: []
+    - rid: 5277635568523018698
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEnding1_Monologue
+        tags: []
+    - rid: 5277635568523018699
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEndingScene3
+        tags: []
+    - rid: 5277635568523018700
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEndingScene3
+        tags: []
+    - rid: 5277635568523018701
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: BadEndingScene3
+        tags: []
+    - rid: 5277635568523018702
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEndingScene
+        tags: []
+    - rid: 5277635568523018703
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEndingScene
+        tags:
+        - lastline
+    - rid: 5277635568523018704
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEndingScene
+        tags: []
+    - rid: 5277635568523018705
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEndingScene
+        tags: []
+    - rid: 5277635568523018706
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEndingScene
+        tags:
+        - lastline
+    - rid: 5277635568523018707
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEndingScene
+        tags: []
+    - rid: 5277635568523018708
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEndingScene
+        tags: []
+    - rid: 5277635568523018709
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEndingScene
+        tags: []
+    - rid: 5277635568523018710
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEndingScene
+        tags: []
+    - rid: 5277635568523018711
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags: []
+    - rid: 5277635568523018712
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags: []
+    - rid: 5277635568523018713
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags: []
+    - rid: 5277635568523018714
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags: []
+    - rid: 5277635568523018715
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags:
+        - lastline
+    - rid: 5277635568523018716
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags: []
+    - rid: 5277635568523018717
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags: []
+    - rid: 5277635568523018718
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags: []
+    - rid: 5277635568523018719
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags: []
+    - rid: 5277635568523018720
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: HappyEndingScene
+        tags: []
+    - rid: 5277635568523018721
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NewYarnScript
+        tags: []
+    - rid: 5277635568523018722
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: PhoneCallScript
+        tags: []
+    - rid: 5277635568523018723
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_501
+        tags: []
+    - rid: 5277635568523018724
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_502
+        tags: []
+    - rid: 5277635568523018725
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_503
+        tags: []
+    - rid: 5277635568523018726
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_504
+        tags: []
+    - rid: 5277635568523018727
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_505
+        tags: []
+    - rid: 5277635568523018728
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_505
+        tags: []
+    - rid: 5277635568523018729
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_506
+        tags: []
+    - rid: 5277635568523018730
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_507
+        tags: []
+    - rid: 5277635568523018731
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_508
+        tags: []
+    - rid: 5277635568523018732
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_509
+        tags: []
+    - rid: 5277635568523018733
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_509
+        tags: []
+    - rid: 5277635568523018734
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_510
+        tags: []
+    - rid: 5277635568523018735
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_601
+        tags: []
+    - rid: 5277635568523018736
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_602
+        tags: []
+    - rid: 5277635568523018737
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_603
+        tags: []
+    - rid: 5277635568523018738
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_604
+        tags: []
+    - rid: 5277635568523018739
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_605
+        tags: []
+    - rid: 5277635568523018740
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_606
+        tags: []
+    - rid: 5277635568523018741
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_607
+        tags: []
+    - rid: 5277635568523018742
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_608
+        tags: []
+    - rid: 5277635568523018743
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_609
+        tags: []
+    - rid: 5277635568523018744
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Call_610
+        tags: []
+    - rid: 5277635568523018745
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEnding
+        tags: []
+    - rid: 5277635568523018746
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: NormalEnding
+        tags: []
+    - rid: 5277635568523018747
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018748
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018749
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018750
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags:
+        - lastline
+    - rid: 5277635568523018751
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018752
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018753
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018754
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018755
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018756
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018757
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018758
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018759
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018760
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018761
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018762
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018763
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018764
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018765
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TestYarnScript
+        tags: []
+    - rid: 5277635568523018766
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TomorrowBonusLine
+        tags: []
+    - rid: 5277635568523018767
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TomorrowBonusLine
+        tags: []
+    - rid: 5277635568523018768
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialSkip
+        tags:
+        - lastline
+    - rid: 5277635568523018769
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialSkip
+        tags: []
+    - rid: 5277635568523018770
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialSkip
+        tags: []
+    - rid: 5277635568523018771
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018772
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018773
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018774
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018775
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018776
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018777
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018778
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018779
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018780
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018781
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018782
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018783
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018784
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018785
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018786
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018787
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018788
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018789
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018790
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018791
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018792
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018793
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018794
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018795
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018796
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018797
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018798
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018799
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018800
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018801
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018802
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018803
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018804
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018805
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018806
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018807
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018808
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018809
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018810
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018811
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018812
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018813
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018814
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018815
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018816
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018817
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018818
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018819
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018820
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018821
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018822
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018823
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018824
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018825
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018826
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018827
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018828
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018829
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018830
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018831
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018832
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018833
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018834
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018835
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018836
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018837
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018838
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018839
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018840
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018841
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags:
+        - lastline
+    - rid: 5277635568523018842
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018843
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: Tutorial
+        tags: []
+    - rid: 5277635568523018844
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialEnd
+        tags: []
+    - rid: 5277635568523018845
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialEnd
+        tags:
+        - lastline
+    - rid: 5277635568523018846
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialEnd
+        tags: []
+    - rid: 5277635568523018847
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialEnd
+        tags: []
+    - rid: 5277635568523018848
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialBadEnd
+        tags: []
+    - rid: 5277635568523018849
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialBadEnd
+        tags: []
+    - rid: 5277635568523018850
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialBadEnd
+        tags: []
+    - rid: 5277635568523018851
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialBadEnd
+        tags: []
+    - rid: 5277635568523018852
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialEndOK
+        tags: []
+    - rid: 5277635568523018853
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialEndOK
+        tags: []
+    - rid: 5277635568523018854
+      type: {class: LineMetadata, ns: Yarn.Unity.UnityLocalization, asm: YarnSpinner.Unity}
+      data:
+        nodeName: TutorialEndOK
+        tags: []

@@ -1,0 +1,659 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Dialogue_en
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: f47b00dd2c3e2634d94e87c8c0078e38, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 62510194688
+    m_Localized: 'Me: ......'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080768
+    m_Localized: 'Me: It looks like no receipt is coming in at all.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080769
+    m_Localized: 'Me: ......'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080770
+    m_Localized: 'Baepsae: No one is ordering anything.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080771
+    m_Localized: "Baepsae: Well, I suppose that\u2019s expected, considering you
+      haven\u2019t done anything for two days."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080772
+    m_Localized: 'Baepsae: You really are the worst employee.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080773
+    m_Localized: "Baepsae: I don\u2019t think you need to show up anymore."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080774
+    m_Localized: 'Baepsae: Thank you for working hard for the past two weeks.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080775
+    m_Localized: 'Baepsae: But... I don''t think you''re quite the right fit for
+      this role.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080776
+    m_Localized: 'Baepsae: I hope you can pursue your dreams elsewhere!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080777
+    m_Localized: 'Baepsae: Good job working for the last two weeks!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080778
+    m_Localized: 'Baepsae: I actually like you quite a bit... would you like to become
+      my official employee?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080779
+    m_Localized: Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080780
+    m_Localized: No
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080781
+    m_Localized: 'Baepsae: What did you say?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080782
+    m_Localized: Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080783
+    m_Localized: No, I mean yes!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080784
+    m_Localized: 'Baepsae: Good choice.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080785
+    m_Localized: 'Baepsae: I look forward to working with you!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080786
+    m_Localized: 'Baepsae: You''ve done a great job over the last two weeks!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080787
+    m_Localized: 'Baepsae: You did even better than I expected.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080788
+    m_Localized: 'Baepsae: You''ve been a huge help in running the shop.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080789
+    m_Localized: "Baepsae: So, I would be thrilled if you\u2019d stay on as my employee!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080790
+    m_Localized: 'Baepsae: How would you like to keep running this shop with me?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080791
+    m_Localized: Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080792
+    m_Localized: Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080793
+    m_Localized: 'Baepsae: Wonderful choice!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080794
+    m_Localized: "Baepsae: I\u2019d like you to start at 11:00 AM from tomorrow.
+      It makes me so happy to have an employee I can truly trust!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080795
+    m_Localized: 'Baepsae: I look forward to working together for a long time!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080796
+    m_Localized: This is an example of a Yarn Spinner script. Write your dialogue
+      here!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080797
+    m_Localized: hey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080798
+    m_Localized: I placed an order, so why isn't it here? Have some professionalism.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080799
+    m_Localized: I've been waiting all this time........
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080800
+    m_Localized: I'm hungry and annoyed. You should've said something!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080801
+    m_Localized: When is the delivery coming? Oh... I hope I can actually eat it
+      next time.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080802
+    m_Localized: This is really too much. I was really craving tteokbokki today.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080803
+    m_Localized: But if I order again, will you accept it?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080804
+    m_Localized: "I ordered tteokbokki because I wanted it so badly, but it's not
+      coming\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080805
+    m_Localized: What happened to the tteokbokki I ordered? Did it just vanish? How
+      could this happen?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080806
+    m_Localized: Please understand how much I want tteokbokki. Can't you just cook
+      it and bring it now?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080807
+    m_Localized: "Owner, please open the door. It\u2019s nothing big, I just have
+      something to say."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080808
+    m_Localized: Owner? Hello? Owner? Are you there? Hello??
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080809
+    m_Localized: "It\u2019s been such a hard day, and I wanted to end it on a happy
+      note. What a shame."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080810
+    m_Localized: "The wrong item arrived... I'd like a refund\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080811
+    m_Localized: This isn't what I ordered. What should I do? Could you send me the
+      correct one? Well??
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080812
+    m_Localized: This isn't what I ordered... Please double-check from now on.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080813
+    m_Localized: I'm hungry and mad. I can't even eat this.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080814
+    m_Localized: I was so looking forward to that specific dish. Why is this happening
+      to me? Sigh
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080815
+    m_Localized: Refund.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080816
+    m_Localized: The wrong order came, what should I do? I'm eating it for now, though.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080817
+    m_Localized: This isn't what I ordered, sir. I want my actual order. What should
+      I do with this food?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080818
+    m_Localized: Owner... I think my delivery got mixed up... T_T
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080819
+    m_Localized: Seriously, it's been wrong every time I order! I've ordered more
+      than 3 times now, so why do you keep bringing the wrong thing?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080820
+    m_Localized: "Baepsae: \uD55C \uB2EC \uB3D9\uC548 \uACE0\uC0DD\uD588\uC5B4!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080821
+    m_Localized: "Baepsae: \u3147\u3147"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080822
+    m_Localized: "Baepsae: \uC774\uAC74 \uD14C\uC2A4\uD2B8 \uC2A4\uD06C\uB9BD\uD2B8\uC5D0\uC694"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080823
+    m_Localized: "Baepsae: \uC798 \uC0DD\uAC01\uD574\uBD05\uC2DC\uB2E4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62594080824
+    m_Localized: "Baepsae: \uC0AC\uC2E4 \uB09C \uC798 \uBAA8\uB974\uACA0\uACE0"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275084
+    m_Localized: 'Baepsae: Tomorrow''s bonus ingredients will be... {0} and {1}!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275085
+    m_Localized: 'Baepsae: Sadly, there''s no bonus tomorrow!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275086
+    m_Localized: 'System: Skip Baepsae''s tutorial and proceed?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275087
+    m_Localized: Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275088
+    m_Localized: No
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275089
+    m_Localized: 'Me: I found a good part-time job in this gloomy time of high unemployment.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275090
+    m_Localized: 'Me: It''s close to my house, and most importantly it pays better
+      than other part-time jobs. If I do well for two weeks, I can become a full
+      time employee.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275092
+    m_Localized: 'Me: Hello, I''m here for the part time job interview.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275091
+    m_Localized: 'Me: I''ve got to pass this, no matter what.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275093
+    m_Localized: '??: Hello, come in.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275094
+    m_Localized: 'Baepsae: Nice to meet you!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275095
+    m_Localized: 'Me: uh...?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275096
+    m_Localized: "Me: It's a bird\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275097
+    m_Localized: 'Baepsae: You are the 1st person who hasn''t been surprised by my
+      appearance.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275098
+    m_Localized: 'Me: haha'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275099
+    m_Localized: 'Baepsae: Since I was little, I have loved Tteokbokki.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275100
+    m_Localized: 'Baepsae: So I saved up a lot of money and opened a Tteokbokki restaurant.
+      But?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275101
+    m_Localized: 'Baepsae: As you can see, It''s hard for a bird to cook.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275102
+    m_Localized: 'Baepsae: So, I am looking for a part-time worker to cook in my
+      place.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275103
+    m_Localized: 'Me: Oh, I see.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275104
+    m_Localized: 'Baepsae: Have you ever done a similar part-time job before?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275105
+    m_Localized: 'Me: Yes, It''s not Tteokbokki but I worked at a neighborhood restaurant
+      for 5 months.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275106
+    m_Localized: 'Baepsae: Great!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275107
+    m_Localized: 'Baepsae: Then let me explain what you need to do next.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275108
+    m_Localized: 'Baepsae: If you ran this restaurant well for 2 weeks, you could
+      be a full time worker as you know.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275109
+    m_Localized: 'Baepsae: Your performance will be judged by the sales over 2 weeks.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62598275110
+    m_Localized: 'Baepsae: You seem really nice. I hope we can manage the store successfully
+      together.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469376
+    m_Localized: 'Me: Yes. I''ll do my best.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469377
+    m_Localized: 'Baepsae: Good!, we''re delivery-only, so there''s no need to meet
+      customers directly.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469378
+    m_Localized: 'Baepsae: Right now, we have 2 menu items : Gunja Tteokbokki and
+      Spicy Gunja Tteokbokki'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469379
+    m_Localized: 'Baepsae: We just got an order.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469380
+    m_Localized: 'Baepsae: shall we try to make it?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469381
+    m_Localized: 'Baepsae: Press the receipt, it shows you what ingredients to add.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469382
+    m_Localized: 'Baepsae: After that, add the ingredients and let it boil. Easy,
+      isn''t it?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469383
+    m_Localized: 'Baepsae: First, can you put <b>Rice Cake and Fish Cake</b> twice,
+      <b>Green Onions and Cabbage</b> once in the pan.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469384
+    m_Localized: 'Baepsae: Then put <b>Gunja Sauce</b> in the pan.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469385
+    m_Localized: 'Baepsae: It is the special sauce that I made.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469386
+    m_Localized: 'Baepsae: After you put everything in, turn up the heat.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469387
+    m_Localized: 'Baepsae: Turn on the gas stove.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469388
+    m_Localized: 'Baepsae: Stir well so it doesn''t burn. that''s the way of cooking.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469389
+    m_Localized: 'Baepsae: After cooking put it on <b>packing table </b>, I will
+      pack it.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469390
+    m_Localized: 'Baepsae: You need to attach <b>receipt </b> to the packed food
+      so the delivery driver can deliver it.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469391
+    m_Localized: 'Baepsae: Put the receipt on it.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469392
+    m_Localized: 'Baepsae: Good job.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469393
+    m_Localized: 'Baepsae: As soon as the delivery goes out, the earnings appear
+      in <b>the account balance</b>.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469394
+    m_Localized: 'Baepsae: We sometimes get many orders at once, so make sure to
+      double-check the receipts.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469395
+    m_Localized: 'Baepsae: You can throw away Tteokbokki and receipts by dragging
+      them to the trash bin or just right-clicking them!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469396
+    m_Localized: 'Baepsae: If you cook it wrong or don''t have the ingredients, don''t
+      force it. Just throw it away.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469397
+    m_Localized: 'Baepsae: Now, let me show you how to close up for the day.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469398
+    m_Localized: 'Baepsae: Normally we can''t close yet, but let''s do a special
+      early closing for today.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469399
+    m_Localized: 'Baepsae: Please press the <b>''End Day''</b> button.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469400
+    m_Localized: 'Baepsae: I''ll handle the closing on the computer.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469401
+    m_Localized: 'Baepsae: In settlement, you can check today''s receipts and see
+      which orders succeeded<b>or failed</b>.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469402
+    m_Localized: 'Baepsae: The successful and failed orders from earlier are shown
+      here. Did you check them?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469403
+    m_Localized: 'Baepsae: You can also check how much tax was deducted.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469404
+    m_Localized: 'Baepsae: Now, shall we pay taxes and go buy some ingredients? Press
+      the ''Pay Tax'' button.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469405
+    m_Localized: 'Baepsae: And you can use the money you earned today to buy more
+      ingredients.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469406
+    m_Localized: 'Baepsae: The ingredients we ordered will arrive tomorrow.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469407
+    m_Localized: 'Baepsae: Besides the basic ingredients, you can also add extra
+      toppings.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469408
+    m_Localized: 'Baepsae: By purchasing new sauces, we can add new Tteokbokki options
+      to the menu.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469409
+    m_Localized: 'Baepsae: The more new ingredients and sauces we have, the more
+      customers we draw. right?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469410
+    m_Localized: 'Baepsae: First, let''s try buying the new <b>Mala Sauce</b>.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469411
+    m_Localized: 'Baepsae: Mala is very popular!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469412
+    m_Localized: 'Baepsae: Selected items for purchase will be highlighted with a
+      brown border.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469413
+    m_Localized: 'Baepsae: If business is good and stock runs low, they''ll be marked
+      in red in the shop.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469414
+    m_Localized: 'Baepsae: I recommend checking often and keeping your stock replenished
+      in advance!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469415
+    m_Localized: 'Baepsae: Oh, and one more thing!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469416
+    m_Localized: 'Baepsae: There will be special events every few days.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469417
+    m_Localized: 'Baepsae: Specific ingredients will give you bonuses!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469418
+    m_Localized: 'Baepsae: So keep a close eye on that.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469419
+    m_Localized: 'Baepsae: Now, click <b>''Order''</b> to complete your purchase.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469420
+    m_Localized: 'Baepsae: Lastly, let me show you the <b>Daily Closing Report</b>!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469421
+    m_Localized: 'Baepsae: It summarizes today''s revenue, expenses, and purchased
+      ingredients all at a glance.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469422
+    m_Localized: 'Baepsae: Now, try pressing <b>''Close Shop''</b>.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469423
+    m_Localized: "Baepsae: That\u2019s everything for the closing process!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469424
+    m_Localized: 'Baepsae: How was it? Can you handle it?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469425
+    m_Localized: Yes. I can do it.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469426
+    m_Localized: No. This is too difficult.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469427
+    m_Localized: 'Baepsae: Really? As a bird, I can''t do anything this by myself.
+      I need help.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469428
+    m_Localized: 'Baepsae: You really don''t think you can do it?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469429
+    m_Localized: No, on second thought, I think I can do it.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469430
+    m_Localized: Yes, I don't think I can do this.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469431
+    m_Localized: "Baepsae: I see\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469432
+    m_Localized: 'Baepsae: That''s a shame. Still, if you come as a customer, I''ll
+      give you a little extra.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469433
+    m_Localized: "Baepsae: I don't know if I'll be able to find anyone else to help,
+      but\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469434
+    m_Localized: "Baepsae: Goodbye\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469435
+    m_Localized: 'Baepsae: Great! Then let''s start the business!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469436
+    m_Localized: 'Baepsae: The goal is 2.5 million won.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 62602469437
+    m_Localized: 'Baepsae: Good luck!'
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

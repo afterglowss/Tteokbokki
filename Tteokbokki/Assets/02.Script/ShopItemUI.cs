@@ -45,15 +45,19 @@ public class ShopItemUI : MonoBehaviour
         CurrentCount = 0;
 
         // 1. 텍스트 설정
-        if (nameText != null) nameText.text = data.Name;
-        if (priceText != null) priceText.text = $"{data.OrderCost:N0}원";
-        if (amountText != null) amountText.text = $"(+{data.ServingsPerOrder}인분)";
+        // ✨ 1-1. 재료 이름 번역 (데이터베이스의 이름을 번역 키로 사용)
+        if (nameText != null) nameText.text = TextTranslator.GetIngredientName(data.Name);
+
+        // ✨ 1-2. 가격과 수량 텍스트 번역
+        if (priceText != null) priceText.text = TextTranslator.GetUIText("Shop_ItemPrice", data.OrderCost);
+        if (amountText != null) amountText.text = TextTranslator.GetUIText("Shop_ItemAmount", data.ServingsPerOrder);
 
         // 2. 재고 표시
         if (currentStockText != null)
         {
             if (!hasPurchased)
-                currentStockText.text = "<color=#888888>미입고</color>";
+                // ✨ 1-3. "미입고" 텍스트 번역
+                currentStockText.text = TextTranslator.GetUIText("Shop_ItemNotStocked");
             else
             {
                 string colorHex = currentStock <= 0 ? "red" : "#00AA00";
@@ -96,7 +100,7 @@ public class ShopItemUI : MonoBehaviour
         // ✨ [NEW] 3개 제한 체크
         if (CurrentCount >= MAX_QUANTITY)
         {
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "한 번에 최대 3개까지만 구매 가능합니다.", 1f);
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Shop_MaxShopping"), 1f);
             return;
         }
 

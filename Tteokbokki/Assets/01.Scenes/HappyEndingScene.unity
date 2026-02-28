@@ -414,6 +414,24 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1278698531}
     m_Modifications:
+    - target: {fileID: 4974359572170455623, guid: ee617c586c075ae4c83e3fc5faca8790, type: 3}
+      propertyPath: m_text
+      value: "<font=\"KimjungchulMyungjo-Bold SDF\">\uD50C\uB808\uC774 \uD574\uC8FC\uC154\uC11C
+        \uAC10\uC0AC\uD569\uB2C8\uB2E4!</font>\n\n<font=\"KimjungchulMyungjo-Bold
+        SDF\">Team \uC6B0\uC720 \uC6D0\uC815\uB300</font> (Milky Expedition)\n\n<font=\"KimjungchulMyungjo-Bold
+        SDF\">PM</font> \t\t\uC2E0\uD61C\uC6D0\n<font=\"KimjungchulMyungjo-Bold SDF\">\uAE30\uD68D</font>
+        \t\t\uC724\uD558\uACBD, \uC2E0\uD61C\uC6D0\n<font=\"KimjungchulMyungjo-Bold
+        SDF\">\uD504\uB85C\uADF8\uB798\uBC0D</font> \t\uC2E0\uD61C\uC6D0, \uCD5C\uC601\uC9C4\n<font=\"KimjungchulMyungjo-Bold
+        SDF\">\uC544\uD2B8</font>\t\t\uC2E0\uD61C\uC6D0, \uC724\uD558\uACBD, \uCD5C\uC601\uC9C4\n<font=\"KimjungchulMyungjo-Bold
+        SDF\">\uC81C\uACF5</font>\t\tPandoraCube\n\n<size=60%><font=\"KimjungchulMyungjo-Bold
+        SDF\">Special Thanks</font>\t\uC2DC\uD0A4\uC2DC\uD0A4, \uB974\uB124, \uCD5C\uC885\uD604,
+        HJ, \uC774\uC0C1\uD604\n\n<font=\"KimjungchulMyungjo-Bold SDF\">\uCD9C\uCC98</font>
+        \t\t\tTrack : \uB6B1\uB545\uB6B1\uB545 (Music provided by \uBE0C\uAE08\uB300\uD1B5\uB839)\n\t\t\t\uC774
+        \uCF58\uD150\uCE20\uB294 \uC778\uACF5\uC9C0\uB2A5 \uAC00\uC0C1 \uC5F0\uAE30\uC790
+        \uC11C\uBE44\uC2A4, \uD0C0\uC785\uCE90\uC2A4\uD2B8\uB97C \uD65C\uC6A9\uD558\uC5EC
+        \uC81C\uC791\uB418\uC5C8\uC2B5\uB2C8\uB2E4. \uCD9C\uC5F0\uC9C4: \uBCA0\uB9AC\n\t\t\t\uAC8C\uC784
+        \uB0B4 AI\uB85C \uC81C\uC791\uB41C \uC774\uBBF8\uC9C0\uAC00 \uC0AC\uC6A9\uB418\uC5C8\uC2B5\uB2C8\uB2E4.\n</size>\n"
+      objectReference: {fileID: 0}
     - target: {fileID: 5110932593575163160, guid: ee617c586c075ae4c83e3fc5faca8790, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -668,13 +686,72 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6614250709009362606, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
       insertIndex: -1
       addedObject: {fileID: 388019632}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2360727409982015730, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1278698534}
   m_SourcePrefab: {fileID: 100100000, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
 --- !u!224 &1278698531 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6614250709009362606, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
   m_PrefabInstance: {fileID: 1278698530}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1278698532 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2360727409982015730, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
+  m_PrefabInstance: {fileID: 1278698530}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1278698533 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4491912808612745192, guid: 298a1937f36489a4fa959983cb5eb753, type: 3}
+  m_PrefabInstance: {fileID: 1278698530}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1278698532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1278698534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1278698532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_StringReference:
+    m_TableReference:
+      m_TableCollectionName: GUID:e7934d7df2cc07c459fb09e33a20aa39
+    m_TableEntryReference:
+      m_KeyId: 347229162692609
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  m_FormatArguments: []
+  m_UpdateString:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1278698533}
+        m_TargetAssemblyTypeName: TMPro.TMP_Text, Unity.TextMeshPro
+        m_MethodName: set_text
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
+  references:
+    version: 2
+    RefIds: []
 --- !u!1001 &1873385142
 PrefabInstance:
   m_ObjectHideFlags: 0

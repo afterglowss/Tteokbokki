@@ -1385,6 +1385,7 @@ GameObject:
   - component: {fileID: 6251336041533790178}
   - component: {fileID: 6133978191339005426}
   - component: {fileID: 3312229909144677654}
+  - component: {fileID: 5891462214556925820}
   m_Layer: 0
   m_Name: Dialogue System_v2
   m_TagString: Untagged
@@ -1425,7 +1426,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   yarnProject: {fileID: 7545569452688597077, guid: a1851ff2190e29646b37087c174cf295, type: 3}
   variableStorage: {fileID: 6251336041533790178}
-  lineProvider: {fileID: 0}
+  lineProvider: {fileID: 5891462214556925820}
   saliencyStrategy: 0
   dialoguePresenters:
   - {fileID: 5719470130369219911}
@@ -1493,6 +1494,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df1bb11bff77fd24283167da6c85d0bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5891462214556925820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6876391097094250351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9c1f487b798d402db42bc11cee5b810, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stringsTable:
+    m_TableReference:
+      m_TableCollectionName: GUID:f47b00dd2c3e2634d94e87c8c0078e38
+  assetTable:
+    m_TableReference:
+      m_TableCollectionName: 
 --- !u!1 &7257707034208021350
 GameObject:
   m_ObjectHideFlags: 0

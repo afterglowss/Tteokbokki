@@ -133,10 +133,11 @@ public class DailyBonusManager : MonoBehaviour
     public string GetTodayBonusString()
     {
         if (tomorrowBonusCandidates.Count == 0)
-            return "없음";
+            return TextTranslator.GetUIText("UI_WokStatus_Empty");
 
-        // HashSet에 있는 재료 이름들을 ", "로 연결해서 문자열로 반환
-        return string.Join(", ", tomorrowBonusCandidates);
+        var translatedBonuses = tomorrowBonusCandidates.Select(name => TextTranslator.GetIngredientName(name));
+
+        return string.Join(", ", translatedBonuses);
     }
 
     public bool IsBonusIngredient(string name)

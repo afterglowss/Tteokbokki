@@ -443,6 +443,218 @@ MonoBehaviour:
     m_Key: UI_HowtoPlay
     m_Metadata:
       m_Items: []
+  - m_Id: 327958172917760
+    m_Key: Shop_MaxShopping
+    m_Metadata:
+      m_Items: []
+  - m_Id: 332793928605696
+    m_Key: Pause_Save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 332835057950720
+    m_Key: Pause_ReturntoTitle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 335235013533696
+    m_Key: Popup_Warning_NewGame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 335235105808384
+    m_Key: Popup_Warning_GoToTitle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 335235105808385
+    m_Key: UI_Button_Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 335235105808386
+    m_Key: UI_Button_No
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911144828928
+    m_Key: Start_SaveRecord
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023232
+    m_Key: Start_Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023233
+    m_Key: Start_DataCorrupted
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023234
+    m_Key: Start_NoRecord
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023235
+    m_Key: Loading_Tip_1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023236
+    m_Key: Loading_Tip_2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023237
+    m_Key: Loading_Tip_3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023238
+    m_Key: Loading_Tip_4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023239
+    m_Key: Loading_Tip_5
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023240
+    m_Key: Loading_Tip_6
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023241
+    m_Key: Loading_Tip_7
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023242
+    m_Key: Loading_Complete
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023243
+    m_Key: UI_Start_NewGame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023244
+    m_Key: UI_Start_Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023245
+    m_Key: UI_Start_Exit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 338911149023246
+    m_Key: UI_Start_Credits
+    m_Metadata:
+      m_Items: []
+  - m_Id: 341561743630336
+    m_Key: Ending_Credits
+    m_Metadata:
+      m_Items: []
+  - m_Id: 347229070417920
+    m_Key: Ending_Bad_1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 347229162692608
+    m_Key: Ending_Bad_2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 347229162692609
+    m_Key: Ending_Happy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 347229162692610
+    m_Key: Ending_Normal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349898954629120
+    m_Key: Shop_ItemPrice
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349898954629121
+    m_Key: Shop_ItemAmount
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349898954629122
+    m_Key: Shop_ItemNotStocked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204522696704
+    m_Key: EOD_SuccessAmount
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582784
+    m_Key: EOD_MissedAmount
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582785
+    m_Key: EOD_TotalAndTax
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582786
+    m_Key: EOD_NetIncome
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582787
+    m_Key: EOD_BtnPayTax
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582788
+    m_Key: EOD_Warning_Check
+    m_Metadata:
+      m_Items: []
+  - m_Id: 355204606582789
+    m_Key: EOD_Warning_NoMoney
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357668898594816
+    m_Key: EOD_Title_Settlement
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841024
+    m_Key: EOD_Panel_Success
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841025
+    m_Key: EOD_Panel_Fail
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841026
+    m_Key: EOD_Panel_Result
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841027
+    m_Key: EOD_Title_Shop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841028
+    m_Key: Shop_Category_Reorder
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841029
+    m_Key: Shop_Category_NewArrival
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841030
+    m_Key: EOD_Title_Report
+    m_Metadata:
+      m_Items: []
+  - m_Id: 357669011841031
+    m_Key: EOD_Btn_FinalClose
+    m_Metadata:
+      m_Items: []
+  - m_Id: 406002153676800
+    m_Key: UI_Btn_EndOfDay
+    m_Metadata:
+      m_Items: []
+  - m_Id: 406267732811776
+    m_Key: Tutorial_Report_NetIncome
+    m_Metadata:
+      m_Items: []
+  - m_Id: 407026587262976
+    m_Key: Tutorial_Report_Finance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 408169962921984
+    m_Key: Tutorial_Report_Stats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 408881367212032
+    m_Key: Tutorial_Report_Unlocked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 409192165138432
+    m_Key: Tutorial_Report_ShoppingItem
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

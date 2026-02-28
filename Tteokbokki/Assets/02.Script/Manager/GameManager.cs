@@ -68,12 +68,40 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
+    public void ApplyYarnLanguage()
+    {
+        if (dialogueRunner == null) return;
+
+        // ✨ 점장님이 찾아내신 진짜 인덱스 적용! (0: 영어, 1: 한국어)
+        // (기본값을 한국어인 1로 설정해 둡니다)
+        int savedLangIndex = PlayerPrefs.GetInt("GameLanguage", 1);
+
+        // ✨ 0번일 때 "en", 1번일 때 "ko"가 되도록 수정!
+        string yarnLangCode = (savedLangIndex == 0) ? "en" : "ko";
+
+        var builtinProvider = dialogueRunner.GetComponent<Yarn.Unity.BuiltinLocalisedLineProvider>();
+
+        if (builtinProvider != null)
+        {
+            builtinProvider.LocaleCode = yarnLangCode;
+            builtinProvider.AssetLocaleCode = yarnLangCode;
+            Debug.Log($"[시스템] 대화 언어가 '{yarnLangCode}'로 완벽하게 설정되었습니다!");
+        }
+        else
+        {
+            Debug.LogWarning("🚨 [시스템] BuiltinLocalisedLineProvider가 없습니다!");
+        }
+    }
+
     void Start()
     {
         // ✨ Yarn 커맨드 등록 (대화 끝날 때 호출됨)
+        // ✨ Yarn 커맨드 등록
         if (dialogueRunner != null)
         {
             dialogueRunner.AddCommandHandler("trigger_bad_ending_1", TriggerBadEnding1Sequence);
+            // ✨ [핵심 수정] Yarn이 작동하기 전, 가장 먼저 언어를 세팅합니다!
+            //ApplyYarnLanguage();
         }
 
 
@@ -236,8 +264,12 @@ public class GameManager : MonoBehaviour
         if (dialogueRunner != null)
         {
             dialogueRunner.VariableStorage.SetValue("$hasBonus", hasBonus);
-            dialogueRunner.VariableStorage.SetValue("$bonus1", bonusList.Count > 0 ? bonusList[0] : "");
-            dialogueRunner.VariableStorage.SetValue("$bonus2", bonusList.Count > 1 ? bonusList[1] : "");
+
+            // ✨ [핵심 수정] 원본 이름(한국어) 대신, 번역기를 한 번 거친 이름을 Yarn 변수에 넣습니다!
+            string translatedBonus1 = bonusList.Count > 0 ? TextTranslator.GetIngredientName(bonusList[0]) : "";
+            string translatedBonus2 = bonusList.Count > 1 ? TextTranslator.GetIngredientName(bonusList[1]) : "";
+            dialogueRunner.VariableStorage.SetValue("$bonus1", translatedBonus1);
+            dialogueRunner.VariableStorage.SetValue("$bonus2", translatedBonus2);
         }
 
         Debug.Log("[이어하기] 마감 정산 화면으로 복귀했습니다.");
@@ -553,9 +585,11 @@ public class GameManager : MonoBehaviour
         bool hasBonus = bonusList.Count > 0;
         dialogueRunner.VariableStorage.SetValue("$hasBonus", hasBonus);
 
-        // $bonus1, $bonus2: 재료 이름 (없으면 빈 문자열)
-        dialogueRunner.VariableStorage.SetValue("$bonus1", bonusList.Count > 0 ? bonusList[0] : "");
-        dialogueRunner.VariableStorage.SetValue("$bonus2", bonusList.Count > 1 ? bonusList[1] : "");
+        // ✨ [핵심 수정] 원본 이름(한국어) 대신, 번역기를 한 번 거친 이름을 Yarn 변수에 넣습니다!
+        string translatedBonus1 = bonusList.Count > 0 ? TextTranslator.GetIngredientName(bonusList[0]) : "";
+        string translatedBonus2 = bonusList.Count > 1 ? TextTranslator.GetIngredientName(bonusList[1]) : "";
+        dialogueRunner.VariableStorage.SetValue("$bonus1", translatedBonus1);
+        dialogueRunner.VariableStorage.SetValue("$bonus2", translatedBonus2);
 
         // (디버깅용 로그)
         if (hasBonus)

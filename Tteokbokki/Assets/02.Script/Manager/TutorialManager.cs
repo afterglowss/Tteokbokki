@@ -116,6 +116,7 @@ public class TutorialManager : MonoBehaviour
 
         if (dialogueRunner != null && !dialogueRunner.IsDialogueRunning)
         {
+            GameManager.Instance?.ApplyYarnLanguage();
             dialogueRunner.StartDialogue("TutorialStart");
         }
     }

@@ -10,6 +10,10 @@
   "localisation": {
     "ko": {
       "assets": "YarnScript"
+    },
+    "en": {
+      "assets": ".",
+      "strings": "EnglishStrings.csv"
     }
   },
   "baseLanguage": "ko",

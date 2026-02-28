@@ -47,6 +47,6 @@ public class CharacterFaceManager : MonoBehaviour
         if (faceImage == null) return;
 
         // 화자가 '뱁새'일 때만 이미지 컴포넌트를 활성화
-        faceImage.enabled = (speakerName == "뱁새");
+        faceImage.enabled = (speakerName == "뱁새" || speakerName == "Baepsae");
     }
 }

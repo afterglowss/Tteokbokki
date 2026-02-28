@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using SaveData;
 using DG.Tweening; // DOTween (선택사항, 여기선 코루틴으로 처리함)
+using UnityEngine.Localization.Settings;
 
 public static class GameLoadFlags
 {
@@ -28,6 +29,10 @@ public class StartSceneUI : MonoBehaviour
     // ✨ [NEW] 디버그용 세이브 삭제 버튼
     [Header("디버그")]
     [SerializeField] private Button deleteSaveButton;
+
+    [Header("언어 설정")]
+    [SerializeField] private Toggle languageToggle;
+    [SerializeField] private TextMeshProUGUI languageToggleText;
 
     // ✨ [NEW] 타이틀 로고 애니메이션용 변수
     [Header("타이틀 애니메이션")]
@@ -80,16 +85,16 @@ public class StartSceneUI : MonoBehaviour
         new Keyframe(1, 1) // 마지막에 완료
     );
 
-    // 재미있는 로딩 멘트들
-    private string[] loadingTips = new string[]
+    // ✨ [수정] 한글 대신 번역 Key를 저장해 둡니다.
+    private string[] loadingTipKeys = new string[]
     {
-        "재료를 손질하는 중...",
-        "육수를 끓이는 중...",
-        "단무지를 채워넣는 중...",
-        "앞치마를 매는 중...",
-        "진상 손님 예방 훈련 중...",
-        "배달 오토바이 시동 거는 중...",
-        "사장님 지갑 확인하는 중..."
+        "Loading_Tip_1",
+        "Loading_Tip_2",
+        "Loading_Tip_3",
+        "Loading_Tip_4",
+        "Loading_Tip_5",
+        "Loading_Tip_6",
+        "Loading_Tip_7"
     };
 
     private string saveFilePath;
@@ -105,8 +110,35 @@ public class StartSceneUI : MonoBehaviour
         if (loadingPanel != null) loadingPanel.SetActive(false); // 시작할 땐 끄기
     }
 
-    private void Start()
+    private static bool isLanguageSynced = false;
+
+    private IEnumerator Start()
     {
+        // 1. 아직 언어 체크를 안 한 '진짜 최초 실행'일 때만 들어갑니다.
+        if (!isLanguageSynced)
+        {
+            isLanguageSynced = true; // 도장 쾅! 이제 다신 이 블록 안 들어옴.
+
+            int currentLangIndex = PlayerPrefs.GetInt("GameLanguage", 1);
+            if (currentLangIndex == 0) // 어? 영어가 저장되어 있네?
+            {
+                // 유니티 언어를 영어로 잽싸게 바꾸고
+                yield return LocalizationSettings.InitializationOperation;
+                foreach (var loc in LocalizationSettings.AvailableLocales.Locales)
+                {
+                    if (loc.Identifier.Code.StartsWith("en"))
+                    {
+                        LocalizationSettings.SelectedLocale = loc;
+                        break;
+                    }
+                }
+
+                // ✨ 점장님 아이디어 발동! 씬을 그냥 바로 다시 켜버립니다.
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                yield break; // 여기서 현재 코드 실행 완전 종료!
+            }
+        }
+
         startButton.onClick.AddListener(OnStartButtonClicked);
         continueButton.onClick.AddListener(OnContinueButtonClicked);
         settingButton.onClick.AddListener(OnSettingButtonClicked);
@@ -129,6 +161,23 @@ public class StartSceneUI : MonoBehaviour
         // 시작할 땐 꺼두기
         if (panelCredits != null) panelCredits.SetActive(false);
         if (newGameWarningPanel != null) newGameWarningPanel.SetActive(false);
+
+        // ✨ 1. PlayerPrefs에서 저장된 언어 불러오기 (0: 한국어, 1: 영어)
+        if (languageToggle != null)
+        {
+            int currentLangIndex = PlayerPrefs.GetInt("GameLanguage", 1); // 기본값 0 (한국어)
+            bool isEnglish = (currentLangIndex == 0);
+
+            languageToggle.SetIsOnWithoutNotify(isEnglish);
+
+            // ✨ 현재 설정된 언어에 맞게 토글 글자 세팅!
+            if (languageToggleText != null)
+                languageToggleText.text = isEnglish ? "English" : "Korean";
+
+            languageToggle.onValueChanged.AddListener(OnLanguageToggleChanged);
+
+            //StartCoroutine(InitLocaleOnStart(isEnglish));
+        }
 
         UpdateContinueDateLabel();
 
@@ -194,11 +243,11 @@ public class StartSceneUI : MonoBehaviour
                 GameSaveData data = LoadSaveMetaOnly();
                 if (DateTime.TryParse(data.gameTime, out DateTime gameTime))
                 {
-                    continueDateText.text = $"{gameTime.Month}월 {gameTime.Day}일 영업 기록";
+                    continueDateText.text = TextTranslator.GetUIText("Start_SaveRecord", gameTime.Month, gameTime.Day);
                 }
                 else
                 {
-                    continueDateText.text = "이어하기";
+                    continueDateText.text = TextTranslator.GetUIText("Start_Continue");
                 }
                 // ✨ [수정] 활성화 상태 색상 적용
                 continueButton.interactable = true;
@@ -213,8 +262,8 @@ public class StartSceneUI : MonoBehaviour
             }
             catch
             {
-                continueDateText.text = "데이터 손상됨";
-                // ✨ [수정] 비활성화 상태 색상 적용
+                // ✨ 3. 데이터 손상 번역
+                continueDateText.text = TextTranslator.GetUIText("Start_DataCorrupted");
                 continueButton.interactable = false;
                 if (continueDateText != null)
                 {
@@ -228,7 +277,7 @@ public class StartSceneUI : MonoBehaviour
         }
         else
         {
-            continueDateText.text = "기록이 없습니다";
+            continueDateText.text = TextTranslator.GetUIText("Start_NoRecord");
             // ✨ [수정] 비활성화 상태 색상 적용
             continueButton.interactable = false;
             if (continueDateText != null)
@@ -390,8 +439,7 @@ public class StartSceneUI : MonoBehaviour
             loadingPanel.SetActive(true);
             if (loadingSlider != null) loadingSlider.value = 0f;
 
-            // ✨ 타이핑 효과 시작! (기존 텍스트 설정 로직 대체)
-            if (loadingText != null && loadingTips.Length > 0)
+            if (loadingText != null && loadingTipKeys.Length > 0) // ✨ 이름 변경 완료!
             {
                 // 혹시 돌고 있을 코루틴 정지 후 새로 시작
                 if (typingCoroutine != null) StopCoroutine(typingCoroutine);
@@ -434,12 +482,11 @@ public class StartSceneUI : MonoBehaviour
             {
                 if (loadingSlider != null) loadingSlider.value = 1f;
 
-                // 타이핑 멈춤 & 완료 멘트
                 if (typingCoroutine != null) StopCoroutine(typingCoroutine);
-                if (loadingText != null) loadingText.text = "영업 준비 완료!";
+                // ✨ "영업 준비 완료!" 번역
+                if (loadingText != null) loadingText.text = TextTranslator.GetUIText("Loading_Complete");
 
                 yield return new WaitForSeconds(0.5f);
-
                 op.allowSceneActivation = true;
             }
         }
@@ -450,8 +497,11 @@ public class StartSceneUI : MonoBehaviour
     {
         while (true) // 무한 반복 (로딩 끝날 때 StopCoroutine으로 멈춤)
         {
-            // 1. 랜덤 멘트 뽑기
-            string targetText = loadingTips[UnityEngine.Random.Range(0, loadingTips.Length)];
+            // ✨ 1. 랜덤 Key 뽑기
+            string targetKey = loadingTipKeys[UnityEngine.Random.Range(0, loadingTipKeys.Length)];
+
+            // ✨ 2. 번역된 진짜 멘트 가져오기
+            string targetText = TextTranslator.GetUIText(targetKey);
 
             // 2. 텍스트 비우기
             loadingText.text = "";
@@ -492,6 +542,64 @@ public class StartSceneUI : MonoBehaviour
         //// 원래 자리로 탱탱볼처럼 떨어짐
         //titleLogoRect.DOAnchorPosY(originalY, 1.5f).SetEase(Ease.OutBounce);
 
+    }
+    // ✨ 2. 토글을 눌렀을 때 실행될 함수
+    // ✨ 2. 토글을 눌렀을 때 실행될 함수
+    private void OnLanguageToggleChanged(bool isEnglish)
+    {
+        // 클릭하는 순간 바로 글자를 바꿔줍니다! (Korean -> English)
+        if (languageToggleText != null)
+            languageToggleText.text = isEnglish ? "English" : "Korean";
+
+        // ✨ [수정] 영어가 0번, 한국어가 1번!
+        int targetLangIndex = isEnglish ? 0 : 1;
+        PlayerPrefs.SetInt("GameLanguage", targetLangIndex);
+        PlayerPrefs.Save();
+
+        StartCoroutine(ChangeLocaleAndReload(isEnglish));
+    }
+
+    // ✨ 3. 인덱스가 아니라 정확한 언어 코드("en", "ko")로 찾아서 매칭합니다!
+    private IEnumerator ChangeLocaleAndReload(bool isEnglish)
+    {
+        yield return LocalizationSettings.InitializationOperation;
+
+        string targetCode = isEnglish ? "en" : "ko";
+        UnityEngine.Localization.Locale targetLocale = null;
+
+        // 시스템에 등록된 언어 리스트를 싹 뒤져서 코드가 일치하는 걸 찾아냅니다.
+        foreach (var loc in LocalizationSettings.AvailableLocales.Locales)
+        {
+            if (loc.Identifier.Code.StartsWith(targetCode))
+            {
+                targetLocale = loc;
+                break;
+            }
+        }
+
+        if (targetLocale != null)
+            LocalizationSettings.SelectedLocale = targetLocale;
+        else
+            Debug.LogWarning($"[시스템] '{targetCode}' 언어를 유니티 Localization 설정에서 찾을 수 없습니다!");
+
+        yield return new WaitForSeconds(0.1f);
+        StartCoroutine(LoadSceneWithLoadingScreen(SceneManager.GetActiveScene().name));
+    }
+
+    // ✨ [NEW] 게임 시작 시 언어 동기화 코루틴
+    private IEnumerator InitLocaleOnStart(bool isEnglish)
+    {
+        yield return LocalizationSettings.InitializationOperation;
+
+        string targetCode = isEnglish ? "en" : "ko";
+        foreach (var loc in LocalizationSettings.AvailableLocales.Locales)
+        {
+            if (loc.Identifier.Code.StartsWith(targetCode))
+            {
+                LocalizationSettings.SelectedLocale = loc;
+                break;
+            }
+        }
     }
 
     private void OnSettingButtonClicked()
