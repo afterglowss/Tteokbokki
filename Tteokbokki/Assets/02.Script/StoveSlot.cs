@@ -250,7 +250,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         if (menuResult == "Invalid")
         {
             Debug.LogWarning("필수 재료 부족 또는 소스 없음");
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "기본 재료가 부족하거나 소스가 없습니다!", 1f);
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Warning_NoRecipe"), 1f);
             return;
         }
 

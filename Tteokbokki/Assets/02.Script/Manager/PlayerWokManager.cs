@@ -36,7 +36,7 @@ public class PlayerWokManager : MonoBehaviour
         if (!StoveManager.Instance.HasSelectedSlot())
         {
             Debug.LogWarning("선택된 화구가 없습니다!");
-            TooltipManager.ShowFollowMouse(TooltipType.UI, "화구를 먼저 선택해주세요!", 1f);
+            TooltipManager.ShowFollowMouse(TooltipType.UI, TextTranslator.GetUIText("Warning_SelectStove_Key"), 1f);
             return;
         }
 

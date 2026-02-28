@@ -141,7 +141,7 @@ public class RandomReceiptGenerator : MonoBehaviour
 
             if (GameManager.Instance != null)
             {
-                GameManager.Instance.TriggerEmergencyClose("재고로 조리 가능한 메뉴가 없습니다!");
+                GameManager.Instance.TriggerEmergencyClose(TextTranslator.GetUIText("Reason_NoMenuAvailable"));
             }
             return;
         }

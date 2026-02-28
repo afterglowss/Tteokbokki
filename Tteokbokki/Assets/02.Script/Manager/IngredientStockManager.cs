@@ -300,7 +300,9 @@ public class IngredientStockManager : MonoBehaviour
         {
             if (GetStock(item) <= 0)
             {
-                GameManager.Instance.TriggerEmergencyClose($"필수 재료 '{item}' 소진!");
+                // ✨ 1. 필수 재료 소진 번역
+                string transItem = TextTranslator.GetIngredientName(item);
+                GameManager.Instance.TriggerEmergencyClose(TextTranslator.GetUIText("Reason_EssentialEmpty", transItem));
                 return;
             }
         }
@@ -323,7 +325,8 @@ public class IngredientStockManager : MonoBehaviour
 
         if (!hasAnySauce)
         {
-            GameManager.Instance.TriggerEmergencyClose("모든 소스 소진!");
+            // ✨ 2. 모든 소스 소진 번역
+            GameManager.Instance.TriggerEmergencyClose(TextTranslator.GetUIText("Reason_AllSauceEmpty"));
         }
     }
 

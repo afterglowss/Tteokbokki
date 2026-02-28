@@ -337,6 +337,181 @@ MonoBehaviour:
       after finishing the remaining orders.
     m_Metadata:
       m_Items: []
+  - m_Id: 42467355648000
+    m_Localized: 'Out of essential ingredient: ''{0}''!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648001
+    m_Localized: Out of all sauces!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648002
+    m_Localized: No menus can be cooked with current stock!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648003
+    m_Localized: No receipt found for Order No. {0}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648004
+    m_Localized: Ingredient List for Order No. {0}\n\n
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648005
+    m_Localized: '[{0}] {1} Ingredients\n'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648006
+    m_Localized: Please enter a valid Order Number.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648007
+    m_Localized: Invalid date format (yyyy-MM-dd, yyyymmdd, yyyy-MM-dd_No).
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648008
+    m_Localized: No receipt found for Order No. {1} on {0}.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648009
+    m_Localized: Not enough base ingredients or no sauce!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42986354630656
+    m_Localized: You can only add up to 10 {0} per stove!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43260129435648
+    m_Localized: Not enough {0} in stock!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44068531200000
+    m_Localized: Please select a stove first (1~5)!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44068531200001
+    m_Localized: The stove is currently in use or has food!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 301756578127872
+    m_Localized: Audio Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 301836601253888
+    m_Localized: Display Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 301893538930688
+    m_Localized: Tteokbokki Recipes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 302033335083008
+    m_Localized: How to Play
+    m_Metadata:
+      m_Items: []
+  - m_Id: 303152039845888
+    m_Localized: Manager's Desk
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702803832832
+    m_Localized: Master
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027136
+    m_Localized: BGM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027137
+    m_Localized: SFX
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027138
+    m_Localized: Default
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027139
+    m_Localized: Fullscreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027140
+    m_Localized: Windowed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027141
+    m_Localized: Resolution
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027142
+    m_Localized: Apply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 315165939982336
+    m_Localized: "<size=140%><font=\"KimjungchulMyungjo-Bold SDF\">Gunja Tteokbokki
+      Kitchen Manual</font></size>\r\n<size=80%><color=#888888>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</color></size>\r\n\r\n<size=120%><font=\"KimjungchulMyungjo-Bold
+      SDF\">1. Kitchen Controls Basics</font></size>\r\nVeteran managers are faster
+      with a keyboard than their hands! Mouse clicks work, but try learning the shortcuts
+      below.\r\n\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Select Stove</font>:
+      Press number keys <color=#87CEEB>1 ~ 5</color> to instantly select a stove
+      to cook on.\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Add Ingredients</font>:
+      With a stove selected, press the keyboard to add ingredients.\r\n\_ \_ - <color=#FFA500>Top
+      Shelf (Q, W, E, R, T, Y, U)</color>: Base ingredients like Rice Cake, Fish
+      Cake, Green Onion.\r\n\_ \_ - <color=#FFA500>Middle Shelf (A, S, D, F, G, H,
+      J)</color>: Various toppings like Sweet Potato, Egg, Ramen.\r\n\_ \_ - <color=#FFA500>Bottom
+      Shelf (Z, X, C, V, B, N, M)</color>: Various sauces that determine the menu's
+      flavor.\r\n\_ \_ <size=80%><Tip> For keys that are further away, hold <color=#87CEEB>Shift</color>
+      to map them to closer keys.</size>\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
+      SDF\">Start Cooking</font>: Once all ingredients are added, press the <color=#87CEEB>Space
+      Bar</color> to turn on the heat.\r\n\r\n<size=80%><color=#888888>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</color></size>\r\n\r\n<size=120%><font=\"KimjungchulMyungjo-Bold
+      SDF\">2. The Secret to Perfect Cooking</font></size>\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
+      SDF\">The Absolute Basics</font>: Every Tteokbokki must include <color=#FF6347>Rice
+      Cake x2, Fish Cake x2, Green Onion x1, Cabbage x1</color>, and <color=#FF6347>1
+      Sauce</color>.\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Menu Determination</font>:
+      The final menu is decided by the sauce added along with the base ingredients.
+      You cannot start cooking without a sauce.\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
+      SDF\">Cooking Complete</font>: Once the heat is on and the gauge fills up,
+      cooking is done. You can then drag the food to the packaging area.\r\n\r\n<size=80%><color=#888888>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</color></size>\r\n\r\n<size=120%><font=\"KimjungchulMyungjo-Bold
+      SDF\">3. Packaging & Delivery</font></size>\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
+      SDF\">Packaging</font>: Drag a finished wok to a packaging slot to neatly pack
+      it into a delivery container.\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Stacking
+      System</font>: You can stack up to <color=#87CEEB>3</color> containers in a
+      single packaging slot.\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Delivery
+      Complete</font>: Drag a receipt from the right side of the screen onto the
+      packaged food to send it out for delivery.\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
+      SDF\">Strict Evaluation</font>: The requested menu and <font=\"KimjungchulMyungjo-Bold
+      SDF\">Extra Ingredients (Toppings)</font> must perfectly match the receipt
+      to succeed.\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Delivery Failure</font>:
+      If you deliver the wrong food, you won't earn any money, and you might get
+      a complaint call right away!\r\n\r\n<size=80%><color=#888888>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</color></size>\r\n\r\n<size=120%><font=\"KimjungchulMyungjo-Bold
+      SDF\">4. Essential Operations for the Boss</font></size>\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
+      SDF\">Emergency Early Closing</font>: If you run out of any base ingredient,
+      or if all sauces are depleted, the shop will be forced to close. Always check
+      your stock!\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Complaint Calls</font>:
+      If you take too long to process an order or deliver the wrong food, the phone
+      will ring. Answer it quickly, or you'll have to listen to the customer complain
+      for even longer!\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Trash Bin</font>:
+      If you make a mistake while adding ingredients or cook the wrong food, you
+      can throw it in the trash bin. The same goes for receipts\u2014cancel unmanageable
+      orders early!\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold SDF\">Closing & Taxes</font>:
+      When business ends, you must pay taxes on the money you earned today. Don't
+      forget to account for taxes when calculating your profit!\r\n\u25B6 <font=\"KimjungchulMyungjo-Bold
+      SDF\">Tomorrow's Bonus</font>: At closing, 2 bonus ingredients for the next
+      day are announced. Selling food with these ingredients earns you an extra <color=#FF6347>\u20A95,000</color>
+      per ingredient.\r\n\r\n<size=80%><color=#888888>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</color></size>\r\n\r\n<size=125%><font=\"KimjungchulMyungjo-Bold
+      SDF\"><color=#32CD32>Veteran Boss's Secret Tips</color></font></size>\r\n1.
+      <font=\"KimjungchulMyungjo-Bold SDF\">Click the Receipts!</font>: Click a receipt
+      on the right to see the total number of required ingredients at a glance. Look
+      at the list and use shortcuts to add ingredients quickly.\r\n2. <font=\"KimjungchulMyungjo-Bold
+      SDF\">Use the Magnifying Glass</font>: Hover your mouse over cooked food to
+      check its ingredients. Compare it with the receipt to deliver without mistakes.\r\n3.
+      <font=\"KimjungchulMyungjo-Bold SDF\">Shop Convenience</font>: In the shop
+      after closing, use the <color=#87CEEB>'1 of Low Stock'</color> button to easily
+      restock. However, you can only order up to <color=#FF6347>3 sets</color> of
+      each ingredient at a time.\r\n4. <font=\"KimjungchulMyungjo-Bold SDF\">The
+      Secret of the Queue</font>: Don't panic if the receipt line is full. There
+      are pending orders waiting in line out of sight. Once you complete one, the
+      next order will appear immediately."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

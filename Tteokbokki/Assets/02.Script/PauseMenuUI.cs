@@ -427,7 +427,27 @@ public class PauseMenuUI : MonoBehaviour
         if (index < 0 || index >= rightPanels.Count) return;
         currentMenuIndex = index;
 
-        if (textHeader != null && index < tabNames.Count) textHeader.text = tabNames[index];
+        // if (textHeader != null && index < tabNames.Count) textHeader.text = tabNames[index];
+
+        // ✨ [핵심 수정] 탭 번호가 아니라 Inspector에 적힌 '원래 이름'을 보고 판단합니다!
+        if (textHeader != null && index < tabNames.Count)
+        {
+            string rawTabName = tabNames[index]; // 에디터에 적어둔 원래 한글 이름
+            string transKey = "";
+
+            // 이름에 특정 단어가 포함되어 있는지 확인해서 알맞은 Key를 매칭합니다.
+            if (rawTabName.Contains("소리"))
+                transKey = "Pause_Tab_Audio";
+            else if (rawTabName.Contains("환경"))
+                transKey = "Pause_Tab_Display";
+            else if (rawTabName.Contains("레시피"))
+                transKey = "Pause_Tab_Recipe";
+            else
+                transKey = "Pause_Tab_Manual"; // 소리/화면/레시피가 아니면 전부 운영 매뉴얼로 간주!
+
+            // 최종적으로 찾아낸 Key로 번역 적용
+            textHeader.text = TextTranslator.GetUIText(transKey);
+        }
 
         for (int i = 0; i < rightPanels.Count; i++)
         {
@@ -608,8 +628,9 @@ public class PauseMenuUI : MonoBehaviour
                 string recipeString = "";
                 foreach (var ing in menuData.DefaultIngredients)
                 {
-                    // 예: "떡 x2\n오뎅 x2\n군자 소스 x1"
-                    recipeString += $"- {ing.Key} <color=#FF8C00>x{ing.Value}</color>\n";
+                    // ✨ 1. 재료 이름 번역!
+                    string transIng = TextTranslator.GetIngredientName(ing.Key);
+                    recipeString += $"- {transIng} <color=#FF8C00>x{ing.Value}</color>\n";
                 }
 
                 // ✨ [NEW] StoveManager에서 해당 메뉴의 '완성된 스프라이트' 가져오기
@@ -619,8 +640,9 @@ public class PauseMenuUI : MonoBehaviour
                     finishedSprite = StoveManager.Instance.GetFinishedSprite(menuName);
                 }
 
-                // 3. UI에 적용 (가져온 스프라이트 같이 넘기기)
-                recipeUI.Setup(menuName, recipeString.TrimEnd(), finishedSprite);
+                // ✨ 2. 메뉴 이름 번역 후 Setup으로 넘기기!
+                string transMenu = TextTranslator.GetMenuName(menuName);
+                recipeUI.Setup(transMenu, recipeString.TrimEnd(), finishedSprite);
             }
         }
 

@@ -331,6 +331,118 @@ MonoBehaviour:
     m_Key: Announcement_EmergencyClose
     m_Metadata:
       m_Items: []
+  - m_Id: 42467355648000
+    m_Key: Reason_EssentialEmpty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648001
+    m_Key: Reason_AllSauceEmpty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648002
+    m_Key: Reason_NoMenuAvailable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648003
+    m_Key: Receipt_Search_NotFound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648004
+    m_Key: Receipt_Search_Header
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648005
+    m_Key: Receipt_Search_MenuHeader
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648006
+    m_Key: Receipt_Search_InvalidID
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648007
+    m_Key: Receipt_Search_InvalidDate
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648008
+    m_Key: Receipt_Search_NotFoundDate
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42467355648009
+    m_Key: Warning_NoRecipe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44068531200000
+    m_Key: Warning_SelectStove_Key
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44068531200001
+    m_Key: Warning_StoveInUse
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42986354630656
+    m_Key: Warning_MaxIngredient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43260129435648
+    m_Key: Warning_OutOfStock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 301756578127872
+    m_Key: Pause_Tab_Audio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 301836601253888
+    m_Key: Pause_Tab_Display
+    m_Metadata:
+      m_Items: []
+  - m_Id: 301893538930688
+    m_Key: Pause_Tab_Recipe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 302033335083008
+    m_Key: Pause_Tab_Manual
+    m_Metadata:
+      m_Items: []
+  - m_Id: 303152039845888
+    m_Key: Pause_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702803832832
+    m_Key: UI_Audio_Master
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027136
+    m_Key: UI_Audio_BGM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027137
+    m_Key: UI_Audio_SFX
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027138
+    m_Key: UI_Settings_Default
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027139
+    m_Key: UI_Display_Fullscreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027140
+    m_Key: UI_Display_Windowed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027141
+    m_Key: UI_Display_Resolution
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311702808027142
+    m_Key: UI_Settings_Apply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 315165939982336
+    m_Key: UI_HowtoPlay
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
