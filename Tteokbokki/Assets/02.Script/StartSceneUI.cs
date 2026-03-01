@@ -38,6 +38,11 @@ public class StartSceneUI : MonoBehaviour
     [Header("타이틀 애니메이션")]
     [SerializeField] private RectTransform titleLogoRect;
 
+    // ✨ [수정] Sprite 스왑 대신 GameObject 껐다 켜기!
+    [Header("언어별 로고 오브젝트")]
+    [SerializeField] private GameObject logoObjectKorean;
+    [SerializeField] private GameObject logoObjectEnglish;
+
     [Header("이어하기 정보")]
     [SerializeField] private TextMeshProUGUI continueDateText;
 
@@ -168,12 +173,12 @@ public class StartSceneUI : MonoBehaviour
             int currentLangIndex = PlayerPrefs.GetInt("GameLanguage", 1); // 기본값 0 (한국어)
             bool isEnglish = (currentLangIndex == 0);
 
+            // ✨ [핵심 수정] 언어에 맞춰서 오브젝트 자체를 껐다 켭니다!
+            if (logoObjectKorean != null) logoObjectKorean.SetActive(!isEnglish); // 영어면 끄고, 한국어면 켬
+            if (logoObjectEnglish != null) logoObjectEnglish.SetActive(isEnglish); // 영어면 켜고, 한국어면 끔
+
             languageToggle.SetIsOnWithoutNotify(isEnglish);
-
-            // ✨ 현재 설정된 언어에 맞게 토글 글자 세팅!
-            if (languageToggleText != null)
-                languageToggleText.text = isEnglish ? "English" : "Korean";
-
+            if (languageToggleText != null) languageToggleText.text = isEnglish ? "English" : "Korean";
             languageToggle.onValueChanged.AddListener(OnLanguageToggleChanged);
 
             //StartCoroutine(InitLocaleOnStart(isEnglish));

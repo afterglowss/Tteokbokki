@@ -738,6 +738,22 @@ MonoBehaviour:
   - "\uD30C"
   - "\uC591\uBC30\uCD94"
   - "\uAD70\uC790 \uC18C\uC2A4"
+  - "\uB9C8\uB77C \uC18C\uC2A4"
+  - "\uB85C\uC81C \uC18C\uC2A4"
+  - "\uD06C\uB9BC \uC18C\uC2A4"
+  - "\uAC04\uC7A5 \uC18C\uC2A4"
+  - "\uCE74\uB808 \uC18C\uC2A4"
+  - "\uC9DC\uC7A5 \uC18C\uC2A4"
+  - "\uACE0\uAD6C\uB9C8"
+  - "\uC870\uB7AD\uC774\uB5A1"
+  - "\uBAA8\uC9DC\uB810\uB77C"
+  - "\uB77C\uBA74\uC0AC\uB9AC"
+  - "\uC77C\uBC18\uB2F9\uBA74"
+  - "\uACC4\uB780"
+  - "\uC18C\uC138\uC9C0"
+  - "\uC625\uC218\uC218"
+  - "\uACF1\uCC3D"
+  - "\uC6B0\uC0BC\uACB9"
 --- !u!4 &73123802
 Transform:
   m_ObjectHideFlags: 0
@@ -4202,7 +4218,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &476810737
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5012,7 +5028,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &577950860
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7794,7 +7810,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &871315881
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8920,7 +8936,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1123651206
 RectTransform:
   m_ObjectHideFlags: 0
@@ -13065,7 +13081,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: D - 3
+  m_text: D - 14
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6655c2416f14ec945a4585ad84226687, type: 2}
   m_sharedMaterial: {fileID: -7703378714327936900, guid: 6655c2416f14ec945a4585ad84226687, type: 2}
@@ -16129,7 +16145,7 @@ MonoBehaviour:
   ddayContainer: {fileID: 1213843035}
   ddayText: {fileID: 1591896608}
   dialogueRunner: {fileID: 9205710100398790771}
-  endingCount: 3
+  endingCount: 14
   panelBadEnding1: {fileID: 1862345003}
   cgBadEnding1: {fileID: 1862345005}
   btnBackToTitle1: {fileID: 319207845}
