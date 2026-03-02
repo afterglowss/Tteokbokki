@@ -31,6 +31,8 @@ public class GameSaveData
     public int totalSuccessCount; // 2주간 총 성공 횟수
     public int totalMissedCount;  // 2주간 총 실패 횟수
     public int consecutiveZeroSuccessDays; // 연속 0건 성공 일수 (배드엔딩1 용)
+
+    public int dayStartBalance;
 }
 
 [Serializable]
@@ -80,7 +82,9 @@ public class GameSaveManager : MonoBehaviour
 
             totalSuccessCount = GameManager.Instance.TotalSuccessCount,
             totalMissedCount = GameManager.Instance.TotalMissedCount,
-            consecutiveZeroSuccessDays = GameManager.Instance.ConsecutiveZeroSuccessDays
+            consecutiveZeroSuccessDays = GameManager.Instance.ConsecutiveZeroSuccessDays,
+
+            dayStartBalance = (GameDataLogger.Instance != null) ? GameDataLogger.Instance.DayStartBalance : PlayerWalletManager.Instance.CurrentBalance
         };
 
         // 화구 상태 저장 (Pending 포함)
@@ -168,6 +172,13 @@ public class GameSaveManager : MonoBehaviour
         );
 
         IsSettlementPhase = data.isEndOfDayPanelActive;
+
+        // ✨ [NEW] 불러온 진짜 아침 잔고를 로거에 완벽하게 복구해줍니다!
+        if (GameDataLogger.Instance != null)
+        {
+            GameDataLogger.Instance.StartNewDayLog(data.dayStartBalance);
+            Debug.Log($"[시스템] 로거 복원 완료: 아침 시작 잔고 {data.dayStartBalance}원");
+        }
 
         if (GameManager.Instance != null)
         {

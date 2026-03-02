@@ -196,6 +196,7 @@ public class PhoneCallManager : MonoBehaviour
         var list = (reason == FailReason.Timeout) ? timeoutNodes : wrongNodes;
         if (list == null || list.Count == 0) return null;
         int idx = Random.Range(0, list.Count);
+        //int idx = 5;
         return list[idx];
     }
 

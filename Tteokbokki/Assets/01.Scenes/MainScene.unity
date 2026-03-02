@@ -738,22 +738,6 @@ MonoBehaviour:
   - "\uD30C"
   - "\uC591\uBC30\uCD94"
   - "\uAD70\uC790 \uC18C\uC2A4"
-  - "\uB9C8\uB77C \uC18C\uC2A4"
-  - "\uB85C\uC81C \uC18C\uC2A4"
-  - "\uD06C\uB9BC \uC18C\uC2A4"
-  - "\uAC04\uC7A5 \uC18C\uC2A4"
-  - "\uCE74\uB808 \uC18C\uC2A4"
-  - "\uC9DC\uC7A5 \uC18C\uC2A4"
-  - "\uACE0\uAD6C\uB9C8"
-  - "\uC870\uB7AD\uC774\uB5A1"
-  - "\uBAA8\uC9DC\uB810\uB77C"
-  - "\uB77C\uBA74\uC0AC\uB9AC"
-  - "\uC77C\uBC18\uB2F9\uBA74"
-  - "\uACC4\uB780"
-  - "\uC18C\uC138\uC9C0"
-  - "\uC625\uC218\uC218"
-  - "\uACF1\uCC3D"
-  - "\uC6B0\uC0BC\uACB9"
 --- !u!4 &73123802
 Transform:
   m_ObjectHideFlags: 0
@@ -3639,7 +3623,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4306347759669800512, guid: 2d4b193198711324fbfe2056db5953a4, type: 3}
       propertyPath: m_text
-      value: "\uAC00\uB098\uB2E4\uB77C\uB9C8\uBC14\uC0AC\uC544\uC790\uCC28\uCE74\uD0C0\uD30C\uD558\uAC00\uAC00\uB098\uB2E4\uB77C\uB9C8\uBC14\uC0AC\uC544\uC790\uCC28\uCE74\uD0C0\uD30C\uD558"
+      value: "\uD658\uBD88."
       objectReference: {fileID: 0}
     - target: {fileID: 4306347759669800512, guid: 2d4b193198711324fbfe2056db5953a4, type: 3}
       propertyPath: m_fontSize

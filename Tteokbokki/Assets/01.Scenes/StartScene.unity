@@ -1169,9 +1169,9 @@ MonoBehaviour:
   defaultCursor: {fileID: 2800000, guid: 246d2d1068ba84349a7ce9f0469a3fe5, type: 3}
   hoverCursor: {fileID: 2800000, guid: 246d2d1068ba84349a7ce9f0469a3fe5, type: 3}
   dragCursor: {fileID: 2800000, guid: 618a532d31652fe4396c5a3592eeb79b, type: 3}
-  defaultHotspot: {x: 0, y: 0}
-  hoverHotspot: {x: 0, y: 0}
-  dragHotspot: {x: 0, y: 0}
+  defaultHotspot: {x: 7, y: 5}
+  hoverHotspot: {x: 7, y: 5}
+  dragHotspot: {x: 7, y: 5}
 --- !u!4 &311504421
 Transform:
   m_ObjectHideFlags: 0
