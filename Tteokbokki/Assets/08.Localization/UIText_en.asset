@@ -602,9 +602,9 @@ MonoBehaviour:
   - m_Id: 338911149023246
     m_Localized: "<font=\"KimjungchulMyungjo-Bold SDF\">Team Milky Expedition</font>\r\n<size=80%><font=\"KimjungchulMyungjo-Bold
       SDF\">PM</font> \t\t\tShin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Game
-      Design</font> \tYoon Hakyeong, Shin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold
+      Design</font> \tYoon Hagyeong, Shin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold
       SDF\">Programming</font> \tShin Hyewon, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold
-      SDF\">Art</font>\t\t\tShin Hyewon, Yoon Hakyeong, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold
+      SDF\">Art</font>\t\t\tShin Hyewon, Yoon Hagyeong, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold
       SDF\">Presented by</font>\tPandoraCube</size>\r\n<size=60%><font=\"KimjungchulMyungjo-Bold
       SDF\">Special Thanks</font>\t\uC2DC\uD0A4\uC2DC\uD0A4, \uB974\uB124, \uCD5C\uC885\uD604,
       HJ, \uC774\uC0C1\uD604\r\n\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Credits</font>
@@ -617,9 +617,9 @@ MonoBehaviour:
     m_Localized: "<font=\"KimjungchulMyungjo-Bold SDF\">Thank you for playing!</font>\r\n\r\n<font=\"KimjungchulMyungjo-Bold
       SDF\">Team Milky Expedition</font>\r\n\r\n<font=\"KimjungchulMyungjo-Bold SDF\">PM</font>
       \t\t\tShin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Game Design</font>
-      \tYoon Hakyeong, Shin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Programming</font>
+      \tYoon Hagyeong, Shin Hyewon\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Programming</font>
       \tShin Hyewon, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Art</font>\t\t\tShin
-      Hyewon, Yoon Hakyeong, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Presented
+      Hyewon, Yoon Hagyeong, Choi Young Jin\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Presented
       by</font>\tPandoraCube\r\n\r\n<size=60%><font=\"KimjungchulMyungjo-Bold SDF\">Special
       Thanks</font>\t\uC2DC\uD0A4\uC2DC\uD0A4, \uB974\uB124, \uCD5C\uC885\uD604,
       HJ, \uC774\uC0C1\uD604\r\n\r\n<font=\"KimjungchulMyungjo-Bold SDF\">Credits</font>
@@ -665,7 +665,11 @@ MonoBehaviour:
 
 
 
-      <size=50%>-
+
+
+
+
+      <size=35>-
       Happy Ending -</size>'
     m_Metadata:
       m_Items: []
@@ -679,7 +683,8 @@ MonoBehaviour:
 
 
 
-      <size=50%>-
+
+      <size=35>-
       Normal Ending -</size>'
     m_Metadata:
       m_Items: []
