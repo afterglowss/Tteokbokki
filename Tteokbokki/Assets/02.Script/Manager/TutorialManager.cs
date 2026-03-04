@@ -885,6 +885,11 @@ public class TutorialManager : MonoBehaviour
         PlayerPrefs.SetInt("SawTutorial", 1);
         PlayerPrefs.Save();
 
+        if (AchievementManager.Instance != null)
+        {
+            AchievementManager.Instance.Unlock(AchievementID.all_set);
+        }
+
         // 2. 직접 깼다고 플래그 세우기
         GameLoadFlags.isTutorialJustFinished = true; // 이게 true여야 셔터 애니메이션 나옴
         GameLoadFlags.shouldLoadFromSave = false;

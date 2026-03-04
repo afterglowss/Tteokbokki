@@ -24,6 +24,7 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
                 food.currentSlot.RemoveFood(food);
             }
             Destroy(food.gameObject);
+            AddTrashCount();
             return;
         }
 
@@ -60,6 +61,7 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
                 Debug.Log($"[휴지통] {stoveSlot.name}의 완성된 요리를 버립니다.");
 
                 stoveSlot.ResetSlot(); // ✨ 화구 초기화!
+                AddTrashCount();
                 return;
             }
 
@@ -70,6 +72,7 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
                 Debug.Log($"[휴지통] {stoveSlot.name}의 재료를 비웁니다.");
 
                 stoveSlot.ClearPending(); // ✨ 재료만 비우기
+                AddTrashCount();
                 return;
             }
         }
@@ -83,5 +86,18 @@ public class TrashBinSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, I
     public void OnPointerExit(PointerEventData eventData)
     {
         TooltipManager.Hide(TooltipType.UI);
+    }
+
+    private void AddTrashCount()
+    {
+        int trashCount = PlayerPrefs.GetInt("TotalTrashedItems", 0);
+        trashCount++;
+        PlayerPrefs.SetInt("TotalTrashedItems", trashCount);
+        PlayerPrefs.Save();
+
+        if (trashCount == 20 && AchievementManager.Instance != null)
+        {
+            AchievementManager.Instance.Unlock(AchievementID.gordon_ramsays_nightmare);
+        }
     }
 }

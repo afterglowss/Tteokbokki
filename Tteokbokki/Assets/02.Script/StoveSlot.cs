@@ -511,6 +511,16 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         {
             // 재료가 이상하거나 망했으면 '망한 완성 이미지' 사용
             finishedSprite = StoveManager.Instance.ruinedFinishedSprite;
+
+            int totalRuined = PlayerPrefs.GetInt("TotalRuinedFood", 0);
+            totalRuined++;
+            PlayerPrefs.SetInt("TotalRuinedFood", totalRuined);
+            PlayerPrefs.Save();
+
+            if (totalRuined == 10 && AchievementManager.Instance != null)
+            {
+                AchievementManager.Instance.Unlock(AchievementID.dark_matter_chef);
+            }
         }
         else
         {

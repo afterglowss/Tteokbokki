@@ -2258,6 +2258,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cf0060101cb5bd43802ca71dc69f778, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentBalance: 250000
   taxRate: 0.25
   balanceText: {fileID: 1367417713}
   endOfDayBalanceText:

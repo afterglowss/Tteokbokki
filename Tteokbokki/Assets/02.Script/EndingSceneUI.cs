@@ -124,6 +124,24 @@ public class EndingSceneUI : MonoBehaviour
 
     private void ShowReturnButton()
     {
+        if (AchievementManager.Instance != null)
+        {
+            string currentScene = SceneManager.GetActiveScene().name;
+
+            if (currentScene == "BadEnding3Scene") // (배드엔딩 2)
+            {
+                AchievementManager.Instance.Unlock(AchievementID.the_perpetual_intern);
+            }
+            else if (currentScene == "NormalEndingScene") // (노멀 엔딩)
+            {
+                AchievementManager.Instance.Unlock(AchievementID.official_family_member);
+            }
+            else if (currentScene == "HappyEndingScene") // (해피 엔딩)
+            {
+                AchievementManager.Instance.Unlock(AchievementID.the_tteokbokki_tycoon);
+            }
+        }
+
         if (btnBackToTitle != null)
         {
             btnBackToTitle.gameObject.SetActive(true);

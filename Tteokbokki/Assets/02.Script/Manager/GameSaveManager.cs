@@ -31,6 +31,7 @@ public class GameSaveData
     public int totalSuccessCount; // 2주간 총 성공 횟수
     public int totalMissedCount;  // 2주간 총 실패 횟수
     public int consecutiveZeroSuccessDays; // 연속 0건 성공 일수 (배드엔딩1 용)
+    public int consecutivePerfectDays; // 연속 퍼펙트(노미스) 일수 저장
 
     public int dayStartBalance;
 }
@@ -83,6 +84,7 @@ public class GameSaveManager : MonoBehaviour
             totalSuccessCount = GameManager.Instance.TotalSuccessCount,
             totalMissedCount = GameManager.Instance.TotalMissedCount,
             consecutiveZeroSuccessDays = GameManager.Instance.ConsecutiveZeroSuccessDays,
+            consecutivePerfectDays = GameManager.Instance.ConsecutivePerfectDays,
 
             dayStartBalance = (GameDataLogger.Instance != null) ? GameDataLogger.Instance.DayStartBalance : PlayerWalletManager.Instance.CurrentBalance
         };
@@ -168,7 +170,8 @@ public class GameSaveManager : MonoBehaviour
         GameManager.Instance.RestoreSessionData(
             data.totalSuccessCount,
             data.totalMissedCount,
-            data.consecutiveZeroSuccessDays
+            data.consecutiveZeroSuccessDays,
+            data.consecutivePerfectDays
         );
 
         IsSettlementPhase = data.isEndOfDayPanelActive;

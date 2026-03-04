@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour
     public int TotalSuccessCount { get; private set; } = 0;
     public int TotalMissedCount { get; private set; } = 0;
     public int ConsecutiveZeroSuccessDays { get; private set; } = 0;
+    public int ConsecutivePerfectDays { get; private set; } = 0; // 연속 퍼펙트 변수 생성
 
     public int endingCount = 14;
 
@@ -51,11 +52,12 @@ public class GameManager : MonoBehaviour
     public string normalEndingScene = "NormalEndingScene"; // 31~70% or 재료 부족
     public string happyEndingScene = "HappyEndingScene";   // 71% 이상 + 재료 충분
 
-    public void RestoreSessionData(int success, int missed, int zeroDays)
+    public void RestoreSessionData(int success, int missed, int zeroDays, int perfectDays)
     {
         TotalSuccessCount = success;
         TotalMissedCount = missed;
         ConsecutiveZeroSuccessDays = zeroDays;
+        ConsecutivePerfectDays = perfectDays;
     }
 
     void Awake()
@@ -184,6 +186,7 @@ public class GameManager : MonoBehaviour
             TotalSuccessCount = 0;
             TotalMissedCount = 0;
             ConsecutiveZeroSuccessDays = 0;
+            ConsecutivePerfectDays = 0;
             isBadEndingDay = false;
 
             if (GameLoadFlags.isTutorialJustFinished)
@@ -314,6 +317,11 @@ public class GameManager : MonoBehaviour
                 {
                     if (btnBackToTitle1 != null)
                     {
+                        if (AchievementManager.Instance != null)
+                        {
+                            AchievementManager.Instance.Unlock(AchievementID.youre_fired);
+                        }
+
                         btnBackToTitle1.gameObject.SetActive(true);
                         // 버튼도 살짝 페이드인 하면 예쁨
                         CanvasGroup btnCg = btnBackToTitle1.GetComponent<CanvasGroup>();
@@ -480,19 +488,50 @@ public class GameManager : MonoBehaviour
         int missedCount = todayMissed.Count;
         int canceledCount = todayCanceled.Count; // ✨ [NEW]
 
-        // 2. 누적 데이터 업데이트
-        TotalSuccessCount += successCount;
-        TotalMissedCount += (missedCount + canceledCount);
+        bool isTutorial = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorial;
 
-        // 3. 배드엔딩 1 (조기 폐업) 체크 조건 업데이트
-        if (successCount == 0)
+        if (!isTutorial)
         {
-            ConsecutiveZeroSuccessDays++;
-            Debug.Log($"[주의] 오늘 성공한 주문 0건. 연속 {ConsecutiveZeroSuccessDays}일째.");
-        }
-        else
-        {
-            ConsecutiveZeroSuccessDays = 0; // 성공한 게 있으면 초기화
+            if (missedCount == 0 && successCount > 0)
+            {
+                ConsecutivePerfectDays++;
+
+                if (AchievementManager.Instance != null)
+                {
+                    AchievementManager.Instance.Unlock(AchievementID.today_is_perfect);
+
+                    // ✨ 2. 3일 연속 달성 시 업적 해제!
+                    if (ConsecutivePerfectDays >= 3)
+                    {
+                        AchievementManager.Instance.Unlock(AchievementID.trust_you_eat);
+                    }
+
+                    if (ConsecutivePerfectDays >= endingCount)
+                    {
+                        AchievementManager.Instance.Unlock(AchievementID.any_time);
+                    }
+                }
+            }
+            else
+            {
+                // 실패가 1건이라도 있거나 손님이 안 왔다면 연속 기록 얄짤없이 0으로 뚝스딱스!
+                ConsecutivePerfectDays = 0;
+            }
+
+            // 2. 누적 데이터 업데이트
+            TotalSuccessCount += successCount;
+            TotalMissedCount += (missedCount + canceledCount);
+
+            // 3. 배드엔딩 1 (조기 폐업) 체크 조건 업데이트
+            if (successCount == 0)
+            {
+                ConsecutiveZeroSuccessDays++;
+                Debug.Log($"[주의] 오늘 성공한 주문 0건. 연속 {ConsecutiveZeroSuccessDays}일째.");
+            }
+            else
+            {
+                ConsecutiveZeroSuccessDays = 0; // 성공한 게 있으면 초기화
+            }
         }
 
         PackagingAreaManager.Instance.ClearAllFoods();
@@ -540,34 +579,34 @@ public class GameManager : MonoBehaviour
             ReceiptLineManager.Instance.combinedIngredientManager.ClearIngredientsText();
         }
 
-        // ✨ [NEW] 밸런싱 데이터 수집 및 CSV 저장
-        if (GameDataLogger.Instance != null)
+        if (isTutorial)
         {
-            // 1. 판매된 재료 카운팅 (성공 영수증 분석)
-            foreach (var r in successful)
+            // ✨ [NEW] 밸런싱 데이터 수집 및 CSV 저장
+            if (GameDataLogger.Instance != null)
             {
-                foreach (var order in r.GetOrders())
+                // 1. 판매된 재료 카운팅 (성공 영수증 분석)
+                foreach (var r in successful)
                 {
-                    // 기본 재료 + 추가 재료 모두 'Sold'로 기록
-                    // (주의: 레시피 DB 접근이 필요하지만, 일단 Extras라도 확실히 기록)
-                    // 만약 MenuItem에 DefaultIngredients가 있다면 그것도 순회해야 완벽함
-                    foreach (var ing in order.Menu.DefaultIngredients)
-                        GameDataLogger.Instance.LogIngredientSold(ing.Key, ing.Value);
+                    foreach (var order in r.GetOrders())
+                    {
+                        // 기본 재료 + 추가 재료 모두 'Sold'로 기록
+                        // (주의: 레시피 DB 접근이 필요하지만, 일단 Extras라도 확실히 기록)
+                        // 만약 MenuItem에 DefaultIngredients가 있다면 그것도 순회해야 완벽함
+                        foreach (var ing in order.Menu.DefaultIngredients)
+                            GameDataLogger.Instance.LogIngredientSold(ing.Key, ing.Value);
 
-                    foreach (var extra in order.GetExtras())
-                        GameDataLogger.Instance.LogIngredientSold(extra.Key, extra.Value);
+                        foreach (var extra in order.GetExtras())
+                            GameDataLogger.Instance.LogIngredientSold(extra.Key, extra.Value);
+                    }
+                }
+
+                // 2. 보너스 수익 기록
+                if (DailyBonusManager.Instance != null)
+                {
+                    GameDataLogger.Instance.AddBonusIncome(DailyBonusManager.Instance.TodayAccumulatedBonus);
                 }
             }
-
-            // 2. 보너스 수익 기록
-            if (DailyBonusManager.Instance != null)
-            {
-                GameDataLogger.Instance.AddBonusIncome(DailyBonusManager.Instance.TodayAccumulatedBonus);
-            }
-
-            
         }
-
         // 마감 UI 출력
         ShowEndOfDayPanel();
 
@@ -659,6 +698,11 @@ public class GameManager : MonoBehaviour
 
         isEmergencyClosing = true;
 
+        int emergencyCount = PlayerPrefs.GetInt("TotalEmergencyCloses", 0);
+        emergencyCount++;
+        PlayerPrefs.SetInt("TotalEmergencyCloses", emergencyCount);
+        PlayerPrefs.Save();
+
         Debug.Log($"[긴급 마감] {reason} - 재료 소진. 잔여 주문 처리 대기 중...");
 
         // 2. 주문 생성 즉시 중단
@@ -724,6 +768,11 @@ public class GameManager : MonoBehaviour
         int currentBalance = PlayerWalletManager.Instance.CurrentBalance;
         int normalEndingTargetBalance = 2500000; // 목표 금액: 250만 원
         int happyEndingTargetBalance = 3000000;  // 해피 엔딩 목표 금액
+
+        if (currentBalance >= 5000000 && AchievementManager.Instance != null)
+        {
+            AchievementManager.Instance.Unlock(AchievementID.young_and_rich_bird);
+        }
 
         Debug.Log($"최종 성적 - 성공률: {successRate:F1}% ({TotalSuccessCount}/{totalOrders}), 해금 재료: {unlockedIngredientsCount}개");
 

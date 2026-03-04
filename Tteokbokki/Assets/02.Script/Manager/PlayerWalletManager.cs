@@ -7,7 +7,15 @@ public class PlayerWalletManager : MonoBehaviour
     public static PlayerWalletManager Instance { get; private set; }
     public int TodayEarnedAmount { get; private set; } = 0;     //하루동안 얻은 수익
 
-    public int CurrentBalance { get; private set; } = 250000; // 초기 잔고
+    [SerializeField]
+    private int currentBalance = 250000;
+
+    // 기존 코드들이 에러 나지 않도록 연결해주는 프로퍼티
+    public int CurrentBalance
+    {
+        get { return currentBalance; }
+        private set { currentBalance = value; }
+    }
     public float taxRate = 0.25f; // 25% 세금
 
     public int LastPaidTaxAmount { get; private set; } = 0; //EndOfDayUIHandler <- 세금 기록용 프로퍼티

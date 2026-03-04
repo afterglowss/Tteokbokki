@@ -373,6 +373,8 @@ public class IngredientStockManager : MonoBehaviour
         if (!purchasedAtLeastOnce.Contains(ingredientName))
         {
             purchasedAtLeastOnce.Add(ingredientName); // 리스트의 맨 끝에 추가됨 -> 버튼도 맨 뒤에 생김
+            CheckSauceAchievement();
+            CheckAllIngredientsAchievement();
         }
 
         UpdateStockText(ingredientName);
@@ -750,6 +752,51 @@ public class IngredientStockManager : MonoBehaviour
                     // Shift 안 눌렀을 때 원상복구
                     btn.SetHotkeyDisplay(assignedKey.ToString());
                 }
+            }
+        }
+    }
+
+    // ✨ [NEW] 스팀 도전과제: 모든 소스 구매 확인
+    private void CheckSauceAchievement()
+    {
+        // DB에 있는 모든 소스 이름
+        string[] allSauces = {
+            "군자 소스", "마라 소스", "로제 소스", "크림 소스",
+            "간장 소스", "카레 소스", "짜장 소스"
+        };
+
+        bool hasAllSauces = true;
+
+        foreach (string sauce in allSauces)
+        {
+            // 하나라도 구매 이력에 없다면 탈락!
+            if (!purchasedAtLeastOnce.Contains(sauce))
+            {
+                hasAllSauces = false;
+                break;
+            }
+        }
+
+        // 7개 소스를 모두 구매했다면 업적 해제!
+        if (hasAllSauces)
+        {
+            if (AchievementManager.Instance != null)
+            {
+                AchievementManager.Instance.Unlock(AchievementID.for_a_wider_variety_of_tteokbokki);
+            }
+        }
+    }
+
+    // ✨ [NEW] 스팀 도전과제: 모든 재료 해금 확인
+    private void CheckAllIngredientsAchievement()
+    {
+        // 상점 DB(IngredientEconomyDatabase.Data)에 있는 전체 재료 개수와
+        // 내가 한 번이라도 구매한 재료(purchasedAtLeastOnce)의 개수를 비교합니다!
+        if (purchasedAtLeastOnce.Count >= IngredientEconomyDatabase.Data.Count)
+        {
+            if (AchievementManager.Instance != null)
+            {
+                AchievementManager.Instance.Unlock(AchievementID.everything_goes_well_with_tteokbokki);
             }
         }
     }
