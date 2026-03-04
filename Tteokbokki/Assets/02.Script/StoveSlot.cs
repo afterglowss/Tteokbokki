@@ -62,6 +62,8 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     private Transform originalIconParent;
     private CanvasGroup iconCanvasGroup;
 
+    private int originalIconSiblingIndex;
+
     // 프로퍼티
     public bool IsCooking => isCooking;
     public bool IsCooked => isCooked;
@@ -336,6 +338,8 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         originalIconPos = wokImage.transform.localPosition;
         originalIconParent = wokImage.transform.parent;
 
+        originalIconSiblingIndex = wokImage.transform.GetSiblingIndex();
+
         // 캔버스 최상단으로 이동 (화면 앞으로 가져오기)
         if (canvas != null)
         {
@@ -376,6 +380,7 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         // 원래 부모와 위치로 복귀
         wokImage.transform.SetParent(originalIconParent);
+        wokImage.transform.SetSiblingIndex(originalIconSiblingIndex); // 👈 이게 오버레이 가림 현상을 막아줍니다!
         wokImage.transform.localPosition = originalIconPos;
         wokImage.transform.localScale = Vector3.one;
 
@@ -511,6 +516,21 @@ public class StoveSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         {
             // 정상 메뉴라면 해당 메뉴의 '완성 이미지' 요청
             finishedSprite = StoveManager.Instance.GetFinishedSprite(menuName);
+
+            // ✨ [스팀 도전과제: beginner 추가!] 정상적인 떡볶이가 완성되었을 때만 카운트!
+            int totalCooked = PlayerPrefs.GetInt("TotalCookedTteokbokki", 0);
+            totalCooked++;
+            PlayerPrefs.SetInt("TotalCookedTteokbokki", totalCooked);
+            PlayerPrefs.Save();
+
+            // 100개째 완성되는 그 찰나의 순간!
+            if (totalCooked == 100)
+            {
+                if (AchievementManager.Instance != null)
+                {
+                    AchievementManager.Instance.Unlock(AchievementID.beginner);
+                }
+            }
         }
 
         // CookedFoodUI 초기화 및 이미지 전달
