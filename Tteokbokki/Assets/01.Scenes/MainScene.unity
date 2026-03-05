@@ -5814,6 +5814,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3567409634694300696, guid: 676fe79f0d1a418499704ccdaf814e27, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.44799805
+      objectReference: {fileID: 0}
     - target: {fileID: 3624605494534709217, guid: 676fe79f0d1a418499704ccdaf814e27, type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
@@ -5889,6 +5893,10 @@ PrefabInstance:
     - target: {fileID: 4434444651315874535, guid: 676fe79f0d1a418499704ccdaf814e27, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4490283595256373712, guid: 676fe79f0d1a418499704ccdaf814e27, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -33.30005
       objectReference: {fileID: 0}
     - target: {fileID: 5074088719868464588, guid: 676fe79f0d1a418499704ccdaf814e27, type: 3}
       propertyPath: m_AnchorMax.y
@@ -14532,11 +14540,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5368113041583635612, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 127.16998
-      objectReference: {fileID: 0}
-    - target: {fileID: 5462474807788006319, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
-      propertyPath: m_Navigation.m_Mode
-      value: 0
+      value: 127.16999
       objectReference: {fileID: 0}
     - target: {fileID: 5642647124883012895, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
       propertyPath: m_AnchorMax.y
@@ -14634,10 +14638,6 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8830181528115267661, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: -8255265284343932801, guid: f4585d05bfa43c94ea98b51390b5d6af, type: 3}
     - target: {fileID: 9039088996099643933, guid: 80abfab564067a64ab3bba06540e5111, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -15946,9 +15946,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dateTimeText: {fileID: 1950824747}
   realSecondsPerGameMinute: 1.5
-  startYear: 2025
-  startMonth: 7
-  startDay: 4
+  startYear: 2026
+  startMonth: 3
+  startDay: 18
   startHour: 17
   startMinute: 0
 --- !u!1 &1971352209
